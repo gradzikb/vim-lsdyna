@@ -1,5 +1,5 @@
 # vim-lsdyna
-VIM filetype plugin for [Ls-Dyna](www.lstc.com)
+VIM filetype plugin for [Ls-Dyna](http://www.lstc.com) FE solver.
 
 
 ## Main features
@@ -31,7 +31,7 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 ## Documentation
 
-In documentation you can find detail explanation of all the plugin features
+Please read documentation for detail explanations of all plugin features.
 
 `:help lsdyna`
 
