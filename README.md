@@ -1,11 +1,9 @@
-###vim-lsdyna
-==========
+### vim-lsdyna
 
 VIM filetype plugin for Ls-Dyna
 
-## Plugin fetures:
+## Plugin features:
 - Syntax highlighting
 - Folding
 - Keyword library
 - Commands to work with curves
-- 
