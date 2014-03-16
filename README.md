@@ -20,6 +20,8 @@ The plugin gives you commands to operate with a curves data:
 - LsDynaResample
 - LsDynaAddPoint
 
+Example of use you can find on [wiki page](https://github.com/gradzikb/vim-lsdyna.wiki.git)
+
 ## Installation
 
 [Pathogen](https://github.com/tpope/vim-pathogen)
