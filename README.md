@@ -20,7 +20,7 @@ The plugin gives you commands to operate with a curves data:
 - LsDynaResample
 - LsDynaAddPoint
 
-Example of use you can find on [wiki page](https://github.com/gradzikb/vim-lsdyna.wiki.git)
+Example of use you can find on [wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Curve-Commands)
 
 ## Installation
 
@@ -33,9 +33,13 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 ## Documentation
 
-Please read documentation for detail explanations of all plugin features.
+The plugin has a documentation with all information how to use it.
+
+It is highly recommended to read the documentation.
 
 `:help lsdyna`
+
+Some basic introduction to main plugin features can be found also on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki)
 
 ## License
 
