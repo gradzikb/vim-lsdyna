@@ -1,0 +1,1114 @@
+*lsdyna.txt*		For Vim version 7.4			Last change: 2014 February 6
+================================================================================
+                   _               ____                                        ~
+                  | |    ___      |  _ \ _   _ _ __   __ _                     ~
+                  | |   / __|_____| | | | | | | '_ \ / _` |                    ~
+                  | |___\__ \_____| |_| | |_| | | | | (_| |                    ~
+                  |_____|___/     |____/ \__, |_| |_|\__,_|                    ~
+                                         |___/                                 ~
+                                               VIM Filetype Plugin             ~
+
+              -----------------------------------------------------
+              Author: Bartosz Gradzik (bartosz.gradzik@hotmail.com)
+              -----------------------------------------------------
+
+================================================================================
+CONTENTS
+
+    1. Introduction............................|lsdyna-introduction|
+    2. Quick start.............................|lsdyna-start|
+    3. Syntax highlighting.....................|lsdyna-syntax|
+    4. Folding.................................|lsdyna-folding|
+    5. Keyword library.........................|lsdyna-keywordLibrary|
+       5.1. Inserting keywords.................|lsdyna-insertKeyword|
+       5.2. Extending the library..............|lsdyna-extendLibrary|
+       5.3. Keywords templates.................|lsdyna-templates|
+    6. Mappings................................|lsdyna-mappings|
+       6.1. Comment/uncomment .................|lsdyna-comment|
+       6.2. Data line autoformating ...........|lsdyne-autoFormat|
+       6.3. Text objects.......................|lsdyna-textObject|
+    7. Commands................................|lsdyna-commands|
+       7.1. LsDynaScale........................|lsdyna-scale|
+       7.2. LsDynaShift........................|lsdyna-shift|
+       7.3. LsDynaAddPoint.....................|lsdyna-addPoint|
+       7.4. LSDynaResample.....................|lsdyna-resample|
+       7.5. Number format......................|lsdyna-numberFormat|
+    8. Credits.................................|lsdyna-credits|
+    9. License.................................|lsdyna-license|
+   10. Bugs....................................|lsdyna-bugs|
+
+================================================================================
+1. Introduction                                            *lsdyna-introduction*
+
+It is VIM filetype plugin for Ls-Dyna keyword file.
+
+Ls-Dyna is simulation software developed by the Livermore Software Technology
+Corporation (www.lstc.com). Keyword file is used to store model information.
+It is text file with keywords which follow specific syntax rules.
+
+Ls-Dyna filetype plugin gives you:
+- syntax highlighting
+- folding
+- keyword library
+- useful mappings
+- useful functions
+- commands for curve operations
+
+The plugin is designed to work with fixed keyword format not for free format.
+
+================================================================================
+2. Quick start                                                    *lsdyna-start*
+
+Plugin was tested with VIM 7.4 both Windows and Linux operating systems.
+To use |lsdyna-commands| for curve operations your VIM has to support float
+calculation.
+
+To use the filetype plugin and syntax highlighting you have to have following
+commands in your vimrc file:
+>
+	filetype plugin on
+	syntax on
+<
+The plugin loads automatic for all files with *.k and *.key extension.
+To check does the plugin was load use:
+>
+	:set filetype?
+<
+You should see:
+>
+	filetype=lsdyna
+<
+You can also load the plugin manually with command:
+>
+	:set filetype=lsdyna
+<
+
+================================================================================
+3. Syntax highlighting                                           *lsdyna-syntax*
+
+Syntax highlighting supports:
+- keyword lines (start with *)
+- comment lines (start with $)
+- data lines (8x10 columns format only)
+
+Current version of syntax highlighting is not perfect and has some limitations.
+Only 8x10 data line format is supported, It is main format so it is true for
+almost all Ls-Dyna keywords. For keywords with different format (*NODE,*INCLUDE)
+highlighting will be incorrect.
+
+================================================================================
+4. Folding                                                      *lsdyna-folding*
+
+All lines not started with * (keyword lines) or $ (comment lines) are folded.
+Minimal number of lines to fold is four.
+
+In practise node/element lines and curves data points with more than four
+lines are folded. To break folding put empty comment line.
+
+================================================================================
+5. Keyword library                                       *lsdyna-keywordLibrary*
+
+With keyword library you can:
+- put standard Ls-Dyna keywords into your keyword file
+- use keywords with your predefined settings
+- build templates (group of keywords) to speed up your work
+- setup the same keywords for different system units
+- create your own simple material database
+
+--------------------------------------------------------------------------------
+5.1. Inserting keywords                                   *lsdyna-insertKeyword*
+
+In insert mode start typing keyword you want to and hit Ctrl-Tab:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*pa<Ctrl-Tab>                                |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+VIM will show you list of available keywords with popup menu:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*pa                                          |
+    ||parameter            |                      |
+    ||parameter_expression |                      |
+    ||part                 |                      |
+    ||part_inertia         |                      |
+    |+--------------------++                      |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Select keyword from list:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*pa                                          |
+    ||parameter            |                      |
+    ||parameter_expression |                      |
+   >||part                 |<                     |
+    ||part_inertia         |                      |
+    |+---------------------+                      |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Accept selection with <CR> or <C-y>:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PART                                        |
+    |$#title                                      |
+    |?title?                                      |
+    |$#      pid     secid       mid              |
+    |          ?         ?         ?              |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Asterisk sign (*) at the beginning is not mandatory, also it does not matter
+if the keyword is lowercase or uppercase. All following examples work the same:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*pa<Ctrl-Tab>                                |
+    |*Pa<Ctrl-Tab>                                |
+    |*PA<Ctrl-Tab>                                |
+    |pa<Ctrl-Tab>                                 |
+    |Pa<Ctrl-Tab>                                 |
+    |PA<Ctrl-Tab>                                 |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Note: To get list of all available keywords you can use:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*<Ctrl-Tab>                                  |
+    |<Ctrl-Tab>                                   |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+5.2. Extending the library                                *lsdyna-extendLibrary*
+
+The library has limited list of keywords you can use for now.  At some point you
+will want to add a new keyword. To understand how you can do it first you need
+to understand how the keyword library works.
+
+Keyword library is a folder name "keywords". The folder is part of filetype
+plugin. Inside the folder are text files, each file includes Ls-Dyna keyword.
+When you use <Ctrl-Tab> you run user completion function to get list of all
+files inside "keywords" folder, after you accept selection VIM will put content
+of selected file into your master file.
+
+To add a new keyword into the library you have to make new file with keyword
+definition and copy the file into "keywords" folder. Name of the file is used to
+perform user completion when you run <Ctrl-Tab>, that is why the name has to
+follow few of rules:
+- use no extension
+- name must be lowercase
+- do not use any white signs (like space bar)
+
+Following names are correct: part, part_inertia
+Following names are not correct: Part, PART, part.txt, part inertia
+
+Default location of "keywords" folder you can check with command:
+>
+	:echom g:lsdynaKeyLibPath
+<
+When the plugin is used by many users each user has his own keyword library.
+If you want to you can change this behaviour.  It is better if all user of the
+plugin can share one global keyword library and use the same keywords/templates.
+
+To define location of the keyword library put for all users in vimrc:
+>
+	let g:lsdynaKeyLibPath = "C:\\lsdyna\\glbKeyLib\\"
+	let g:lsdynaKeyLibPath = "/home/lsdyna/glbKeyLib/"
+<
+
+--------------------------------------------------------------------------------
+5.3. Keywords templates                                       *lsdyna-templates*
+
+Keyword files does not have to include only one "empty" Ls-Dyna keyword.
+You can create a template file with group of keywords you are using often.
+
+Some examples are already in the keyword library:
+- load_body_z_gravity_mkgsec
+  - predefined gravity for m, kg, sec system unit
+- template_master_mmkgms
+  - template for master deck with basic *CONTROL_ and *DATABASE_ keywords
+
+================================================================================
+6. Mappings                                                    *lsdyna-mappings*
+
+Most of mappings start with <localLeadear>. The list shows mapping with default
+VIM settings where <localLeadear> = "\".
+
+Movement controls:
+]] : jump to next keyword
+[[ : jump to previous keyword
+
+Comment line:
+\c : put empty comment line below
+\C : put empty comment line above
+
+Separator line:
+\0 : separator with title
+\1 : separator line (type 1)
+\2 : separator line (type 2)
+\3 : separator line (type 3)
+
+--------------------------------------------------------------------------------
+6.1. Comment/uncomment                                          *lsdyna-comment*
+
+The function is used to comment/uncomment line/lines in Ls-Dyna keyword file.
+
+Function is mapped with:
+- <ALT-c>
+- <Ctrl-c> (you can use it if you have problem with Alt mapping)
+
+If selected line start with "$" it will be uncommented, if the line does not
+start with "$" it will be commented. If you selected more than one line
+comment/uncomment will be performed according to first line from selection.
+
+Select lines you want to comment:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+   >|*DEFINE_CURVE_TITLE                          |<
+   >|$# title                                     |<
+   >|Load                                         |<
+   >|$#    lcid      sidr       sfa       sfo     |<
+   >|         1         0       1.0       1.0     |<
+   >|$#                a1                  o1     |<
+   >|                 0.0                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Use <Alt-c>:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |$*DEFINE_CURVE_TITLE                         |
+    |$$# title                                    |
+    |$Load                                        |
+    |$$#    lcid      sidr       sfa       sfo    |
+    |$         1         0       1.0       1.0    |
+    |$$#                a1                  o1    |
+    |$                 0.0                 0.0    |
+    |$                 1.0                 1.0    |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+To uncomment select the same lines and use <Alt-c> once again.
+
+--------------------------------------------------------------------------------
+6.2. Data line autoformating                                 *lsdyna-autoFormat*
+
+The plugin has simple autoformating function. The function is trigged with
+<localLeadear><localLeadear> mapping (\\ for default VIM settings).
+The function try to guess under what keyword is and format data line according
+to syntax rules.
+
+Below position of part ids in line is incorrect, put cursor at data line:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*SET_PART_TITLE                              |
+    |$# title                                     |
+    |Contact_parts                                |
+    |$#    pid1      pid2      pid3      pid4     |
+   >|1 2 3                                        |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+\\ command will run autoformating function:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*SET_PART_TITLE                              |
+    |$# title                                     |
+    |Contact_parts                                |
+    |$#    pid1      pid2      pid3      pid4     |
+    |         1         2         3               |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Coma "," is used as special sign (not true under *DEFINE_CURVE). Autoformating
+function insert empty 10 wide column for each coma.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*SET_PART_TITLE                              |
+    |$# title                                     |
+    |Contact_parts                                |
+    |$#    pid1      pid2      pid3      pid4     |
+   >| , , 3                                       |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+\\ command will format the line:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*SET_PART_TITLE                              |
+    |$# title                                     |
+    |Contact_parts                                |
+    |$#    pid1      pid2      pid3      pid4     |
+   >|                             3               |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+You can use prefix for coma as well:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*SET_PART_TITLE                              |
+    |$# title                                     |
+    |Contact_parts                                |
+    |$#    pid1      pid2      pid3      pid4     |
+   >| 3, 3                                        |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+\\ command will format the line:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*SET_PART_TITLE                              |
+    |$# title                                     |
+    |Contact_parts                                |
+    |$#    pid1      pid2      pid3      pid4     |
+   >|                                       3     |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Autoformating functions is useful tool if your curves come from third part
+software and you need to convert them to Ls-Dyna format.
+
+Make visual line selection for data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >| 0.0 0.0                                     |<
+   >| 1.0 1.0                                     |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Use \\ to format x and y values to correct positions:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 1.0                 1.0     |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Autoformating function supports "," under *DEFINE_CURVE as separator.  You can
+have more than one points in line. In next example *AMPLITUDE data points from
+Abaqus will be converted in Ls-Dyna *DEFINE_CURVE format.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >| 0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0      |<
+   >| 4.0, 4.0, 5.0, 5.0, 6.0, 6.0, 7.0, 7.0      |<
+   >| 8.0, 8.0                                    |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Use \\ with selected lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 1.0                 1.0     |
+    |                 2.0                 2.0     |
+    |                 3.0                 3.0     |
+    |                 4.0                 4.0     |
+    |                 5.0                 5.0     |
+    |                 6.0                 6.0     |
+    |                 7.0                 7.0     |
+    |                 8.0                 8.0     |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+6.3. Text objects                                            *lsdyna-textObject*
+
+Ls-Dyna filetype plugin give you two new text object like aw/iw.
+
+ik : insert keyword
+ak : around keyword
+
+Both text object work the same! There is no distinguish like in aw/iw.
+You can use them with other VIM commands like d, y, v.
+
+Examples of use:
+
+Put cursor at any keyword line:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$-- Start load curve --                      |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+   >|Load                                         |<
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 1.0                 1.0     |
+    |$-- End load curve --                        |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Use dak/dik to delete *DEFINE_CURVE_TITLE keyword:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$-- Start load curve --                      |
+    |$-- End load curve --                        |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+YI like think about dak command as "delete all keyword".
+
+Put cursor at any keyword line:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PART                                        |
+    |$#title                                      |
+    |Support                                      |
+    |$#      pid     secid       mid              |
+   >|          1         1         1              |<
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use yak/yik to yank *PART keyword, now you can go to any line and use p to put
+copy of the keyword in a new place:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PART                                        |
+    |$#title                                      |
+    |Support                                      |
+    |$#      pid     secid       mid              |
+    |          1         1         1              |
+    |$                                            |
+    |*PART                                        |
+    |$#title                                      |
+    |Support                                      |
+    |$#      pid     secid       mid              |
+    |          1         1         1              |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Put cursor at any keyword line:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+   >|*PART                                        |<
+    |$#title                                      |
+    |Support                                      |
+    |$#      pid     secid       mid              |
+    |          1         1         1              |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use vak/vik for visual selection of the keyword, now you can use <Alt-c> to
+comment whole keyword:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |$*PART                                       |
+    |$$#title                                     |
+    |$Support                                     |
+    |$$#      pid     secid       mid             |
+    |$          1         1         1             |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+================================================================================
+7. Commands                                                   *lsdyna-commands*
+
+Ls-Dyna filetype plugin has commands to manipulate a curve data.
+
+:LsDynaScale    - scale x and/or y data
+:LsDynaShift    - shift x and/or y data
+:LsDynaAddpoint - used to extend a curve
+:LsDynaResample - resample curve
+
+--------------------------------------------------------------------------------
+7.1. LsDynaScale command                                          *lsdyna-scale*
+
+Description:
+Scale x and/or y value on the curve.
+
+Syntax:
+:LsDynaScale x_sf y_sf
+
+Arguments:
+x_sf - scaling factor for x data (default value 1.0)
+y_sf - scaling factor for y data (default value 1.0)
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaScale 10.0 5.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                10.0                 5.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.2. LsDynaShift command                                         *lsdyna-shift*
+
+Description:
+Shift x and/or y values on the curve,
+
+Syntax:
+:LsDynaShift x_shift y_shift
+
+Arguments:
+x_shift - offset value for x data (default value 0.0)
+y_shift - offset value for y data (default value 0.0)
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaShift 10.0 5.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                10.0                 5.0     |
+    |                11.0                10.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.3. LsDynaAddPoint command                                    *lsdyna-addPoint*
+
+Description:
+LsDynaAddPoint insert a new point for x user value. For points outside range new
+y value is linear extrapolated base on two first or two last points. For points
+inside the range new y value is linear interpolated base on the closets points.
+
+Synatx:
+:LsDynaAddPoint x
+
+Arguments:
+x - user x value for new point
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|                 2.0                 4.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaAddPoint -1.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                -1.0                -2.0     |
+    |                 0.0                 0.0     |
+    |                 2.0                 4.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaAddPoint 0.5
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 0.5                 1.0     |
+    |                 2.0                 4.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaAddPoint 4.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 2.0                 4.0     |
+    |                 4.0                 8.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.4. LsDynaResample command                                    *lsdyna-resample*
+
+Description:
+Command allow you to resample the curve with new number of points.
+
+Synatx:
+:LsDynaResample -i incr
+:LsDynaResample -p nump
+
+Arguments:
+incr - increment
+nump - number of points
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaResample -i 0.2
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 0.2                 0.2     |
+    |                 0.4                 0.4     |
+    |                 0.6                 0.6     |
+    |                 0.8                 0.8     |
+    |                 1.0                 1.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaResample -p 6
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 0.2                 0.2     |
+    |                 0.4                 0.4     |
+    |                 0.6                 0.6     |
+    |                 0.8                 0.8     |
+    |                 1.0                 1.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.5. Number format                                         *lsdyna-numberFormat*
+
+Each function use number format base on first x value.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|            0.00e+00                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaScale 10.0 5.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |            0.00e+00            0.00e+00     |
+    |            1.00e+01            5.00e+00     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Note:
+If you do not want change curve values but only format of numbers change
+first x value and use LsDynaScale/LsDynaShift command with default parameters.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|          0.0000e+00                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaScale
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |          0.0000e+00          0.0000e+00     |
+    |          1.0000e+00          1.0000e+00     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+NOTE:
+Always keep in mind that format of first x-value is important.
+In some situations you can loose some data during curve operations.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|               0.001               0.005     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaShift 0.01
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 0.0                 0.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+As you can see after shifting data precision have been lost since first x value
+has only one decimal place.
+
+================================================================================
+8. Credits                                                     *lsdyna-credits*
+
+ keyword library       Bartosz Gradzik
+ mappings              Bartosz Gradzik
+ functions             Bartosz Gradzik
+ curve commands        Bartosz Gradzik
+ syntax highlighting   Jakub Pajerski
+ folding               Jakub Pajerski
+
+================================================================================
+9. License                                                     *lsdyna-license*
+
+Ls-Dyna filetype plugin for VIM
+Copyright (C) 2014 Bartosz Gradzik (bartosz.gradzik@hotmail.com)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+================================================================================
+10. Bugs                                                           *lsdyna-bugs*
+
+It's not a bug is a feature ;-)
+
+Found a bug? Please let me know at bartosz.gradzik@hotmail.com.
+
+Bugs list:
+- nothing
+
+================================================================================
+vim:tw=80:ts=4:ft=help:norl:
