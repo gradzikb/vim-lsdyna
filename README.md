@@ -22,7 +22,7 @@ You can use commands to operate with a curves data directly in VIM.
 - LsDynaResample
 - LsDynaAddPoint
 
-Example of use you will find on [wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Curve-Commands).
+![vimLsDynaScale](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaScale.gif)
 
 ##Installation
 
@@ -39,7 +39,7 @@ It is highly recommended to read the documentation to know and understand all th
 
 `:help lsdyna`
 
-Some basic introduction to main plugin features can be found also on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
+Examples how to use main features can be found on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
 
 ##License
 
