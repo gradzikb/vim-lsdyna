@@ -1,7 +1,7 @@
 #vim-lsdyna
 VIM filetype plugin for [Ls-Dyna](http://www.lstc.com) FE solver.
 
-What is Ls-Dyna filetype plugin? It's just bunch of scripts for VIM I've made to speed up work with Ls-Dyna keyword file.
+What is Ls-Dyna filetype plugin? It's just bunch of scripts for VIM to speed up work with Ls-Dyna keyword file.
 
 ##Main features
 - Syntax highlighting
