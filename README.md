@@ -16,7 +16,7 @@ With keyword library you can very quick add a new Ls-Dyna keyword into your mode
 ![vimLsDynaKeyLib](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaKeyLib.gif)
 
 ###Curve commands
-You can use commands to operate with a curves data directly in VIM. The plugin gives four commands:
+You can use commands to operate with a curves data directly in VIM. The plugin includes four commands:
 - LsDynaScale
 - LsDynaShift
 - LsDynaResample
