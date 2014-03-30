@@ -42,7 +42,7 @@ Visit [curve commands wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Key
 The plugin has couple of useful function to make your work even faster:
 - mappings `:help lsdyna-mappings`
 - comment/uncomment `:help lsdyna-comment`
-- data line auroformating `:help lsdyna-autoFormat`
+- data line autoformating `:help lsdyna-autoFormat`
 - text objects `:help lsdyna-testObject`
 
 ##Installation
@@ -56,7 +56,7 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 ##Documentation
 
-Please read documentation befor you start to use plugin: ':help lsdyna`
+Please read documentation before you start to use plugin: ':help lsdyna`
 
 Some examples how to use the plugin can be found on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
 
