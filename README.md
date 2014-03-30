@@ -10,6 +10,17 @@ What is Ls-Dyna filetype plugin? It's just bunch of scripts for VIM to speed up 
 - Curve commands
 - Useful functions & mappings
 
+###Syntax highlighting
+With color syntax highlighiting it is easier to navigate through the keyword file.
+Standard 8x10 columns is supported.
+
+![vimLsDynaColorSyntax](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaColorSyntax.gif)
+
+###Folding
+Node & element table are folded, no more never ending scrolling.
+
+![vimLsDynaFold](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaFold.gif)
+
 ###Keyword library
 With keyword library you can very quick add a new Ls-Dyna keyword into your model.
 
