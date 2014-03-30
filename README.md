@@ -52,7 +52,7 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 ##Documentation
 
-Please read documentation before you start to use plugin: ':help lsdyna`
+Please read documentation before you start to use plugin: `:help lsdyna`
 
 Some examples how to use the plugin can be found on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
 
