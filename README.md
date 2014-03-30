@@ -25,6 +25,8 @@ With keyword library you can very quick add a new Ls-Dyna keyword into your mode
 
 ![vimLsDynaKeyLib](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaKeyLib.gif)
 
+Visit [keyword library wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Keyword-Library) to see more.
+
 ###Curve commands
 You can use commands to operate with a curves data directly in VIM. The plugin includes four commands:
 - LsDynaScale
@@ -33,6 +35,15 @@ You can use commands to operate with a curves data directly in VIM. The plugin i
 - LsDynaAddPoint
 
 ![vimLsDynaScale](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaScale.gif)
+
+Visit [curve commands wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Keyword-Library) to meet all commands.
+
+###Functions & mappings
+The plugin has couple of useful function to make your work even faster:
+- mappings `:help lsdyna-mappings`
+- comment/uncomment `:help lsdyna-comment`
+- data line auroformating `:help lsdyna-autoFormat`
+- text objects `:help lsdyna-testObject`
 
 ##Installation
 
@@ -45,11 +56,9 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 ##Documentation
 
-It is highly recommended to read the documentation to know and understand all the plugin features.
+Please read documentation befor you start to use plugin: ':help lsdyna`
 
-`:help lsdyna`
-
-Examples how to use main features can be found on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
+Some examples how to use the plugin can be found on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
 
 ##License
 
