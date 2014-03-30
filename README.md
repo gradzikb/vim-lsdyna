@@ -39,7 +39,7 @@ The plugin has couple of useful function to make your work even faster:
 - mappings `:help lsdyna-mappings`
 - comment/uncomment `:help lsdyna-comment`
 - data line autoformating `:help lsdyna-autoFormat`
-- text objects `:help lsdyna-testObject`
+- text objects `:help lsdyna-textObject`
 
 ##Installation
 
