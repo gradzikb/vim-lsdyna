@@ -34,7 +34,7 @@ You can use commands to operate with curve data directly in VIM.
 
 ![vimLsDynaScale](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaScale.gif)
 
-Visit [curve commands wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Keyword-Library) to meet all commands.
+Visit [curve commands wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Curve-Commands) to meet all commands.
 
 ###Functions & mappings
 The plugin has couple of useful functions to make your work even faster:
