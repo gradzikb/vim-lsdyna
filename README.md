@@ -38,7 +38,7 @@ Visit [curve commands wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Cur
 
 ###Functions & mappings
 The plugin has couple of useful functions to make your work even faster:
-- mappings `:help lsdyna-mappings`
+- [mappings](https://github.com/gradzikb/vim-lsdyna/wiki/Mappings) `:help lsdyna-mappings`
 - comment/uncomment `:help lsdyna-comment`
 - data line autoformating `:help lsdyna-autoFormat`
 - text objects `:help lsdyna-textObject`
