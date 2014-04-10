@@ -336,6 +336,7 @@ command! -buffer -range -nargs=* LsDynaShift :call lsdyna_crvs#Offset(<line1>,<l
 command! -buffer -range -nargs=* LsDynaScale :call lsdyna_crvs#Scale(<line1>,<line2>,<f-args>)
 command! -buffer -range -nargs=* LsDynaResample :call lsdyna_crvs#Resample(<line1>,<line2>,<f-args>)
 command! -buffer -range -nargs=* LsDynaAddPoint :call lsdyna_crvs#AddPoint(<line1>,<line2>,<f-args>)
+command! -buffer -range LsDynaSwap :call lsdyna_crvs#Swap(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
 " restore vim functions

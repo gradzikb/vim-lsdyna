@@ -373,4 +373,39 @@ function! lsdyna_crvs#AddPoint(line1,line2,...)
 
 endfunction
 
+"-------------------------------------------------------------------------------
+
+function! lsdyna_crvs#Swap(line1,line2)
+
+  "-----------------------------------------------------------------------------
+  " Function to scale curve.
+  " Arguments:
+  " - a:line1 : first selected line
+  " - a:line2 : last selected line
+  " Return:
+  " - none
+  "-----------------------------------------------------------------------------
+
+  " what number format?
+  let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
+  let strFormat = repeat(lsdyna_crvs#WhatNumFormat(line1[0], 20), 2)
+
+  " collect the data
+  let points = lsdyna_crvs#Read(a:line1,a:line2)
+
+  " swap x & y
+  for i in range(0, len(points)-1, 2)
+    let tmpPoint = points[i]
+    let points[i] = points[i+1]
+    let points[i+1] = tmpPoint
+  endfor
+
+  " remove old lines
+  execute a:line1 . "," . a:line2 . "delete"
+
+  " save data
+  call lsdyna_crvs#Write(a:line1, points, strFormat)
+
+endfunction
+
 "-------------------------------------EOF---------------------------------------
