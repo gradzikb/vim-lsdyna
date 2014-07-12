@@ -1,0 +1,4 @@
+*CONTROL_IMPLICIT_DYNAMICS
+$#   imass     gamma      beta    tdybir    tdydth    tdybur     irate
+         ?       0.5      0.25                                       1
+$

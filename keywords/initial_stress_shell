@@ -1,0 +1,6 @@
+*INITIAL_STRESS_SHELL
+$#     eid    nplane    nthick     nhisv    ntensr     large    nthint    nthhsv
+         ?
+$#       t     sigxx     sigyy     sigzz     sigxy     sigyz     sigzx       eps
+         ?
+$
