@@ -4,7 +4,15 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  1st of March 2014
+" Last Change:  19th of Jult 2014
+" Version:      1.0.1
+"
+" History of change:
+" v1.0.1
+"   - GetCompletion function updated
+"     - unnamed register is not overwrite by keyword library
+" v1.0.0
+"   - initial version
 "
 "-------------------------------------------------------------------------------
 
@@ -306,6 +314,9 @@ endfunction
 " function to get keyword and insert it from library
 function! s:GetCompletion()
 
+    " save unnamed register
+    let tmpUnnamedReg = @@
+
     " get keyword from current line
     if getline('.')[0] == "*"
       let keyword = tolower(strpart(getline('.'), 1))
@@ -322,6 +333,9 @@ function! s:GetCompletion()
     else
       normal! <C-Y>
     endif
+
+    " restore unnamed register
+    let @@ = tmpUnnamedReg
 
     " reset completion flag
     let b:lsDynaUserComp = 0

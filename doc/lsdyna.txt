@@ -54,7 +54,7 @@ Ls-Dyna filetype plugin gives you:
 - useful functions
 - commands for curve operations
 
-The plugin is designed to work with fixed keyword format not for free format.
+The plugin is designed to work with fixed keyword format not with free format.
 
 ================================================================================
 2. Quick start                                                    *lsdyna-start*
@@ -1108,7 +1108,10 @@ It's not a bug is a feature ;-)
 Found a bug? Please let me know at bartosz.gradzik@hotmail.com.
 
 Bugs list:
-- nothing
+
+1.
+Description: Keyword library function overwrite VIM unnamed register.
+Fixed ver. : v1.0.1
 
 ================================================================================
 vim:tw=80:ts=4:ft=help:norl:

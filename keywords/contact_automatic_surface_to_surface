@@ -4,7 +4,7 @@ $#     cid title
 $#    ssid      msid     sstyp     mstyp    sboxid    mboxid       spr       mpr
          ?         ?         ?         ?
 $#      fs        fd        dc        vc       vdc    penchk        bt        dt
-         ?         ?                          20.0
+       0.1       0.1                          20.0
 $#     sfs       sfm       sst       mst      sfst      sfmt       fsf       vsf
 
 $#    soft    sofscl    lcidab    maxpar     sbopt     depth     bsort    frcfrq
