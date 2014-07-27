@@ -8,6 +8,16 @@
 " Version:      1.0.1
 "
 " History of change:
+" v1.0.2
+"   - LsDynaLine function updated
+"     - regular expresion for keyword line updated
+"     - folowing keywords are supported now
+"       - *ELEMENT_MASS, _PART, _PART_SET
+"       - *ELEMENT_BEAM
+"       - *ELEMENT_DISCRETE
+"       - *ELEMENT_PLOEL
+"       - *ELEMENT_SEATBELT
+"       - *ELEMENT_SOLID
 " v1.0.1
 "   - GetCompletion function updated
 "     - unnamed register is not overwrite by keyword library
@@ -154,7 +164,7 @@ function! s:LsDynaLine() range
   let keyword = getline('.')
 
   "-----------------------------------------------------------------------------
-  if keyword =~? "*DEFINE_CURVE"
+  if keyword =~? "*DEFINE_CURVE *$"
 
     let line = getline(a:firstline)
     let lenLine = len(split(line, '\s*,\s*\|\s\+'))
@@ -194,7 +204,7 @@ function! s:LsDynaLine() range
     endif
 
   "-----------------------------------------------------------------------------
-  elseif keyword =~? "*NODE"
+  elseif keyword =~? "*NODE *$"
 
       for i in range(a:firstline, a:lastline)
         let line = split(getline(i))
@@ -204,12 +214,111 @@ function! s:LsDynaLine() range
       call cursor(a:lastline+1, 0)
 
   "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_SHELL"
+  elseif keyword =~? "*ELEMENT_SHELL *$"
 
       for i in range(a:firstline, a:lastline)
         let line = split(getline(i))
         for j in range(len(line))
           let line[j] = printf("%8s", line[j])
+        endfor
+        call setline(i, join(line, ""))
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT_SOLID *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        for j in range(len(line))
+          let line[j] = printf("%8s", line[j])
+        endfor
+        call setline(i, join(line, ""))
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT_MASS *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        for j in range(len(line))
+          if j == 2
+            let line[j] = printf("%16s", line[j])
+          else
+            let line[j] = printf("%8s", line[j])
+          endif
+        endfor
+        call setline(i, join(line, ""))
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT_MASS_PART *$" ||
+       \ keyword =~? "*ELEMENT_MASS_PART_SET *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        for j in range(len(line))
+          if j == 0
+            let line[j] = printf("%8s", line[j])
+          else
+            let line[j] = printf("%16s", line[j])
+          endif
+        endfor
+        call setline(i, join(line, ""))
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT_BEAM *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        for j in range(len(line))
+          let line[j] = printf("%8s", line[j])
+        endfor
+        call setline(i, join(line, ""))
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT_DISCRETE *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        for j in range(len(line))
+          if j == 5 || j == 7
+            let line[j] = printf("%16s", line[j])
+          else
+            let line[j] = printf("%8s", line[j])
+          endif
+        endfor
+        call setline(i, join(line, ""))
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT_PLOTEL *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        let newLine = printf("%8s%8s%8s",line[0],line[1],line[2])
+        call setline(i, newLine)
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT_SEATBELT *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        for j in range(len(line))
+          if j == 5
+            let line[j] = printf("%16s", line[j])
+          else
+            let line[j] = printf("%8s", line[j])
+          endif
         endfor
         call setline(i, join(line, ""))
       endfor

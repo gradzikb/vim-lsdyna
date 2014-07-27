@@ -1,0 +1,4 @@
+*TERMINATION_SENSOR
+$#    swid
+         ?
+$
