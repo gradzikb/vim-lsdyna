@@ -18,6 +18,7 @@
 "       - *ELEMENT_PLOEL
 "       - *ELEMENT_SEATBELT
 "       - *ELEMENT_SOLID
+"       - *ELEMENT_SHELL
 " v1.0.1
 "   - GetCompletion function updated
 "     - unnamed register is not overwrite by keyword library
@@ -214,19 +215,10 @@ function! s:LsDynaLine() range
       call cursor(a:lastline+1, 0)
 
   "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_SHELL *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          let line[j] = printf("%8s", line[j])
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_SOLID *$"
+  elseif keyword =~? "*ELEMENT_SHELL *$" ||
+       \ keyword =~? "*ELEMENT_SOLID *$" ||
+       \ keyword =~? "*ELEMENT_BEAM *$" ||
+       \ keyword =~? "*ELEMENT_PLOTEL *$"
 
       for i in range(a:firstline, a:lastline)
         let line = split(getline(i))
@@ -254,8 +246,7 @@ function! s:LsDynaLine() range
       call cursor(a:lastline+1, 0)
 
   "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_MASS_PART *$" ||
-       \ keyword =~? "*ELEMENT_MASS_PART_SET *$"
+  elseif keyword =~? "*ELEMENT_MASS_PART.*$"
 
       for i in range(a:firstline, a:lastline)
         let line = split(getline(i))
@@ -265,18 +256,6 @@ function! s:LsDynaLine() range
           else
             let line[j] = printf("%16s", line[j])
           endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_BEAM *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          let line[j] = printf("%8s", line[j])
         endfor
         call setline(i, join(line, ""))
       endfor
@@ -295,16 +274,6 @@ function! s:LsDynaLine() range
           endif
         endfor
         call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_PLOTEL *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        let newLine = printf("%8s%8s%8s",line[0],line[1],line[2])
-        call setline(i, newLine)
       endfor
       call cursor(a:lastline+1, 0)
 
