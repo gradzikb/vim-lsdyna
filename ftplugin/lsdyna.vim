@@ -5,9 +5,13 @@
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
 " Last Change:  19th of Jult 2014
-" Version:      1.0.1
+" Version:      1.0.3
 "
 " History of change:
+" v1.0.3
+"   - LsDynaLine function updated
+"     - folowing keywords are supported now
+"       - *PARAMETER
 " v1.0.2
 "   - LsDynaLine function updated
 "     - regular expresion for keyword line updated
@@ -290,6 +294,22 @@ function! s:LsDynaLine() range
           endif
         endfor
         call setline(i, join(line, ""))
+      endfor
+      call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*PARAMETER *$"
+
+      for i in range(a:firstline, a:lastline)
+        let line = split(getline(i))
+        " parameter prefix present
+        if len(line) == 3
+          let newLine = printf("%1s%9s%10s",line[0],line[1],line[2])
+        " parameter prefix missed (add R by default)
+        elseif len(line) == 2
+          let newLine = printf("%1s%9s%10s","R",line[0],line[1])
+        endif
+        call setline(i, newLine)
       endfor
       call cursor(a:lastline+1, 0)
 
