@@ -169,7 +169,7 @@ function! s:LsDynaLine() range
   let keyword = getline('.')
 
   "-----------------------------------------------------------------------------
-  if keyword =~? "*DEFINE_CURVE *$"
+  if keyword =~? "*DEFINE_CURVE.*$"
 
     let line = getline(a:firstline)
     let lenLine = len(split(line, '\s*,\s*\|\s\+'))
