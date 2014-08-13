@@ -10,7 +10,7 @@
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#Read(firstLine, lastLine)
+function! curves#Read(firstLine, lastLine)
 
   "-----------------------------------------------------------------------------
   " Function to read selected lines and store data into the list.
@@ -38,7 +38,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#Write(startLine, points, strFormat)
+function! curves#Write(startLine, points, strFormat)
 
   "-----------------------------------------------------------------------------
   " Function to write points into a file.
@@ -76,7 +76,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#WhatNumFormat(str, width)
+function! curves#WhatNumFormat(str, width)
 
   " what type?
   if a:str =~? "e"
@@ -97,7 +97,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#Offset(line1,line2,...)
+function! curves#Offset(line1,line2,...)
 
   "-----------------------------------------------------------------------------
   " Function to offset curve.
@@ -124,10 +124,10 @@ function! lsdyna_crvs#Offset(line1,line2,...)
 
   " what number format?
   let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
-  let strFormat = repeat(lsdyna_crvs#WhatNumFormat(line1[0], 20), 2)
+  let strFormat = repeat(curves#WhatNumFormat(line1[0], 20), 2)
 
   " collect the data
-  let points = lsdyna_crvs#Read(a:line1,a:line2)
+  let points = curves#Read(a:line1,a:line2)
 
   " remove old lines
   execute a:line1 . "," . a:line2 . "delete"
@@ -139,13 +139,13 @@ function! lsdyna_crvs#Offset(line1,line2,...)
   endfor
 
   " save data
-  call lsdyna_crvs#Write(a:line1, points, strFormat)
+  call curves#Write(a:line1, points, strFormat)
 
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#Scale(line1,line2,...)
+function! curves#Scale(line1,line2,...)
 
   "-----------------------------------------------------------------------------
   " Function to scale curve.
@@ -172,10 +172,10 @@ function! lsdyna_crvs#Scale(line1,line2,...)
 
   " what number format?
   let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
-  let strFormat = repeat(lsdyna_crvs#WhatNumFormat(line1[0], 20), 2)
+  let strFormat = repeat(curves#WhatNumFormat(line1[0], 20), 2)
 
   " collect the data
-  let points = lsdyna_crvs#Read(a:line1,a:line2)
+  let points = curves#Read(a:line1,a:line2)
 
   " remove old lines
   execute a:line1 . "," . a:line2 . "delete"
@@ -187,13 +187,13 @@ function! lsdyna_crvs#Scale(line1,line2,...)
   endfor
 
   " save data
-  call lsdyna_crvs#Write(a:line1, points, strFormat)
+  call curves#Write(a:line1, points, strFormat)
 
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#Resample(line1,line2,...)
+function! curves#Resample(line1,line2,...)
 
   "-----------------------------------------------------------------------------
   " Function to interpolate curve with user increment or number of points.
@@ -218,10 +218,10 @@ function! lsdyna_crvs#Resample(line1,line2,...)
 
     " what number format?
     let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
-    let strFormat = repeat(lsdyna_crvs#WhatNumFormat(line1[0], 20), 2)
+    let strFormat = repeat(curves#WhatNumFormat(line1[0], 20), 2)
 
     " collect the data
-    let points = lsdyna_crvs#Read(a:line1,a:line2)
+    let points = curves#Read(a:line1,a:line2)
 
     " define interpolation step
     if a:1 ==? '-p'
@@ -281,13 +281,13 @@ function! lsdyna_crvs#Resample(line1,line2,...)
   endwhile
 
   " save data
-  call lsdyna_crvs#Write(a:line1, tempPoints, strFormat)
+  call curves#Write(a:line1, tempPoints, strFormat)
 
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#AddPoint(line1,line2,...)
+function! curves#AddPoint(line1,line2,...)
 
   "-----------------------------------------------------------------------------
   " Function to add a new point for curve.
@@ -310,10 +310,10 @@ function! lsdyna_crvs#AddPoint(line1,line2,...)
 
   " what number format?
   let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
-  let strFormat = repeat(lsdyna_crvs#WhatNumFormat(line1[0], 20), 2)
+  let strFormat = repeat(curves#WhatNumFormat(line1[0], 20), 2)
 
   " collect the data
-  let points = lsdyna_crvs#Read(a:line1,a:line2)
+  let points = curves#Read(a:line1,a:line2)
 
   for i in range(0, len(points)-1, 2)
     if (points[i] == x)
@@ -375,7 +375,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_crvs#Swap(line1,line2)
+function! curves#Swap(line1,line2)
 
   "-----------------------------------------------------------------------------
   " Function to scale curve.
@@ -388,10 +388,10 @@ function! lsdyna_crvs#Swap(line1,line2)
 
   " what number format?
   let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
-  let strFormat = repeat(lsdyna_crvs#WhatNumFormat(line1[0], 20), 2)
+  let strFormat = repeat(curves#WhatNumFormat(line1[0], 20), 2)
 
   " collect the data
-  let points = lsdyna_crvs#Read(a:line1,a:line2)
+  let points = curves#Read(a:line1,a:line2)
 
   " swap x & y
   for i in range(0, len(points)-1, 2)
@@ -404,7 +404,7 @@ function! lsdyna_crvs#Swap(line1,line2)
   execute a:line1 . "," . a:line2 . "delete"
 
   " save data
-  call lsdyna_crvs#Write(a:line1, points, strFormat)
+  call curves#Write(a:line1, points, strFormat)
 
 endfunction
 

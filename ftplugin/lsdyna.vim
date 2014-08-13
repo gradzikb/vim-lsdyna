@@ -4,8 +4,16 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  19th of Jult 2014
-" Version:      1.0.3
+" Last Change:  12th of August 2014
+" Version:      1.1.0
+"
+" History of change:
+" v1.1.0
+"   - most of functions moved to autoload
+"     - keyword library
+"     - include path
+"     - curves commands
+"     - autoformat function
 "
 " History of change:
 " v1.0.3
@@ -144,198 +152,15 @@ function! s:KeywordTextObj()
   call search(reKeyWord,'bW')
   " start line visual mode
   normal! V
-  " serach next keword
+  " serach next keyword
   let res = search(reKeyWord, 'W')
-  " go to the ond of file if you did not find the keyword
+  " go to the end of file if you did not find the keyword
   if res == 0
     normal! G
   endif
   " move back to first data line
   call search(reDataLine,'bW')
 
-endfunction
-
-"-------------------------------------------------------------------------------
-"    LINE FORMATING
-"-------------------------------------------------------------------------------
-
-" data line format
-noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call <SID>LsDynaLine()<CR>
-
-function! s:LsDynaLine() range
-
-  " find keyword
-  call search('^\*[a-zA-Z]','b')
-  let keyword = getline('.')
-
-  "-----------------------------------------------------------------------------
-  if keyword =~? "*DEFINE_CURVE.*$"
-
-    let line = getline(a:firstline)
-    let lenLine = len(split(line, '\s*,\s*\|\s\+'))
-
-    " format 8x10 (first line under the keyword)
-    if lenLine !=2 && line !~ ","
-
-      let oneline = split(getline(a:firstline))
-      for j in range(len(oneline))
-        let oneline[j] = printf("%10s", oneline[j])
-      endfor
-      call setline(a:firstline, join(oneline, ""))
-      call cursor(a:firstline, 0)
-
-    " format 2x20
-    else
-
-      " get all lines with points
-      let points = []
-      for i in range(a:firstline, a:lastline)
-        let points = points + split(getline(i), '\s*,\s*\|\s\+')
-      endfor
-
-      " remove old lines
-      execute a:firstline . "," . a:lastline . "delete"
-      normal! k
-
-      " save new lines
-      for i in range(0, len(points)-1, 2)
-        let newLine = printf("%20s%20s", points[i], points[i+1])
-        normal! o
-        call setline(".", newLine)
-      endfor
-
-      call cursor(a:firstline+1, 0)
-
-    endif
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*NODE *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        let newLine = printf("%8s%16s%16s%16s",line[0],line[1],line[2],line[3])
-        call setline(i, newLine)
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_SHELL *$" ||
-       \ keyword =~? "*ELEMENT_SOLID *$" ||
-       \ keyword =~? "*ELEMENT_BEAM *$" ||
-       \ keyword =~? "*ELEMENT_PLOTEL *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          let line[j] = printf("%8s", line[j])
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_MASS *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 2
-            let line[j] = printf("%16s", line[j])
-          else
-            let line[j] = printf("%8s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_MASS_PART.*$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 0
-            let line[j] = printf("%8s", line[j])
-          else
-            let line[j] = printf("%16s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_DISCRETE *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 5 || j == 7
-            let line[j] = printf("%16s", line[j])
-          else
-            let line[j] = printf("%8s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_SEATBELT *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 5
-            let line[j] = printf("%16s", line[j])
-          else
-            let line[j] = printf("%8s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*PARAMETER *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        " parameter prefix present
-        if len(line) == 3
-          let newLine = printf("%1s%9s%10s",line[0],line[1],line[2])
-        " parameter prefix missed (add R by default)
-        elseif len(line) == 2
-          let newLine = printf("%1s%9s%10s","R",line[0],line[1])
-        endif
-        call setline(i, newLine)
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  " standart format line (8x10)
-  " allow to use coma as empty col
-  else
-
-    for i in range(a:firstline, a:lastline)
-      let line = split(getline(i))
-      for j in range(len(line))
-        let fStr = "%10s"
-        if line[j] =~# ","
-          if len(line[j]) !=# 1
-            let fStr = "%" . line[j][:-2] . "0s"
-          endif
-          let line[j] = printf(fStr, "")
-        else
-          let line[j] = printf(fStr, line[j])
-        endif
-      endfor
-      call setline(i, join(line, ""))
-    endfor
-    call cursor(a:lastline+1, 0)
-
-  endif
 endfunction
 
 "-------------------------------------------------------------------------------
@@ -357,98 +182,59 @@ endif
 " set user completion flag
 let b:lsDynaUserComp = 0
 
-" act <up> and <down> like Ctrl-p and Ctrl-n
-" it has nothing to do with keyword library, it's only because I like it
-inoremap <buffer><silent><script><expr> <Down> pumvisible() ? "\<C-n>" : "\<Down>"
-inoremap <buffer><silent><script><expr> <Up>   pumvisible() ? "\<C-p>" : "\<Up>"
+" set user completion function to run with <C-X><C-U>
+setlocal completefunc=library#CompleteKeywords
 
 " mapping for <CR>/<C-Y>
 " if g:lsDynaUserComp is true run GetCompletion function
 " if g:lsDynaUserComp is false act like <CR>/<C-Y>
 inoremap <buffer><silent><script><expr> <CR>
- \ b:lsDynaUserComp ? "\<ESC>:call \<SID>GetCompletion()\<CR>" : "\<CR>"
+ \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<CR>"
 inoremap <buffer><silent><script><expr> <C-Y>
- \ b:lsDynaUserComp ? "\<ESC>:call \<SID>GetCompletion()\<CR>" : "\<C-Y>"
+ \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<C-Y>"
 
-" set user completion function to run with <C-X><C-U>
-setlocal completefunc=LsDynaCompleteKeywords
+" act <up> and <down> like Ctrl-p and Ctrl-n
+" it has nothing to do with keyword library, it's only because I like it
+inoremap <buffer><silent><script><expr> <Down>
+ \ pumvisible() ? "\<C-n>" : "\<Down>"
+inoremap <buffer><silent><script><expr> <Up>
+ \ pumvisible() ? "\<C-p>" : "\<Up>"
 
-" user completion function
-function! LsDynaCompleteKeywords(findstart, base)
+"-------------------------------------------------------------------------------
+"    LINE FORMATING
+"-------------------------------------------------------------------------------
 
-  " run for first function call
-  if a:findstart
-
-    " find completion start
-    if getline('.')[0] == "*"
-      return 1
-    else
-      return 0
-    endif
-
-  else
-
-    " get list of files in the library
-    let keylibrary = split(globpath(g:lsdynaKeyLibPath, '*'))
-    " keep only file names
-    call map(keylibrary, 'fnamemodify(v:val, ":t")')
-
-    " completion loop
-    let compKeywords = []
-    for key in keylibrary
-      if key =~? '^' . a:base
-        call add(compKeywords, key)
-      endif
-    endfor
-
-    " set completion flag
-    let b:lsDynaUserComp = 1
-    " return list after completion
-    return compKeywords
-
-  endif
-endfunction
-
-" function to get keyword and insert it from library
-function! s:GetCompletion()
-
-    " save unnamed register
-    let tmpUnnamedReg = @@
-
-    " get keyword from current line
-    if getline('.')[0] == "*"
-      let keyword = tolower(strpart(getline('.'), 1))
-    else
-      let keyword = tolower(strpart(getline('.'), 0))
-    endif
-    " set keyword file path
-    let file = g:lsdynaKeyLibPath . keyword
-
-    " check if the file exist and put it
-    if filereadable(file)
-     execute "read " . file
-     normal! kdd
-    else
-      normal! <C-Y>
-    endif
-
-    " restore unnamed register
-    let @@ = tmpUnnamedReg
-
-    " reset completion flag
-    let b:lsDynaUserComp = 0
-
-endfunction
+noremap <buffer><script><silent> <LocalLeader><LocalLeader>
+ \ :call autoformat#LsDynaLine()<CR>
 
 "-------------------------------------------------------------------------------
 "    CURVE COMMANDS
 "-------------------------------------------------------------------------------
 
-command! -buffer -range -nargs=* LsDynaShift :call lsdyna_crvs#Offset(<line1>,<line2>,<f-args>)
-command! -buffer -range -nargs=* LsDynaScale :call lsdyna_crvs#Scale(<line1>,<line2>,<f-args>)
-command! -buffer -range -nargs=* LsDynaResample :call lsdyna_crvs#Resample(<line1>,<line2>,<f-args>)
-command! -buffer -range -nargs=* LsDynaAddPoint :call lsdyna_crvs#AddPoint(<line1>,<line2>,<f-args>)
-command! -buffer -range LsDynaSwap :call lsdyna_crvs#Swap(<line1>,<line2>)
+command! -buffer -range -nargs=* LsDynaShift
+ \ :call curves#Offset(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsDynaScale
+ \ :call curves#Scale(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsDynaResample
+ \ :call curves#Resample(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsDynaAddPoint
+ \ :call curves#AddPoint(<line1>,<line2>,<f-args>)
+
+command! -buffer -range LsDynaSwap
+ \ :call curves#Swap(<line1>,<line2>)
+
+"-------------------------------------------------------------------------------
+"    INCLUDE PATH
+"-------------------------------------------------------------------------------
+
+noremap <buffer><script><silent> gf
+ \ :call includepath#IncludePath()<CR>gf
+
+noremap <buffer><script><silent> <C-W>f
+ \ :call includepath#IncludePath()<CR><C-W>f
 
 "-------------------------------------------------------------------------------
 " restore vim functions
