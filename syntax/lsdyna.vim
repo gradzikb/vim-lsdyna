@@ -29,10 +29,10 @@ syntax match LsDynaTitle '^[a-zA-Z?.].*$' contained
 syntax match LsDynaKeyword '^*[a-zA-Z].*$' contains=LsDynaKeywordOption
 syntax match LsDynaKeywordOption '_.*$' contained
 
-hi def link LsDynaComment Comment
-hi def link LsDynaKeyword Statement
-hi def link LsDynaKeywordOption Type
-hi def link LsDynaTitle Identifier
+highlight default link LsDynaComment Comment
+highlight default link LsDynaKeyword Statement
+highlight default link LsDynaKeywordOption Type
+highlight default link LsDynaTitle Identifier
 
 "-------------------------------------------------------------------------------
 "    Standard Ls-Dyna keyword
@@ -60,7 +60,7 @@ syntax region LsDynaStdKeyword start=/^\*[a-zA-z]/ end=/^\*/me=s-1
  \ contains=@LsDynaStdKeywordCluster
 
 "-------------------------------------------------------------------------------
-"    *NODE
+"    *NODE / *AIRBAG_REF_
 "-------------------------------------------------------------------------------
 
 syntax match LsDynaNode_02_Col '\%9c.\{16}'  contained
@@ -82,11 +82,14 @@ syntax region LsDynaNode start=/\c^\*NODE *$/ end=/^\*/me=s-1
 syntax region LsDynaAirbagRef start=/\c^\*AIRBAG_REF.*$/ end=/^\*/me=s-1
  \ contains=@LsDynaNodeCluster
 
-syntax sync match LsDynaNodeSync grouphere LsDynaNode '\c^\*NODE *$'
-syntax sync match LsDynaAirbagRefSync grouphere LsDynaAirbagRef '\c^\*AIRBAG_REF.*$'
+" following two lines help with syntax highlighting synchronization
+" but they slow down VIM performance for big files
+
+"syntax sync match LsDynaNodeSync grouphere LsDynaNode '\c^\*NODE *$'
+"syntax sync match LsDynaAirbagRefSync grouphere LsDynaAirbagRef '\c^\*AIRBAG_REF.*$'
 
 "-------------------------------------------------------------------------------
-"    *ELEMENT_
+"    *ELEMENT_ / *AIRBAG_SHELL_
 "-------------------------------------------------------------------------------
 
 syntax match LsDynaElShell_02_Col '\%9c.\{8}'  contained
@@ -114,7 +117,10 @@ syntax region LsDynaElShell start=/\c^\*ELEMENT_.\+ *$/ end=/^\*/me=s-1
 syntax region LsDynaAirbagShell start=/\c^\*AIRBAG_SHELL_.\+ *$/ end=/^\*/me=s-1
  \ contains=@LsDynaElShellCluster
 
-syntax sync match LsDynaElShellSync grouphere LsDynaElShell '\c^\*ELEMENT_.\+ *$'
-syntax sync match LsDynaAirbagShellSync grouphere LsDynaAirbagShell '\c^\*AIRBAG_SHELL_.\+ *$'
+" following two lines help with syntax highlighting synchronization
+" but they slow down VIM performance for big files
+
+"syntax sync match LsDynaElShellSync grouphere LsDynaElShell '\c^\*ELEMENT_.\+ *$'
+"syntax sync match LsDynaAirbagShellSync grouphere LsDynaAirbagShell '\c^\*AIRBAG_SHELL_.\+ *$'
 
 "-------------------------------------EOF---------------------------------------
