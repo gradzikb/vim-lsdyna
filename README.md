@@ -33,13 +33,13 @@ You can use commands to operate with curve data directly in VIM.
 
 Visit [curve commands wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Curve-Commands) to meet all commands.
 
-###Functions & mappings
-The plugin has couple of useful functions to make your work even faster:
-- [mappings](https://github.com/gradzikb/vim-lsdyna/wiki/Mappings) `:help lsdyna-mappings`
-- comment/uncomment `:help lsdyna-comment`
-- data line autoformating `:help lsdyna-autoFormat`
-- text objects `:help lsdyna-textObject`
-- include path `:help lsdyna-includePath`
+###Commands, functions & mappings
+The plugin has couple of great functions to make your work even faster:
+- [mappings](https://github.com/gradzikb/vim-lsdyna/wiki/Mappings)
+- comment/uncomment
+- data line autoformating
+- keyword text objects
+- include path
 
 ##Installation
 
