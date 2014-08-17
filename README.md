@@ -1,19 +1,16 @@
 #vim-lsdyna
 [VIM](http://www.vim.org/) filetype plugin for [Ls-Dyna](http://www.lstc.com) FE solver.
 
-What is Ls-Dyna filetype plugin?
-
-It's just bunch of scripts for VIM to speed up work with Ls-Dyna keyword file.
+What is Ls-Dyna filetype plugin? It's just bunch of scripts for VIM to speed up work with Ls-Dyna keyword file.
 
 ##Main features
 - Syntax highlighting
 - Folding
 - Keyword library
-- Curve commands
-- Useful functions & mappings
+- Useful commands, functions and mappings
 
 ###Syntax highlighting
-With color syntax it's easier to navigate through a keyword file. Standard 8x10 columns is supported.
+With color syntax it's easier to navigate through a keyword file.
 
 ![vimLsDynaColorSyntax](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaColorSyntax.gif)
 
@@ -42,6 +39,7 @@ The plugin has couple of useful functions to make your work even faster:
 - comment/uncomment `:help lsdyna-comment`
 - data line autoformating `:help lsdyna-autoFormat`
 - text objects `:help lsdyna-textObject`
+- include path `:help lsdyna-includePath`
 
 ##Installation
 
@@ -54,7 +52,10 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 ##Documentation
 
-Please read documentation before you start to use plugin: `:help lsdyna`
+List of all great features and detail information about them you will find in plugin documentation
+
+`:help lsdyna`
+
 
 Some examples how to use the plugin can be found on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
 
