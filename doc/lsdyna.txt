@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4			Last change: 2014 February 6
+*lsdyna.txt*		For Vim version 7.4			Last change: 2014 August 17
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -27,6 +27,7 @@ CONTENTS
        6.1. Comment/uncomment .................|lsdyna-comment|
        6.2. Data line autoformating ...........|lsdyne-autoFormat|
        6.3. Text objects.......................|lsdyna-textObject|
+       6.4. Include path.......................|lsdyna-includePath|
     7. Commands................................|lsdyna-commands|
        7.1. LsDynaScale........................|lsdyna-scale|
        7.2. LsDynaShift........................|lsdyna-shift|
@@ -42,59 +43,71 @@ CONTENTS
 
 It is VIM filetype plugin for Ls-Dyna keyword file.
 
-Ls-Dyna is simulation software developed by the Livermore Software Technology
-Corporation (www.lstc.com). Keyword file is used to store model information.
-It is text file with keywords which follow specific syntax rules.
+Ls-Dyna is simulation software developed by Livermore Software Technology
+Corporation (www.lstc.com). The keyword file is used to store all model
+information. It is text file with keywords which follow specific syntax rules.
 
 Ls-Dyna filetype plugin gives you:
-- syntax highlighting
-- folding
-- keyword library
-- useful mappings
-- useful functions
-- commands for curve operations
+  - syntax highlighting
+  - folding
+  - keyword library
+  - useful mappings
+  - useful functions & commands
 
 The plugin is designed to work with fixed keyword format not with free format.
 
 ================================================================================
 2. Quick start                                                    *lsdyna-start*
 
-Plugin was tested with VIM 7.4 both Windows and Linux operating systems.
-To use |lsdyna-commands| for curve operations your VIM has to support float
-calculation.
-
-To use the filetype plugin and syntax highlighting you have to have following
-commands in your vimrc file:
+To use any filetype plugin in VIM you must add following lines into vimrc file:
 >
 	filetype plugin on
 	syntax on
 <
-The plugin loads automatic for all files with *.k and *.key extension.
-To check does the plugin was load use:
->
-	:set filetype?
-<
-You should see:
->
-	filetype=lsdyna
-<
-You can also load the plugin manually with command:
+The plugin loads automatic for files with extension:
+  - *.k
+  - *.key
+  - *.inc
+
+If necessary the plugin can be load manually with command:
 >
 	:set filetype=lsdyna
 <
+If something does not work check did VIM load the plugin:
+>
+	:set filetype?
+<
+VIM message should be:
+>
+	filetype=lsdyna
+<
+|Lsdyna-commands| require VIM version which support float operations.
+You can test your VIM installation with command:
+>
+	echom has("float")
+<
+VIM prints 0 if float operations are not supported and 1 when they are.
 
 ================================================================================
 3. Syntax highlighting                                           *lsdyna-syntax*
 
 Syntax highlighting supports:
-- keyword lines (start with *)
-- comment lines (start with $)
-- data lines (8x10 columns format only)
+  - keyword line (start with *)
+  - comment line (start with $)
+  - title line
+  - data line
 
-Current version of syntax highlighting is not perfect and has some limitations.
-Only 8x10 data line format is supported, It is main format so it is true for
-almost all Ls-Dyna keywords. For keywords with different format (*NODE,*INCLUDE)
-highlighting will be incorrect.
+The plugin supports three types of data line syntax highlighting.
+Used type depends on Ls-Dyna keyword type.
+
+1) 1x8,3x16,2x8 field
+   - *NODE
+   - *AIRBAG_REFERENCE_GEOMETRY
+2) 10x8 field
+   - *ELEMENT_ (*ELEMENT_SHELL, *ELEMENT_SOLID, ...)
+   - *AIRBAG_SHELL_REFERENCE_GEOMETRY
+3) 8x10 field
+   - all other keywords (*PART, *SECTION_, *CONTACT_ ...)
 
 ================================================================================
 4. Folding                                                      *lsdyna-folding*
@@ -109,10 +122,10 @@ lines are folded. To break folding put empty comment line.
 5. Keyword library                                       *lsdyna-keywordLibrary*
 
 With keyword library you can:
-- put standard Ls-Dyna keywords into your keyword file
+- put standard Ls-Dyna keyword into your keyword file
 - use keywords with your predefined settings
 - build templates (group of keywords) to speed up your work
-- setup the same keywords for different system units
+- setup the same keyword for different system units
 - create your own simple material database
 
 --------------------------------------------------------------------------------
@@ -583,7 +596,7 @@ Put cursor at any keyword line:
     |                                             |
     +---------------------------------------------+
 
-Use dak/dik to delete *DEFINE_CURVE_TITLE keyword:
+Use dak/dik to delete whole *DEFINE_CURVE_TITLE keyword:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -595,7 +608,7 @@ Use dak/dik to delete *DEFINE_CURVE_TITLE keyword:
     |                                             |
     +---------------------------------------------+
 
-YI like think about dak command as "delete all keyword".
+I like think about dak command as "delete all keyword".
 
 Put cursor at any keyword line:
 
@@ -614,8 +627,8 @@ Put cursor at any keyword line:
     |                                             |
     +---------------------------------------------+
 
-Use yak/yik to yank *PART keyword, now you can go to any line and use p to put
-copy of the keyword in a new place:
+Use yak/yik to yank *PART keyword, now you can go to any line and use p normal
+command to put copy of the keyword in a new place:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -672,10 +685,103 @@ comment whole keyword:
     |                                             |
     +---------------------------------------------+
 
+--------------------------------------------------------------------------------
+6.4. Include path function                                   *lsdyna-includePath*
+
+VIM let you use group of commands to jump from one file into another.
+Some of them can be used to jump from master deck into includes under *INCLUDE.
+
+Jump commands:
+  - gf     : open file under the cursor in current window
+  - <C-W>f : open file under the cursor in new window
+
+Example of use gf command:
+
+Put cursor at line with path and include file name
+
+    +---------------------------------------------+
+    |lsdyna_MASTER.key============================|
+    |$                                            |
+    |$ include material database                  |
+    |*INCLUDE                                     |
+   >|/FEM/LSDYNA/INCL/MAT/matdbs_v01.inc          |<
+    |$                                            |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use gf normal command to open include file
+
+    +---------------------------------------------+
+    |matdbs_v01.inc===============================|
+    |$                                            |
+    |*MAT_ELASTIC_TITLE                           |
+    |$# title                                     |
+    |Steel                                        |
+    |$#     mid        ro         e        pr     |
+    |        10  7.85e-06     210.0       0.3     |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Jump commands are VIM internal commands and works fine as long as we have full
+path and include file name in one line. But it is not true if we are using
+combination of *INCLUDE_PATH and *INCLUDE keywords in our model.
+In this situation VIM is not able make jump since the path is in one line and
+include file name in other line.
+
+To overcome the problem the plugin has "IncludePath" function. The function is
+run every time a user use gf and/or <C-W>f command. First current file is
+scanned and all paths under *INCLUDE_PATH, *INCLUDE_PATH_RELATIVE are collected.
+Next VIM variable &path is extended with those new paths so VIM knows where to
+look for include files.
+
+Example of use gf command:
+
+Put cursor at line with include file name
+
+    +---------------------------------------------+
+    |lsdyna_MASTER.key============================|
+    |$                                            |
+    |*INCLUDE_PATH                                |
+    |/FEM/LSDYNA/INCL/MAT/                        |
+    |$                                            |
+    |*INCLUDE                                     |
+   >|matdbs_v01.inc                               |<
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use gf normal command to open include file
+
+    +---------------------------------------------+
+    |matdbs_v01.inc===============================|
+    |$                                            |
+    |*MAT_ELASTIC_TITLE                           |
+    |$# title                                     |
+    |Steel                                        |
+    |$#     mid        ro         e        pr     |
+    |        10  7.85e-06     210.0       0.3     |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
 ================================================================================
 7. Commands                                                   *lsdyna-commands*
 
-Ls-Dyna filetype plugin has commands to manipulate a curve data.
+Ls-Dyna filetype plugin gives you commands to manipulate a curve data.
 
 :LsDynaScale    - scale x and/or y data
 :LsDynaShift    - shift x and/or y data
@@ -1078,7 +1184,7 @@ has only one decimal place.
  mappings              Bartosz Gradzik
  functions             Bartosz Gradzik
  curve commands        Bartosz Gradzik
- syntax highlighting   Jakub Pajerski
+ syntax highlighting   Bartosz Gradzik / Jakub Pajerski
  folding               Jakub Pajerski
 
 ================================================================================
@@ -1108,6 +1214,7 @@ It's not a bug is a feature ;-)
 Found a bug? Please let me know at bartosz.gradzik@hotmail.com.
 
 Bugs list:
+----------
 
 1.
 Description: Keyword library function overwrite VIM unnamed register.
