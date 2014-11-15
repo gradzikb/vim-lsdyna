@@ -4,10 +4,13 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  12th of August 2014
-" Version:      1.1.0
+" Last Change:  15th of November 2014
+" Version:      1.1.1
 "
 " History of change:
+" v1.1.1
+"   - enter button from numeric pad can be used with keyword library as well
+"
 " v1.1.0
 "   - most of functions moved to autoload
 "     - keyword library
@@ -187,11 +190,13 @@ setlocal completefunc=library#CompleteKeywords
 
 " mapping for <CR>/<C-Y>
 " if g:lsDynaUserComp is true run GetCompletion function
-" if g:lsDynaUserComp is false act like <CR>/<C-Y>
+" if g:lsDynaUserComp is false act like <CR>/<C-Y>/<kEnter>
 inoremap <buffer><silent><script><expr> <CR>
  \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<CR>"
 inoremap <buffer><silent><script><expr> <C-Y>
  \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<C-Y>"
+inoremap <buffer><silent><script><expr> <kEnter>
+ \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<kEnter>"
 
 " act <up> and <down> like Ctrl-p and Ctrl-n
 " it has nothing to do with keyword library, it's only because I like it
