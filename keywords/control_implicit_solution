@@ -1,8 +1,0 @@
-*CONTROL_IMPLICIT_SOLUTION
-$#  nsolvr    ilimit    maxref     dctol     ectol     rctol     lstol    abstol
-         2        11        15     0.001      0.01                 0.9
-$#   dnorm    diverg     istif   nlprint    nlnorm   d3itctl
-
-$#  arcctl    arcdir    arclen    arcmth    arcdmp
-
-$

@@ -1,4 +1,0 @@
-*PARAMETER
-$#    name       val
-         ?         ?
-$

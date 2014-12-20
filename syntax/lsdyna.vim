@@ -25,8 +25,8 @@ let b:current_syntax = "lsdyna"
 "-------------------------------------------------------------------------------
 
 syntax match LsDynaComment '^[$#].*$'
-syntax match LsDynaTitle '^[a-zA-Z?.].*$' contained
-syntax match LsDynaKeyword '^*[a-zA-Z].*$' contains=LsDynaKeywordOption
+syntax match LsDynaTitle '^\(\a\|?\|\.\).*$' contained
+syntax match LsDynaKeyword '^*\a.*$' contains=LsDynaKeywordOption
 syntax match LsDynaKeywordOption '_.*$' contained
 
 highlight default link LsDynaComment Comment
@@ -56,7 +56,7 @@ syntax cluster LsDynaStdKeywordCluster add=LsDynaStdKeyword_04_Col
 syntax cluster LsDynaStdKeywordCluster add=LsDynaStdKeyword_06_Col
 syntax cluster LsDynaStdKeywordCluster add=LsDynaStdKeyword_08_Col
 
-syntax region LsDynaStdKeyword start=/^\*[a-zA-z]/ end=/^\*/me=s-1
+syntax region LsDynaStdKeyword start=/^\*\a/ end=/^\*/me=s-1
  \ contains=@LsDynaStdKeywordCluster
 
 "-------------------------------------------------------------------------------

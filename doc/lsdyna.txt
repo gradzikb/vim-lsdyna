@@ -182,7 +182,7 @@ Select keyword from list:
     |                                             |
     +---------------------------------------------+
 
-Accept selection with <CR> or <C-y>:
+Accept selection with <CR>, <C-y>, <kEnter>:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -237,26 +237,44 @@ Note: To get list of all available keywords you can use:
 --------------------------------------------------------------------------------
 5.2. Extending the library                                *lsdyna-extendLibrary*
 
-The library has limited list of keywords you can use for now.  At some point you
-will want to add a new keyword. To understand how you can do it first you need
-to understand how the keyword library works.
+The library has limited list of keywords you can use. At some point you will
+want to add a new keyword. It is easy task and do not required any scripts
+modifications. First you need to understand the library structure.
 
-Keyword library is a folder name "keywords". The folder is part of filetype
-plugin. Inside the folder are text files, each file includes Ls-Dyna keyword.
-When you use <Ctrl-Tab> you run user completion function to get list of all
-files inside "keywords" folder, after you accept selection VIM will put content
-of selected file into your master file.
+Whole library is one directory "keywords". Inside are subdirectories for each
+Ls-Dyna keyword family. Finally in the subdirectories are *.k files with
+keywords definitions.
+
+Keyword library structure:
+>
+	- lsdyna                   -> main plugin level
+	  - keywords               -> keyword library
+	    - part                 -> part subdirectory
+	      - part.k
+	      - part_contact.k     -> keyword definition
+	      - part_inertia.k
+	      - ...
+	    - section              -> section subdirectory
+	      - section_shell.k
+	      - section_solid.k    -> keyword definition
+	      - section_beam.k
+	      - ...
+	    - ...
+<
+<Ctrl-Tab> runs user completion function to get list of all *.k files inside
+"keywords" folder, after you accept selection VIM will put content of
+selected file into your inputdeck.
 
 To add a new keyword into the library you have to make new file with keyword
-definition and copy the file into "keywords" folder. Name of the file is used to
-perform user completion when you run <Ctrl-Tab>, that is why the name has to
-follow few of rules:
-- use no extension
-- name must be lowercase
-- do not use any white signs (like space bar)
+definition and copy it into the library structure folder. If there is no
+subdirectory for your keyword family just add a new one.
+New file name has to follow couple of rules.
 
-Following names are correct: part, part_inertia
-Following names are not correct: Part, PART, part.txt, part inertia
+Keyword library rules:
+- all names (directories & files) must be lowercase
+- do not use any white signs (space bar)
+- file names must start with subdirectory name
+- *.k extension is mandatory for all files
 
 Default location of "keywords" folder you can check with command:
 >
@@ -271,7 +289,6 @@ To define location of the keyword library put for all users in vimrc:
 	let g:lsdynaKeyLibPath = "C:\\lsdyna\\glbKeyLib\\"
 	let g:lsdynaKeyLibPath = "/home/lsdyna/glbKeyLib/"
 <
-
 --------------------------------------------------------------------------------
 5.3. Keywords templates                                       *lsdyna-templates*
 

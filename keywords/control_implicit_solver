@@ -1,6 +1,0 @@
-*CONTROL_IMPLICIT_SOLVER
-$#  lsolvr    lprint     negev     order      drcm    drcprm   autospc   autotol
-
-$#  lcpack    mtxdmp
-
-$

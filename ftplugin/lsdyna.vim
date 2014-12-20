@@ -4,8 +4,13 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  15th of November 2014
-" Version:      1.1.1
+" Last Change:  6th of December 2014
+" Version:      1.2.0
+"
+" History of change:
+" v1.2.0
+"   - keyword library functions updated for new library organisation
+"   - updates for new autoload file names
 "
 " History of change:
 " v1.1.1
@@ -89,6 +94,17 @@ setlocal foldminlines=4
 "-------------------------------------------------------------------------------
 "    USEFUL MAPPINGS
 "-------------------------------------------------------------------------------
+
+function! LsDynaComment()
+  if getline('.')[0] == '4'
+    normal! hx
+    return '$'
+  else
+    return ''
+  endif
+endfunction
+" change 4 -> $ but only at the beginning of the line
+inoreabbrev 4 4<C-R>=LsDynaComment()<CR>
 
 " mapping for separation lines
 nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
@@ -182,21 +198,27 @@ if !exists("g:lsdynaKeyLibPath")
   let g:lsdynaKeyLibPath = expand('<sfile>:p:h:h') . '/keywords/'
 endif
 
+" initialize lsdyna keyword library
+" the library is initilized only once per Vim session
+if !exists("g:lsdynaKeyLib")
+  let g:lsdynaKeyLib =lsdyna_library#initLib(g:lsdynaKeyLibPath)
+endif
+
 " set user completion flag
 let b:lsDynaUserComp = 0
 
 " set user completion function to run with <C-X><C-U>
-setlocal completefunc=library#CompleteKeywords
+setlocal completefunc=lsdyna_library#CompleteKeywords
 
-" mapping for <CR>/<C-Y>
+" mapping for <CR>/<C-Y>/<kEnter>
 " if g:lsDynaUserComp is true run GetCompletion function
 " if g:lsDynaUserComp is false act like <CR>/<C-Y>/<kEnter>
 inoremap <buffer><silent><script><expr> <CR>
- \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<CR>"
+ \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<CR>"
 inoremap <buffer><silent><script><expr> <C-Y>
- \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<C-Y>"
+ \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<C-Y>"
 inoremap <buffer><silent><script><expr> <kEnter>
- \ b:lsDynaUserComp ? "\<ESC>:call library#GetCompletion()\<CR>" : "\<kEnter>"
+ \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<kEnter>"
 
 " act <up> and <down> like Ctrl-p and Ctrl-n
 " it has nothing to do with keyword library, it's only because I like it
@@ -210,36 +232,36 @@ inoremap <buffer><silent><script><expr> <Up>
 "-------------------------------------------------------------------------------
 
 noremap <buffer><script><silent> <LocalLeader><LocalLeader>
- \ :call autoformat#LsDynaLine()<CR>
+ \ :call lsdyna_autoformat#LsDynaLine()<CR>
 
 "-------------------------------------------------------------------------------
 "    CURVE COMMANDS
 "-------------------------------------------------------------------------------
 
 command! -buffer -range -nargs=* LsDynaShift
- \ :call curves#Offset(<line1>,<line2>,<f-args>)
+ \ :call lsdyna_curves#Shift(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsDynaScale
- \ :call curves#Scale(<line1>,<line2>,<f-args>)
+ \ :call lsdyna_curves#Scale(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsDynaResample
- \ :call curves#Resample(<line1>,<line2>,<f-args>)
+ \ :call lsdyna_curves#Resample(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsDynaAddPoint
- \ :call curves#AddPoint(<line1>,<line2>,<f-args>)
+ \ :call lsdyna_curves#AddPoint(<line1>,<line2>,<f-args>)
 
 command! -buffer -range LsDynaSwap
- \ :call curves#Swap(<line1>,<line2>)
+ \ :call lsdyna_curves#Swap(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH
 "-------------------------------------------------------------------------------
 
 noremap <buffer><script><silent> gf
- \ :call includepath#IncludePath()<CR>gf
+ \ :call lsdyna_includepath#IncludePath()<CR>gf
 
 noremap <buffer><script><silent> <C-W>f
- \ :call includepath#IncludePath()<CR><C-W>f
+ \ :call lsdyna_includepath#IncludePath()<CR><C-W>f
 
 "-------------------------------------------------------------------------------
 " restore vim functions

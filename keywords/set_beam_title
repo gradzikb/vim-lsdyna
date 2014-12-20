@@ -1,8 +1,0 @@
-*SET_BEAM_TITLE
-$# title
-?title?
-$#     sid       da1       da2       da3       da4    solver
-         ?
-$#    bid1      bid2      bid3      bid4      bid5      bid6      bid7      bid8
-         ?
-$
