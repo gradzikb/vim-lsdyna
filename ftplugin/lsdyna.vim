@@ -92,6 +92,13 @@ setlocal foldmethod=expr
 setlocal foldminlines=4
 
 "-------------------------------------------------------------------------------
+"    INDENT
+"-------------------------------------------------------------------------------
+
+" reset indent rules
+setlocal indentexpr=
+
+"-------------------------------------------------------------------------------
 "    USEFUL MAPPINGS
 "-------------------------------------------------------------------------------
 
@@ -130,6 +137,21 @@ nnoremap <silent><buffer> <LocalLeader>) O$<ESC>79a-<ESC>yypO$<ESC>A
 nnoremap <silent><buffer> [[ ?^\*\a<CR>:nohlsearch<CR>zz
 " jump to next keyword
 nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
+
+"-------------------------------------------------------------------------------
+"    INCLUDES
+"-------------------------------------------------------------------------------
+
+" always set current working directory respect to open file
+augroup lsdynaPWD
+  autocmd!
+  " set working directory to current file
+  cd %:p:h
+  autocmd BufNewFile * cd %:p:h
+  autocmd BufReadPost * cd %:p:h
+  autocmd WinEnter * cd %:p:h
+  autocmd TabEnter * cd %:p:h
+augroup END
 
 "-------------------------------------------------------------------------------
 "    COMMENT FUNCTION
@@ -260,8 +282,8 @@ command! -buffer -range LsDynaSwap
 noremap <buffer><script><silent> gf
  \ :call lsdyna_includepath#IncludePath()<CR>gf
 
-noremap <buffer><script><silent> <C-W>f
- \ :call lsdyna_includepath#IncludePath()<CR><C-W>f
+noremap <buffer><script><silent> gF
+ \ :call lsdyna_includepath#IncludePath()<CR><C-w>f<C-w>H
 
 "-------------------------------------------------------------------------------
 " restore vim functions

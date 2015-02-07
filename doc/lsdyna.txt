@@ -27,16 +27,19 @@ CONTENTS
        6.1. Comment/uncomment .................|lsdyna-comment|
        6.2. Data line autoformating ...........|lsdyne-autoFormat|
        6.3. Text objects.......................|lsdyna-textObject|
-       6.4. Include path.......................|lsdyna-includePath|
     7. Commands................................|lsdyna-commands|
        7.1. LsDynaScale........................|lsdyna-scale|
        7.2. LsDynaShift........................|lsdyna-shift|
        7.3. LsDynaAddPoint.....................|lsdyna-addPoint|
        7.4. LSDynaResample.....................|lsdyna-resample|
        7.5. Number format......................|lsdyna-numberFormat|
-    8. Credits.................................|lsdyna-credits|
-    9. License.................................|lsdyna-license|
-   10. Bugs....................................|lsdyna-bugs|
+    8. Include files...........................|lsdyna-includes|
+       8.1. File name completion...............|lsdyna-includeName|
+       8.2. Include jumps......................|lsdyna-includeJump|
+       8.3. Include path.......................|lsdyna-includePath|
+    9. Credits.................................|lsdyna-credits|
+   10. License.................................|lsdyna-license|
+   11. Bugs....................................|lsdyna-bugs|
 
 ================================================================================
 1. Introduction                                            *lsdyna-introduction*
@@ -702,99 +705,6 @@ comment whole keyword:
     |                                             |
     +---------------------------------------------+
 
---------------------------------------------------------------------------------
-6.4. Include path function                                   *lsdyna-includePath*
-
-VIM let you use group of commands to jump from one file into another.
-Some of them can be used to jump from master deck into includes under *INCLUDE.
-
-Jump commands:
-  - gf     : open file under the cursor in current window
-  - <C-W>f : open file under the cursor in new window
-
-Example of use gf command:
-
-Put cursor at line with path and include file name
-
-    +---------------------------------------------+
-    |lsdyna_MASTER.key============================|
-    |$                                            |
-    |$ include material database                  |
-    |*INCLUDE                                     |
-   >|/FEM/LSDYNA/INCL/MAT/matdbs_v01.inc          |<
-    |$                                            |
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-Use gf normal command to open include file
-
-    +---------------------------------------------+
-    |matdbs_v01.inc===============================|
-    |$                                            |
-    |*MAT_ELASTIC_TITLE                           |
-    |$# title                                     |
-    |Steel                                        |
-    |$#     mid        ro         e        pr     |
-    |        10  7.85e-06     210.0       0.3     |
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-Jump commands are VIM internal commands and works fine as long as we have full
-path and include file name in one line. But it is not true if we are using
-combination of *INCLUDE_PATH and *INCLUDE keywords in our model.
-In this situation VIM is not able make jump since the path is in one line and
-include file name in other line.
-
-To overcome the problem the plugin has "IncludePath" function. The function is
-run every time a user use gf and/or <C-W>f command. First current file is
-scanned and all paths under *INCLUDE_PATH, *INCLUDE_PATH_RELATIVE are collected.
-Next VIM variable &path is extended with those new paths so VIM knows where to
-look for include files.
-
-Example of use gf command:
-
-Put cursor at line with include file name
-
-    +---------------------------------------------+
-    |lsdyna_MASTER.key============================|
-    |$                                            |
-    |*INCLUDE_PATH                                |
-    |/FEM/LSDYNA/INCL/MAT/                        |
-    |$                                            |
-    |*INCLUDE                                     |
-   >|matdbs_v01.inc                               |<
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-Use gf normal command to open include file
-
-    +---------------------------------------------+
-    |matdbs_v01.inc===============================|
-    |$                                            |
-    |*MAT_ELASTIC_TITLE                           |
-    |$# title                                     |
-    |Steel                                        |
-    |$#     mid        ro         e        pr     |
-    |        10  7.85e-06     210.0       0.3     |
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
 ================================================================================
 7. Commands                                                   *lsdyna-commands*
 
@@ -1195,7 +1105,171 @@ As you can see after shifting data precision have been lost since first x value
 has only one decimal place.
 
 ================================================================================
-8. Credits                                                     *lsdyna-credits*
+8. Include files                                               *lsdyna-includes*
+
+VIM has a lot of helpful options to work with many files. You can use them
+to work with Ls-Dyna include files if your model use them.
+
+Please see VIM documentation for details how to work with buffers.
+
+--------------------------------------------------------------------------------
+8.1. File name completion                                   *lsdyna-includeName*
+
+With VIM build-in file completion <Ctrl-x><Ctrl-f> command you can in easy way
+add a new include file to your master deck.
+
+Use <Ctrl-x><Ctrl-f> to get list of files in include directory:
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |**                                           |
+    |*INCLUDE                                     |
+    |../OO_INC<Ctrl-x><Ctrl-f>                    |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Select include file:
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |**                                           |
+    |*INCLUDE                                     |
+    |../OO_INC                                    |
+    | | ../00_INC/include_A.inc  |                |
+    | | ../00_INC/include_B.inc  |                |
+    | | ../00_INC/include_C.inc  |<               |
+    | | ../00_INC/include_D.inc  |                |
+    | +--------------------------+                |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |**                                           |
+    |*INCLUDE                                     |
+    |../00_INC/include_C.inc                      |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+8.2. Include jumps                                          *lsdyna-includeJump*
+
+To jump from master deck into include file you can use gf or gF commands.
+
+Jump commands:
+- gf : open include file in current window
+- gF : will split window and open the file in new window
+
+*NOTE gf is abbreviation from "go file"
+
+Put cursor on the line with include keyword:
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |**                                           |
+    |*INCLUDE                                     |
+    |../OO_INC/include_A.inc                      |
+    |*INCLUDE                                     |
+   >|../OO_INC/include_B.inc                      |<
+    |*INCLUDE                                     |
+    |../OO_INC/include_C.inc                      |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use gf or gF to jump:
+
+    +---------------------------------------------+
+    |include_B.inc================================|
+    |**                                           |
+    |** include B                                 |
+    |**                                           |
+    |*NODE                                        |
+    | 1000, 0.0, 0.0, 0.0                         |
+    | ...                                         |
+    |*ELEMENT_SHELL                               |
+    | 1000, 1001, 1002, 1003, 1004                |
+    | ...                                         |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+8.3. Include path function                                   *lsdyna-includePath*
+
+Jump commands are VIM internal commands and works fine as long as we have full
+path and include file name in one line. But it is not true if we are using
+combination of *INCLUDE_PATH and *INCLUDE keywords in our model.
+In this situation VIM is not able make jump since the path is in one line and
+include file name in other line.
+
+To overcome the problem the plugin has "IncludePath" function. The function is
+run every time a user use gf and/or gF command. First current file is
+scanned and all paths under *INCLUDE_PATH, *INCLUDE_PATH_RELATIVE are collected.
+Next VIM variable &path is extended with those new paths so VIM knows where to
+look for include files.
+
+Example of use gf command:
+
+Put cursor at line with include file name
+
+    +---------------------------------------------+
+    |lsdyna_MASTER.key============================|
+    |$                                            |
+    |*INCLUDE_PATH                                |
+    |/FEM/LSDYNA/INCL/MAT/                        |
+    |$                                            |
+    |*INCLUDE                                     |
+   >|matdbs_v01.inc                               |<
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use gf normal command to open include file
+
+    +---------------------------------------------+
+    |matdbs_v01.inc===============================|
+    |$                                            |
+    |*MAT_ELASTIC_TITLE                           |
+    |$# title                                     |
+    |Steel                                        |
+    |$#     mid        ro         e        pr     |
+    |        10  7.85e-06     210.0       0.3     |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+================================================================================
+9. Credits                                                     *lsdyna-credits*
 
  keyword library       Bartosz Gradzik
  mappings              Bartosz Gradzik
@@ -1205,7 +1279,7 @@ has only one decimal place.
  folding               Jakub Pajerski
 
 ================================================================================
-9. License                                                     *lsdyna-license*
+10. License                                                    *lsdyna-license*
 
 Ls-Dyna filetype plugin for VIM
 Copyright (C) 2014 Bartosz Gradzik (bartosz.gradzik@hotmail.com)
@@ -1224,7 +1298,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ================================================================================
-10. Bugs                                                           *lsdyna-bugs*
+11. Bugs                                                           *lsdyna-bugs*
 
 It's not a bug is a feature ;-)
 

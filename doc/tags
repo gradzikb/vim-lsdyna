@@ -6,7 +6,10 @@ lsdyna-comment	lsdyna.txt	/*lsdyna-comment*
 lsdyna-credits	lsdyna.txt	/*lsdyna-credits*
 lsdyna-extendLibrary	lsdyna.txt	/*lsdyna-extendLibrary*
 lsdyna-folding	lsdyna.txt	/*lsdyna-folding*
+lsdyna-includeJump	lsdyna.txt	/*lsdyna-includeJump*
+lsdyna-includeName	lsdyna.txt	/*lsdyna-includeName*
 lsdyna-includePath	lsdyna.txt	/*lsdyna-includePath*
+lsdyna-includes	lsdyna.txt	/*lsdyna-includes*
 lsdyna-insertKeyword	lsdyna.txt	/*lsdyna-insertKeyword*
 lsdyna-introduction	lsdyna.txt	/*lsdyna-introduction*
 lsdyna-keywordLibrary	lsdyna.txt	/*lsdyna-keywordLibrary*
