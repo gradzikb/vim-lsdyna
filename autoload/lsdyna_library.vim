@@ -9,6 +9,8 @@
 "
 "-------------------------------------------------------------------------------
 "
+" v1.2.0
+"   - new library structure supported (with subdirectories inside)
 " v1.1.0
 "   - library initialization function added
 " v1.0.1
@@ -105,10 +107,11 @@ function! lsdyna_library#GetCompletion()
   endif
 
   " extract sub directory name from keyword name
-  if keyword =~? "_"
-    let KeyLibSubDir = matchstr(keyword, "^.\\{-}\\ze_", 0) . "/"
+  if keyword =~? "^\*"
+    "let KeyLibSubDir = matchstr(keyword, "^.\\{-}\\ze_", 0) . "/"
+    let KeyLibSubDir = keyword[1] . "/"
   else
-    let KeyLibSubDir = keyword . "/"
+    let KeyLibSubDir = keyword[0] . "/"
   endif
 
   " set keyword file path

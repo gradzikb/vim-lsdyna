@@ -14,12 +14,15 @@ lsdyna-insertKeyword	lsdyna.txt	/*lsdyna-insertKeyword*
 lsdyna-introduction	lsdyna.txt	/*lsdyna-introduction*
 lsdyna-keywordLibrary	lsdyna.txt	/*lsdyna-keywordLibrary*
 lsdyna-license	lsdyna.txt	/*lsdyna-license*
+lsdyna-mappList	lsdyna.txt	/*lsdyna-mappList*
 lsdyna-mappings	lsdyna.txt	/*lsdyna-mappings*
 lsdyna-numberFormat	lsdyna.txt	/*lsdyna-numberFormat*
 lsdyna-resample	lsdyna.txt	/*lsdyna-resample*
+lsdyna-reverse	lsdyna.txt	/*lsdyna-reverse*
 lsdyna-scale	lsdyna.txt	/*lsdyna-scale*
 lsdyna-shift	lsdyna.txt	/*lsdyna-shift*
 lsdyna-start	lsdyna.txt	/*lsdyna-start*
+lsdyna-swap	lsdyna.txt	/*lsdyna-swap*
 lsdyna-syntax	lsdyna.txt	/*lsdyna-syntax*
 lsdyna-templates	lsdyna.txt	/*lsdyna-templates*
 lsdyna-textObject	lsdyna.txt	/*lsdyna-textObject*

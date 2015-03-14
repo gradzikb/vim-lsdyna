@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4			Last change: 2014 August 17
+*lsdyna.txt*		For Vim version 7.4			Last change: 2015 March 13
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -23,16 +23,19 @@ CONTENTS
        5.1. Inserting keywords.................|lsdyna-insertKeyword|
        5.2. Extending the library..............|lsdyna-extendLibrary|
        5.3. Keywords templates.................|lsdyna-templates|
-    6. Mappings................................|lsdyna-mappings|
-       6.1. Comment/uncomment .................|lsdyna-comment|
-       6.2. Data line autoformating ...........|lsdyne-autoFormat|
-       6.3. Text objects.......................|lsdyna-textObject|
+    6. Mappings & functions....................|lsdyna-mappings|
+       6.1. Mappings list......................|lsdyna-mappList|
+       6.2. Comment/uncomment..................|lsdyna-comment|
+       6.3. Data line autoformating............|lsdyne-autoFormat|
+       6.4. Text objects.......................|lsdyna-textObject|
     7. Commands................................|lsdyna-commands|
        7.1. LsDynaScale........................|lsdyna-scale|
        7.2. LsDynaShift........................|lsdyna-shift|
        7.3. LsDynaAddPoint.....................|lsdyna-addPoint|
        7.4. LSDynaResample.....................|lsdyna-resample|
-       7.5. Number format......................|lsdyna-numberFormat|
+       7.5. LSDynaSwap.........................|lsdyna-swap|
+       7.6. LSDynaReverse......................|lsdyna-reverse|
+       7.7. Number format......................|lsdyna-numberFormat|
     8. Include files...........................|lsdyna-includes|
        8.1. File name completion...............|lsdyna-includeName|
        8.2. Include jumps......................|lsdyna-includeJump|
@@ -54,15 +57,15 @@ Ls-Dyna filetype plugin gives you:
   - syntax highlighting
   - folding
   - keyword library
-  - useful mappings
-  - useful functions & commands
+  - useful mappings & functions
+  - useful commands
 
 The plugin is designed to work with fixed keyword format not with free format.
 
 ================================================================================
 2. Quick start                                                    *lsdyna-start*
 
-To use any filetype plugin in VIM you must add following lines into vimrc file:
+To use filetype plugin in VIM you must add following lines into your vimrc file:
 >
 	filetype plugin on
 	syntax on
@@ -70,13 +73,12 @@ To use any filetype plugin in VIM you must add following lines into vimrc file:
 The plugin loads automatic for files with extension:
   - *.k
   - *.key
-  - *.inc
 
 If necessary the plugin can be load manually with command:
 >
 	:set filetype=lsdyna
 <
-If something does not work check did VIM load the plugin:
+To check if the plugin is loaded into VIM load use:
 >
 	:set filetype?
 <
@@ -95,13 +97,13 @@ VIM prints 0 if float operations are not supported and 1 when they are.
 3. Syntax highlighting                                           *lsdyna-syntax*
 
 Syntax highlighting supports:
-  - keyword line (start with *)
-  - comment line (start with $)
+  - keyword line (start with "*")
+  - comment line (start with "$")
   - title line
   - data line
 
 The plugin supports three types of data line syntax highlighting.
-Used type depends on Ls-Dyna keyword type.
+Used type depends on Ls-Dyna keyword.
 
 1) 1x8,3x16,2x8 field
    - *NODE
@@ -115,7 +117,7 @@ Used type depends on Ls-Dyna keyword type.
 ================================================================================
 4. Folding                                                      *lsdyna-folding*
 
-All lines not started with * (keyword lines) or $ (comment lines) are folded.
+All lines not started with "*" (keyword lines) or "$" (comment lines) are folded.
 Minimal number of lines to fold is four.
 
 In practise node/element lines and curves data points with more than four
@@ -125,7 +127,7 @@ lines are folded. To break folding put empty comment line.
 5. Keyword library                                       *lsdyna-keywordLibrary*
 
 With keyword library you can:
-- put standard Ls-Dyna keyword into your keyword file
+- add standard Ls-Dyna keyword into your keyword file
 - use keywords with your predefined settings
 - build templates (group of keywords) to speed up your work
 - setup the same keyword for different system units
@@ -134,7 +136,8 @@ With keyword library you can:
 --------------------------------------------------------------------------------
 5.1. Inserting keywords                                   *lsdyna-insertKeyword*
 
-In insert mode start typing keyword you want to and hit Ctrl-Tab:
+In insert mode start typing keyword you want to and use <Ctrl-Tab>:
+*NOTE: Keyword completion can be trigged with <Ctrl-x><Ctrl-u> as well.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -202,7 +205,7 @@ Accept selection with <CR>, <C-y>, <kEnter>:
     |                                             |
     +---------------------------------------------+
 
-Asterisk sign (*) at the beginning is not mandatory, also it does not matter
+Asterisk sign "*" at the beginning is not mandatory, also it does not matter
 if the keyword is lowercase or uppercase. All following examples work the same:
 
     +---------------------------------------------+
@@ -240,44 +243,45 @@ Note: To get list of all available keywords you can use:
 --------------------------------------------------------------------------------
 5.2. Extending the library                                *lsdyna-extendLibrary*
 
-The library has limited list of keywords you can use. At some point you will
-want to add a new keyword. It is easy task and do not required any scripts
-modifications. First you need to understand the library structure.
+The library does not have all Ls-Dyna keywords. If keyword you use often is
+missing you have to add it into the library. It is easy task and do not required
+any script modifications.
 
-Whole library is one directory "keywords". Inside are subdirectories for each
-Ls-Dyna keyword family. Finally in the subdirectories are *.k files with
-keywords definitions.
+Whole library is "keywords" directory. Inside are subdirectories with Ls-Dyna
+keywords. The subdirectories are organized in alphabetical order. Finally inside
+are *.k files with keywords definitions.
 
 Keyword library structure:
 >
 	- lsdyna                   -> main plugin level
 	  - keywords               -> keyword library
-	    - part                 -> part subdirectory
+	    - _                    -> templates subdirectory
+	    - a
+	    - b
+	    - p                    -> p-keywords subdirectory
 	      - part.k
 	      - part_contact.k     -> keyword definition
 	      - part_inertia.k
 	      - ...
-	    - section              -> section subdirectory
+	    - s                    -> s-keywords subdirectory
 	      - section_shell.k
 	      - section_solid.k    -> keyword definition
 	      - section_beam.k
 	      - ...
 	    - ...
 <
-<Ctrl-Tab> runs user completion function to get list of all *.k files inside
-"keywords" folder, after you accept selection VIM will put content of
-selected file into your inputdeck.
+To add a new keyword into the library:
+1. Create a new *.k file with all lines necessary to define new keyword
+2. Copy file to correct subdirectory
 
-To add a new keyword into the library you have to make new file with keyword
-definition and copy it into the library structure folder. If there is no
-subdirectory for your keyword family just add a new one.
-New file name has to follow couple of rules.
-
-Keyword library rules:
-- all names (directories & files) must be lowercase
+There are couple rules you have to keep in mind:
+- file names must be lowercase
 - do not use any white signs (space bar)
-- file names must start with subdirectory name
+- file names must start with subdirectory letter
 - *.k extension is mandatory for all files
+
+*NOTE: Keyword library are initialized once per VIM session.
+       Your new keyword will be available after you close and open VIM.
 
 Default location of "keywords" folder you can check with command:
 >
@@ -296,42 +300,56 @@ To define location of the keyword library put for all users in vimrc:
 5.3. Keywords templates                                       *lsdyna-templates*
 
 Keyword files does not have to include only one "empty" Ls-Dyna keyword.
-You can create a template file with group of keywords you are using often.
+You can create your own keyword template.
 
-Some examples are already in the keyword library:
-- load_body_z_gravity_mkgsec
-  - predefined gravity for m, kg, sec system unit
-- template_master_mmkgms
-  - template for master deck with basic *CONTROL_ and *DATABASE_ keywords
+Keyword templates types:
+1. Predefined keyword
+   - a keyword with predefined values
+     - gravity load for different system unit
+     - contact definition with non-default values
+   - are stored in the library subdirectories like any other keywords
+   - example: load_body_z_gravity_mkgsec.k
+2. Template
+   - group of keywords you are using often
+     - like master deck with *CONTROL_ and *DATABASE_ keywords
+   - are stored in "_" subdirectory in the library
+   - template file names must start with "_"
+   - to insert a template from the library use _<Ctrl-Tab>
+   - example: _template_master_mmkgms.k
 
 ================================================================================
 6. Mappings                                                    *lsdyna-mappings*
 
-Most of mappings start with <localLeadear>. The list shows mapping with default
-VIM settings where <localLeadear> = "\".
-
-Movement controls:
-]] : jump to next keyword
-[[ : jump to previous keyword
-
-Comment line:
-\c : put empty comment line below
-\C : put empty comment line above
-
-Separator line:
-\0 : separator with title
-\1 : separator line (type 1)
-\2 : separator line (type 2)
-\3 : separator line (type 3)
+The plugin gives you a lot of useful mappings and functions to work with
+Ls-Dyna keyword file.
 
 --------------------------------------------------------------------------------
-6.1. Comment/uncomment                                          *lsdyna-comment*
+6.1. Mappings list                                              *lsdyna-mappList*
+
+
+]]       : jump to next keyword
+[[       : jump to previous keyword
+<ll><ll> : aurformating function
+<Alt-C>  : comment/uncomment line
+<Ctrl-C> : comment/uncomment line
+<ll>c    : put empty comment line below
+<ll>C    : put empty comment line above
+<ll>0    : separator with title below
+<ll>1    : separator line (type 1) below
+<ll>2    : separator line (type 2) below
+<ll>3    : separator line (type 3) below
+<ll>!    : separator with title above (is like <ll>1 with <Shift>)
+<ll>@    : separator line (type 1) above (is like <ll>2 with <Shift>)
+<ll>#    : separator line (type 2) above (is like <ll>3 with <Shift>)
+<ll>)    : separator line (type 3) above (is like <ll>4 with <Shift>)
+
+<ll> is <localleader> key in VIM. By default it is backslash "\".
+
+--------------------------------------------------------------------------------
+6.2. Comment/uncomment                                          *lsdyna-comment*
 
 The function is used to comment/uncomment line/lines in Ls-Dyna keyword file.
-
-Function is mapped with:
-- <ALT-c>
-- <Ctrl-c> (you can use it if you have problem with Alt mapping)
+Function is mapped with <ALT-c> or <Ctrl-c>.
 
 If selected line start with "$" it will be uncommented, if the line does not
 start with "$" it will be commented. If you selected more than one line
@@ -380,14 +398,17 @@ Use <Alt-c>:
 To uncomment select the same lines and use <Alt-c> once again.
 
 --------------------------------------------------------------------------------
-6.2. Data line autoformating                                 *lsdyna-autoFormat*
+6.3. Data line autoformating                                 *lsdyna-autoFormat*
 
 The plugin has simple autoformating function. The function is trigged with
-<localLeadear><localLeadear> mapping (\\ for default VIM settings).
+<localLeadear><localLeadear> mapping ("\\" for default VIM settings).
+
 The function try to guess under what keyword is and format data line according
 to syntax rules.
 
-Below position of part ids in line is incorrect, put cursor at data line:
+Example of use:
+
+Position of part ids in *SET_PART is incorrect, put cursor at the line:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -404,7 +425,7 @@ Below position of part ids in line is incorrect, put cursor at data line:
     |                                             |
     +---------------------------------------------+
 
-\\ command will run autoformating function:
+Run autoformating function <ll><ll> to adjust them in 10 wide columns:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -421,8 +442,8 @@ Below position of part ids in line is incorrect, put cursor at data line:
     |                                             |
     +---------------------------------------------+
 
-Coma "," is used as special sign (not true under *DEFINE_CURVE). Autoformating
-function insert empty 10 wide column for each coma.
+*NOTE: Coma "," is used as special sign (not true under *DEFINE_CURVE).
+       Autoformating function insert empty 10 wide column for each coma.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -438,8 +459,6 @@ function insert empty 10 wide column for each coma.
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
-
-\\ command will format the line:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -473,8 +492,6 @@ You can use prefix for coma as well:
     |                                             |
     +---------------------------------------------+
 
-\\ command will format the line:
-
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
@@ -490,8 +507,8 @@ You can use prefix for coma as well:
     |                                             |
     +---------------------------------------------+
 
-Autoformating functions is useful tool if your curves come from third part
-software and you need to convert them to Ls-Dyna format.
+Autoformating functions is very useful to format *DEFINE_CURVE data lines from
+third part softwares.
 
 Make visual line selection for data lines:
 
@@ -513,7 +530,7 @@ Make visual line selection for data lines:
     |                                             |
     +---------------------------------------------+
 
-Use \\ to format x and y values to correct positions:
+Use <ll><ll> to format x and y values to correct positions:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -534,7 +551,7 @@ Use \\ to format x and y values to correct positions:
     +---------------------------------------------+
 
 Autoformating function supports "," under *DEFINE_CURVE as separator.  You can
-have more than one points in line. In next example *AMPLITUDE data points from
+have more than one point in line. In next example *AMPLITUDE data points from
 Abaqus will be converted in Ls-Dyna *DEFINE_CURVE format.
 
     +---------------------------------------------+
@@ -556,7 +573,7 @@ Abaqus will be converted in Ls-Dyna *DEFINE_CURVE format.
     |                                             |
     +---------------------------------------------+
 
-Use \\ with selected lines:
+Use <ll><ll> with selected lines:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -586,13 +603,15 @@ Use \\ with selected lines:
 --------------------------------------------------------------------------------
 6.3. Text objects                                            *lsdyna-textObject*
 
-Ls-Dyna filetype plugin give you two new text object like aw/iw.
+Ls-Dyna filetype plugin gives you two new VIM text objects. If you are not
+familiar with VIM text objects see ":help text-objects".
 
-ik : insert keyword
-ak : around keyword
+Ls-Dyna filetype plugin text-objects:
+- <ik> : insert keyword
+- <ak> : around keyword
 
-Both text object work the same! There is no distinguish like in aw/iw.
-You can use them with other VIM commands like d, y, v.
+Both text object work the same way! There is no distinguish like in <aw>/<iw>.
+You can use them with other VIM commands like <d>, <y>, <v>.
 
 Examples of use:
 
@@ -616,7 +635,7 @@ Put cursor at any keyword line:
     |                                             |
     +---------------------------------------------+
 
-Use dak/dik to delete whole *DEFINE_CURVE_TITLE keyword:
+Use <dak>/<dik> to delete whole *DEFINE_CURVE_TITLE keyword:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -628,7 +647,7 @@ Use dak/dik to delete whole *DEFINE_CURVE_TITLE keyword:
     |                                             |
     +---------------------------------------------+
 
-I like think about dak command as "delete all keyword".
+You can think about <dak> as "delete all keyword".
 
 Put cursor at any keyword line:
 
@@ -647,8 +666,8 @@ Put cursor at any keyword line:
     |                                             |
     +---------------------------------------------+
 
-Use yak/yik to yank *PART keyword, now you can go to any line and use p normal
-command to put copy of the keyword in a new place:
+Use <yak>/<yik> to yank *PART keyword, now you can go to any line and use <p> normal
+command to put copy of the keyword in a new place you want:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -687,7 +706,7 @@ Put cursor at any keyword line:
     |                                             |
     +---------------------------------------------+
 
-Use vak/vik for visual selection of the keyword, now you can use <Alt-c> to
+Use <vak>/<vik> for visual selection of the keyword, now you can use <Alt-c> to
 comment whole keyword:
 
     +---------------------------------------------+
@@ -708,12 +727,14 @@ comment whole keyword:
 ================================================================================
 7. Commands                                                   *lsdyna-commands*
 
-Ls-Dyna filetype plugin gives you commands to manipulate a curve data.
+Ls-Dyna filetype plugin commands list:
 
-:LsDynaScale    - scale x and/or y data
-:LsDynaShift    - shift x and/or y data
-:LsDynaAddpoint - used to extend a curve
-:LsDynaResample - resample curve
+- :LsDynaScale    - scale x and/or y data
+- :LsDynaShift    - shift x and/or y data
+- :LsDynaAddpoint - used to extend a curve
+- :LsDynaResample - resample curve
+- :LsDynaResample - resample curve
+- :LsDynaSwap     - swap x & y column
 
 --------------------------------------------------------------------------------
 7.1. LsDynaScale command                                          *lsdyna-scale*
@@ -987,9 +1008,111 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.5. Number format                                         *lsdyna-numberFormat*
+7.5. LsDynaSwap command                                            *lsdyna-swap*
 
-Each function use number format base on first x value.
+Description:
+Swap x and y columns.
+
+Syntax:
+:LsDynaSwap
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|              1000.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaSwap
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 1.0              1000.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.6. LsDynaReverse command                                      *lsdyna-reverse*
+
+Description:
+Reverse order of curve data points.
+
+Syntax:
+:LsDynaReverse
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|                 2.0                 2.0     |<
+   >|                 4.0                 4.0     |<
+   >|                 6.0                 6.0     |<
+   >|                 8.0                 8.0     |<
+   >|                10.0                10.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaReverse
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                10.0                10.0     |
+    |                 8.0                 8.0     |
+    |                 6.0                 6.0     |
+    |                 4.0                 4.0     |
+    |                 2.0                 2.0     |
+    |                 0.0                 0.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.7. Number format                                         *lsdyna-numberFormat*
+
+Curve commands use number format base on first x value.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1063,9 +1186,8 @@ first x value and use LsDynaScale/LsDynaShift command with default parameters.
     |                                             |
     +---------------------------------------------+
 
-NOTE:
-Always keep in mind that format of first x-value is important.
-In some situations you can loose some data during curve operations.
+NOTE: Always keep in mind that format of first x-value is important.
+      In some situations you can loose some data during curve operations.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1107,10 +1229,8 @@ has only one decimal place.
 ================================================================================
 8. Include files                                               *lsdyna-includes*
 
-VIM has a lot of helpful options to work with many files. You can use them
+VIM has a lot of options to work with many files. You can use them
 to work with Ls-Dyna include files if your model use them.
-
-Please see VIM documentation for details how to work with buffers.
 
 --------------------------------------------------------------------------------
 8.1. File name completion                                   *lsdyna-includeName*
@@ -1171,13 +1291,13 @@ Select include file:
 --------------------------------------------------------------------------------
 8.2. Include jumps                                          *lsdyna-includeJump*
 
-To jump from master deck into include file you can use gf or gF commands.
+To jump from master deck into include file you can use <gf> or <gF> commands.
 
 Jump commands:
-- gf : open include file in current window
-- gF : will split window and open the file in new window
+- <gf> : open include file in current window
+- <gF> : open include file in new window
 
-*NOTE gf is abbreviation from "go file"
+*NOTE <gf> is abbreviation from "go file"
 
 Put cursor on the line with include keyword:
 
@@ -1199,7 +1319,7 @@ Put cursor on the line with include keyword:
     |                                             |
     +---------------------------------------------+
 
-Use gf or gF to jump:
+Use <gf> to jump:
 
     +---------------------------------------------+
     |include_B.inc================================|
@@ -1227,12 +1347,12 @@ In this situation VIM is not able make jump since the path is in one line and
 include file name in other line.
 
 To overcome the problem the plugin has "IncludePath" function. The function is
-run every time a user use gf and/or gF command. First current file is
+run every time a user use <gf> or <gF> command. First current file is
 scanned and all paths under *INCLUDE_PATH, *INCLUDE_PATH_RELATIVE are collected.
-Next VIM variable &path is extended with those new paths so VIM knows where to
+Next VIM variable "&path" is extended with those new paths so VIM knows where to
 look for include files.
 
-Example of use gf command:
+Example of use:
 
 Put cursor at line with include file name
 
@@ -1251,7 +1371,7 @@ Put cursor at line with include file name
     |                                             |
     +---------------------------------------------+
 
-Use gf normal command to open include file
+Use <gf> normal command to open include file
 
     +---------------------------------------------+
     |matdbs_v01.inc===============================|

@@ -378,7 +378,7 @@ endfunction
 function! lsdyna_curves#Swap(line1,line2)
 
   "-----------------------------------------------------------------------------
-  " Function to scale curve.
+  " Function to swap x and y vakues.
   " Arguments:
   " - a:line1 : first selected line
   " - a:line2 : last selected line
@@ -399,6 +399,34 @@ function! lsdyna_curves#Swap(line1,line2)
     let points[i] = points[i+1]
     let points[i+1] = tmpPoint
   endfor
+
+  " remove old lines
+  execute a:line1 . "," . a:line2 . "delete"
+
+  " save data
+  call lsdyna_curves#Write(a:line1, points, strFormat)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_curves#Reverse(line1,line2)
+
+  "-----------------------------------------------------------------------------
+  " Function to reverse curve.
+  " Arguments:
+  " - a:line1 : first selected line
+  " - a:line2 : last selected line
+  " Return:
+  " - none
+  "-----------------------------------------------------------------------------
+
+  " what number format?
+  let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
+  let strFormat = repeat(lsdyna_curves#WhatNumFormat(line1[0], 20), 2)
+
+  " collect the data and reverse them
+  let points = reverse(lsdyna_curves#Read(a:line1,a:line2))
 
   " remove old lines
   execute a:line1 . "," . a:line2 . "delete"
