@@ -14,22 +14,22 @@ It's just bunch of VIM scripts to speed up work with Ls-Dyna keyword file.
 ###Syntax highlighting
 With color syntax it's easier to navigate through a keyword file.
 
-![vimLsDynaColorSyntax](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaColorSyntax.gif)
+![vimLsDynaColorSyntax](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/syntax.gif)
 
 ###Folding
 Node & element table folding, no more never ending scrolling!
 
-![vimLsDynaFold](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaFold.gif)
+![vimLsDynaFold](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
 
 ###Keyword library
 With keyword library you can very quick add a new Ls-Dyna keyword into your model.
 
-![vimLsDynaKeyLib](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaKeyLib.gif)
+![vimLsDynaKeyLib](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/library.gif)
 
 ###Curve commands
 You can use commands to operate with curve data directly in VIM.
 
-![vimLsDynaScale](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaScale.gif)
+![vimLsDynaScale](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/commands.gif)
 
 ###Commands, functions & mappings
 The plugin has couple of great functions to make your work even faster:
