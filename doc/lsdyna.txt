@@ -24,7 +24,7 @@ CONTENTS
        5.2. Extending the library..............|lsdyna-extendLibrary|
        5.3. Keywords templates.................|lsdyna-templates|
     6. Mappings & functions....................|lsdyna-mappings|
-       6.1. Mappings list......................|lsdyna-mappList|
+       6.1. Mappings list......................|lsdyna-mapList|
        6.2. Comment/uncomment..................|lsdyna-comment|
        6.3. Data line autoformating............|lsdyne-autoFormat|
        6.4. Text objects.......................|lsdyna-textObject|
@@ -324,11 +324,11 @@ The plugin gives you a lot of useful mappings and functions to work with
 Ls-Dyna keyword file.
 
 --------------------------------------------------------------------------------
-6.1. Mappings list                                              *lsdyna-mappList*
-
+6.1. Mappings list                                               *lsdyna-mapList*
 
 ]]       : jump to next keyword
 [[       : jump to previous keyword
+4<Space> : put "$" at the beginning of the line (works only if "4" is in 1st col)
 <ll><ll> : aurformating function
 <Alt-C>  : comment/uncomment line
 <Ctrl-C> : comment/uncomment line
