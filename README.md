@@ -1,7 +1,9 @@
 #vim-lsdyna
 [VIM](http://www.vim.org/) filetype plugin for [Ls-Dyna](http://www.lstc.com) FE solver.
 
-What is Ls-Dyna filetype plugin? It's just bunch of scripts for VIM to speed up work with Ls-Dyna keyword file.
+What is Ls-Dyna filetype plugin?
+
+It's just bunch of VIM scripts to speed up work with Ls-Dyna keyword file.
 
 ##Main features
 - Syntax highlighting
@@ -24,18 +26,14 @@ With keyword library you can very quick add a new Ls-Dyna keyword into your mode
 
 ![vimLsDynaKeyLib](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaKeyLib.gif)
 
-Visit [keyword library wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Keyword-Library) to see more.
-
 ###Curve commands
 You can use commands to operate with curve data directly in VIM.
 
 ![vimLsDynaScale](https://raw.github.com/wiki/gradzikb/vim-lsdyna/screenshots/vimLsDynaScale.gif)
 
-Visit [curve commands wiki page](https://github.com/gradzikb/vim-lsdyna/wiki/Curve-Commands) to meet all commands.
-
 ###Commands, functions & mappings
 The plugin has couple of great functions to make your work even faster:
-- [mappings](https://github.com/gradzikb/vim-lsdyna/wiki/Mappings)
+- mappings
 - comment/uncomment
 - data line autoformating
 - keyword text objects
@@ -55,9 +53,6 @@ git clone https://github.com/gradzikb/vim-lsdyna
 List of all great features and detail information about them you will find in plugin documentation
 
 `:help lsdyna`
-
-
-Some examples how to use the plugin can be found on [wiki pages](https://github.com/gradzikb/vim-lsdyna/wiki).
 
 ##License
 
