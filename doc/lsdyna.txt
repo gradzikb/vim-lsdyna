@@ -78,7 +78,7 @@ If necessary the plugin can be load manually with command:
 >
 	:set filetype=lsdyna
 <
-To check if the plugin is loaded into VIM load use:
+To check if the plugin is loaded into VIM use:
 >
 	:set filetype?
 <
@@ -137,7 +137,7 @@ With keyword library you can:
 5.1. Inserting keywords                                   *lsdyna-insertKeyword*
 
 In insert mode start typing keyword you want to and use <Ctrl-Tab>:
-*NOTE: Keyword completion can be trigged with <Ctrl-x><Ctrl-u> as well.
+NOTE: Keyword completion can be trigged with <Ctrl-x><Ctrl-u> as well.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -223,7 +223,7 @@ if the keyword is lowercase or uppercase. All following examples work the same:
     |                                             |
     +---------------------------------------------+
 
-Note: To get list of all available keywords you can use:
+NOTE: To get list of all available keywords you can use:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -280,16 +280,15 @@ There are couple rules you have to keep in mind:
 - file names must start with subdirectory letter
 - *.k extension is mandatory for all files
 
-*NOTE: Keyword library are initialized once per VIM session.
-       Your new keyword will be available after you close and open VIM.
+NOTE: Keyword library are initialized once per VIM session.
+      New keyword will be available after VIM session restart.
 
 Default location of "keywords" folder you can check with command:
 >
 	:echom g:lsdynaKeyLibPath
 <
-When the plugin is used by many users each user has his own keyword library.
-If you want to you can change this behaviour.  It is better if all user of the
-plugin can share one global keyword library and use the same keywords/templates.
+Location of keyword library can be change, it lets use one library among many
+users.
 
 To define location of the keyword library put for all users in vimrc:
 >
@@ -401,10 +400,8 @@ To uncomment select the same lines and use <Alt-c> once again.
 6.3. Data line autoformating                                 *lsdyna-autoFormat*
 
 The plugin has simple autoformating function. The function is trigged with
-<localLeadear><localLeadear> mapping ("\\" for default VIM settings).
-
-The function try to guess under what keyword is and format data line according
-to syntax rules.
+<ll><ll> mapping ("\\" for default VIM settings). The function try to guess
+under what keyword is and format data line according to syntax rules.
 
 Example of use:
 
@@ -442,8 +439,8 @@ Run autoformating function <ll><ll> to adjust them in 10 wide columns:
     |                                             |
     +---------------------------------------------+
 
-*NOTE: Coma "," is used as special sign (not true under *DEFINE_CURVE).
-       Autoformating function insert empty 10 wide column for each coma.
+NOTE: Coma "," is used as special sign (not true under *DEFINE_CURVE).
+      Autoformating function insert empty 10 wide column for each coma.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -733,8 +730,8 @@ Ls-Dyna filetype plugin commands list:
 - :LsDynaShift    - shift x and/or y data
 - :LsDynaAddpoint - used to extend a curve
 - :LsDynaResample - resample curve
-- :LsDynaResample - resample curve
 - :LsDynaSwap     - swap x & y column
+- :LsDynaReverse  - reverse curve points
 
 --------------------------------------------------------------------------------
 7.1. LsDynaScale command                                          *lsdyna-scale*
@@ -844,7 +841,7 @@ Make visual selection line with data lines:
 Description:
 LsDynaAddPoint insert a new point for x user value. For points outside range new
 y value is linear extrapolated base on two first or two last points. For points
-inside the range new y value is linear interpolated base on the closets points.
+inside the range new y value is linear interpolated base on the nearest points.
 
 Synatx:
 :LsDynaAddPoint x
@@ -1148,9 +1145,8 @@ Curve commands use number format base on first x value.
     |                                             |
     +---------------------------------------------+
 
-Note:
-If you do not want change curve values but only format of numbers change
-first x value and use LsDynaScale/LsDynaShift command with default parameters.
+NOTE: If you do not want change curve values but only format, change
+      first x value and use LsDynaScale command with default parameters.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1297,7 +1293,7 @@ Jump commands:
 - <gf> : open include file in current window
 - <gF> : open include file in new window
 
-*NOTE <gf> is abbreviation from "go file"
+NOTE gf is abbreviation from "go file"
 
 Put cursor on the line with include keyword:
 
