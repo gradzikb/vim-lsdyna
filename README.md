@@ -23,8 +23,6 @@ Node & element table folding, no more never ending scrolling!
 
 ![folding](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
 
-See VIM documentation for details about foldings: `:help usr_28`
-
 ###Keyword library
 With keyword library you can very quick add a new Ls-Dyna keyword into your model.
 
