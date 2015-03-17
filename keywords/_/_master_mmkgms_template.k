@@ -44,30 +44,6 @@ $
 $#    hgen      rwen    slnten     rylen
          2
 $
-*CONTROL_SHELL
-$#  wrpang     esort     irnxx    istupd    theory       bwc     miter      proj
-
-$#  rotascl   intgrd    lamsht    cstyp6    thshel
-
-$#   pstupd  sidt4tu     cntco    itsflg    irquad
-                             2
-$#   nfail1   nfail4   psnfail    keepcs
-
-$
-*CONTROL_CONTACT
-$#  slsfac    rwpnal    islchk    shlthk    penopt    thkchg     orien    enmass
-
-$#  usrstr    usrfrc     nsbcs    interm     xpene     ssthk      ecdt   tiedprj
-
-$#   sfric     drfic       edc       vfc        th     th_sf    pen_sf
-
-$#  ignore    frceng   skiprwg    outseg   spotstp   spotdel   spothin
-
-$#    isym    nserod    rwgaps    rwgdth     rwksf      icov    swradf    ithoff
-
-$#  shledg    pstiff    ithcnt    tdcnof     ftall              shltrw
-         1
-$
 $-------------------------------------------------------------------------------
 $    OUTPUTS
 $-------------------------------------------------------------------------------
@@ -85,9 +61,6 @@ $#      dt    binary      lcur     ioopt
 $#      dt    binary      lcur     ioopt
        0.1         2
 *DATABASE_RCFORC
-$#      dt    binary      lcur     ioopt
-       0.1         2
-*DATABASE_ABSTAT
 $#      dt    binary      lcur     ioopt
        0.1         2
 $

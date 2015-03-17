@@ -4,6 +4,10 @@
 "
 " Language:    LS-Dyna FE solver input file
 " Maintainer:  Bartosz Gradzik <bartosz.gradzik@hotmail.com>
+" "
+" Last Change: 13.05.2015
+" - non-default colors for popup menu set
+"
 " Last Change: 1st of January 2014
 " - color scheme updated for Ls-Dyna filetye plugin
 "
@@ -47,6 +51,10 @@ highlight Comment    ctermfg=LightRed
 highlight StatusLine ctermfg=blue	ctermbg=white
 highlight Statement  ctermfg=Yellow			cterm=NONE
 highlight Type						cterm=NONE
+
+" popup menu colors
+highlight Pmenu guibg=black guifg=white
+highlight PmenuSel guibg=white guifg=black
 
 " only for vim 5
 if has("unix")

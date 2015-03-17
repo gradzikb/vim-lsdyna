@@ -11,6 +11,7 @@
 " v1.2.0
 "   - keyword library functions updated for new library organisation
 "   - updates for new autoload file names
+"   - LsDynaReverse command added
 "
 " History of change:
 " v1.1.1
@@ -143,7 +144,7 @@ nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
 "-------------------------------------------------------------------------------
 
 " always set current working directory respect to open file
-augroup lsdynaPWD
+augroup lsdyna
   autocmd!
   " set working directory to current file
   cd %:p:h
@@ -151,6 +152,7 @@ augroup lsdynaPWD
   autocmd BufReadPost * cd %:p:h
   autocmd WinEnter * cd %:p:h
   autocmd TabEnter * cd %:p:h
+  autocmd BufWrite * set ff=unix
 augroup END
 
 "-------------------------------------------------------------------------------
@@ -274,6 +276,9 @@ command! -buffer -range -nargs=* LsDynaAddPoint
 
 command! -buffer -range LsDynaSwap
  \ :call lsdyna_curves#Swap(<line1>,<line2>)
+
+command! -buffer -range LsDynaReverse
+ \ :call lsdyna_curves#Reverse(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH
