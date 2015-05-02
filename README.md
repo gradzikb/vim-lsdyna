@@ -43,6 +43,10 @@ The plugin has couple of great functions to make your work even faster:
 - keyword text objects
 - include path
 
+##Example
+
+The plugin in action you can see [here](https://www.youtube.com/watch?v=5a62UACiBA0&feature=youtu.be).
+
 ##Documentation
 
 The plugin has decent [documentation](https://github.com/gradzikb/vim-lsdyna/blob/master/doc/lsdyna.txt) with detail explanation of all functions and examples.
