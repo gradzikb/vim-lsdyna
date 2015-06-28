@@ -4,27 +4,25 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  6th of December 2014
-" Version:      1.2.0
+" Last Change:  28th of June 2015
+" Version:      1.2.1
 "
 " History of change:
+"
+" v1.2.1
+"   - LsDynaSortbyPart command added
 " v1.2.0
 "   - keyword library functions updated for new library organisation
 "   - updates for new autoload file names
 "   - LsDynaReverse command added
-"
-" History of change:
 " v1.1.1
 "   - enter button from numeric pad can be used with keyword library as well
-"
 " v1.1.0
 "   - most of functions moved to autoload
 "     - keyword library
 "     - include path
 "     - curves commands
 "     - autoformat function
-"
-" History of change:
 " v1.0.3
 "   - LsDynaLine function updated
 "     - folowing keywords are supported now
@@ -103,7 +101,7 @@ setlocal indentexpr=
 "    USEFUL MAPPINGS
 "-------------------------------------------------------------------------------
 
-function! LsDynaComment()
+function! s:LsDynaComment()
   if getline('.')[0] == '4'
     normal! hx
     return '$'
@@ -112,7 +110,7 @@ function! LsDynaComment()
   endif
 endfunction
 " change 4 -> $ but only at the beginning of the line
-inoreabbrev 4 4<C-R>=LsDynaComment()<CR>
+inoreabbrev 4 4<C-R>=<SID>LsDynaComment()<CR>
 
 " mapping for separation lines
 nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
@@ -138,6 +136,9 @@ nnoremap <silent><buffer> <LocalLeader>) O$<ESC>79a-<ESC>yypO$<ESC>A
 nnoremap <silent><buffer> [[ ?^\*\a<CR>:nohlsearch<CR>zz
 " jump to next keyword
 nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
+
+inoreabbrev bof $-------------------------------------BOF---------------------------------------
+inoreabbrev eof $-------------------------------------EOF---------------------------------------
 
 "-------------------------------------------------------------------------------
 "    INCLUDES
@@ -245,7 +246,6 @@ inoremap <buffer><silent><script><expr> <kEnter>
  \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<kEnter>"
 
 " act <up> and <down> like Ctrl-p and Ctrl-n
-" it has nothing to do with keyword library, it's only because I like it
 inoremap <buffer><silent><script><expr> <Down>
  \ pumvisible() ? "\<C-n>" : "\<Down>"
 inoremap <buffer><silent><script><expr> <Up>
@@ -279,6 +279,13 @@ command! -buffer -range LsDynaSwap
 
 command! -buffer -range LsDynaReverse
  \ :call lsdyna_curves#Reverse(<line1>,<line2>)
+
+"-------------------------------------------------------------------------------
+"    SORT COMMANDS
+"-------------------------------------------------------------------------------
+
+command! -buffer -range -nargs=* LsDynaSortbyPart
+ \ :call lsdyna_sort#SortByPart(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH

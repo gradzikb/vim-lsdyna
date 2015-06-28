@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4			Last change: 2015 March 13
+*lsdyna.txt*		For Vim version 7.4			Last change: 2015 June 28th
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -23,10 +23,10 @@ CONTENTS
        5.1. Inserting keywords.................|lsdyna-insertKeyword|
        5.2. Extending the library..............|lsdyna-extendLibrary|
        5.3. Keywords templates.................|lsdyna-templates|
-    6. Mappings & functions....................|lsdyna-functions|
-       6.1. Mappings list......................|lsdyna-mappings|
+    6. Mappings & functions....................|lsdyna-mappings|
+       6.1. Mappings list......................|lsdyna-mapList|
        6.2. Comment/uncomment..................|lsdyna-comment|
-       6.3. Data line autoformating............|lsdyne-autoFormat|
+       6.3. Data line autoformating............|lsdyna-autoFormat|
        6.4. Text objects.......................|lsdyna-textObject|
     7. Commands................................|lsdyna-commands|
        7.1. LsDynaScale........................|lsdyna-scale|
@@ -36,6 +36,7 @@ CONTENTS
        7.5. LSDynaSwap.........................|lsdyna-swap|
        7.6. LSDynaReverse......................|lsdyna-reverse|
        7.7. Number format......................|lsdyna-numberFormat|
+       7.8. LsDynaSortByPart...... ............|lsdyna-sortPart|
     8. Include files...........................|lsdyna-includes|
        8.1. File name completion...............|lsdyna-includeName|
        8.2. Include jumps......................|lsdyna-includeJump|
@@ -317,13 +318,13 @@ Keyword templates types:
    - example: _template_master_mmkgms.k
 
 ================================================================================
-6. Mappings & functions                                       *lsdyna-functions*
+6. Mappings                                                    *lsdyna-mappings*
 
 The plugin gives you a lot of useful mappings and functions to work with
 Ls-Dyna keyword file.
 
 --------------------------------------------------------------------------------
-6.1. Mappings list                                             *lsdyna-mappings*
+6.1. Mappings list                                               *lsdyna-mapList*
 
 ]]       : jump to next keyword
 [[       : jump to previous keyword
@@ -337,10 +338,10 @@ Ls-Dyna keyword file.
 <ll>1    : separator line (type 1) below
 <ll>2    : separator line (type 2) below
 <ll>3    : separator line (type 3) below
-<ll>!    : separator with title above (is like <ll>1 with <Shift>)
-<ll>@    : separator line (type 1) above (is like <ll>2 with <Shift>)
-<ll>#    : separator line (type 2) above (is like <ll>3 with <Shift>)
-<ll>)    : separator line (type 3) above (is like <ll>4 with <Shift>)
+<ll>)    : separator with title above (is like <ll>0 with <Shift>)
+<ll>!    : separator line (type 1) above (is like <ll>1 with <Shift>)
+<ll>@    : separator line (type 2) above (is like <ll>2 with <Shift>)
+<ll>#    : separator line (type 3) above (is like <ll>3 with <Shift>)
 
 <ll> is <localleader> key in VIM. By default it is backslash "\".
 
@@ -1222,6 +1223,52 @@ NOTE: Always keep in mind that format of first x-value is important.
 As you can see after shifting data precision have been lost since first x value
 has only one decimal place.
 
+--------------------------------------------------------------------------------
+7.8. LsDynaSortByPart command                                  *lsdyna-sortPart*
+
+Description:
+Sort element table respect to part id.
+
+Syntax:
+:LsDynaSortByPart
+
+Example of use:
+
+Make visual selection line with element lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|       1    2000     1      2      3      4  |<
+   >|       2    1000     5      6      7      8  |<
+   >|       3    3000     9     10     11     12  |<
+   >|       4    2000    13     14     15     16  |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaSortByPart
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |$# Part     1000    n1     n2     n3     n4  |
+    |       2    1000     5      6      7      8  |
+    |$# Part     2000    n1     n2     n3     n4  |
+    |       1    2000     1      2      3      4  |
+    |       4    2000    13     14     15     16  |
+    |$# Part     3000    n1     n2     n3     n4  |
+    |       3    3000     9     10     11     12  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
 ================================================================================
 8. Include files                                               *lsdyna-includes*
 
@@ -1238,10 +1285,10 @@ Use <Ctrl-x><Ctrl-f> to get list of files in include directory:
 
     +---------------------------------------------+
     |lsdyna_model.k===============================|
-    |**                                           |
+    |$                                            |
     |*INCLUDE                                     |
     |../OO_INC<Ctrl-x><Ctrl-f>                    |
-    |~                                            |
+    |$                                            |
     |~                                            |
     |~                                            |
     |~                                            |
@@ -1255,7 +1302,7 @@ Select include file:
 
     +---------------------------------------------+
     |lsdyna_model.k===============================|
-    |**                                           |
+    |$                                            |
     |*INCLUDE                                     |
     |../OO_INC                                    |
     | | ../00_INC/include_A.inc  |                |
@@ -1271,10 +1318,10 @@ Select include file:
 
     +---------------------------------------------+
     |lsdyna_model.k===============================|
-    |**                                           |
+    |$                                            |
     |*INCLUDE                                     |
     |../00_INC/include_C.inc                      |
-    |~                                            |
+    |$                                            |
     |~                                            |
     |~                                            |
     |~                                            |
@@ -1299,14 +1346,14 @@ Put cursor on the line with include keyword:
 
     +---------------------------------------------+
     |lsdyna_model.k===============================|
-    |**                                           |
+    |$                                            |
     |*INCLUDE                                     |
     |../OO_INC/include_A.inc                      |
     |*INCLUDE                                     |
    >|../OO_INC/include_B.inc                      |<
     |*INCLUDE                                     |
     |../OO_INC/include_C.inc                      |
-    |~                                            |
+    |$                                            |
     |~                                            |
     |~                                            |
     |~                                            |
@@ -1319,9 +1366,9 @@ Use <gf> to jump:
 
     +---------------------------------------------+
     |include_B.inc================================|
-    |**                                           |
-    |** include B                                 |
-    |**                                           |
+    |$                                            |
+    |$ include B                                  |
+    |$                                            |
     |*NODE                                        |
     | 1000, 0.0, 0.0, 0.0                         |
     | ...                                         |

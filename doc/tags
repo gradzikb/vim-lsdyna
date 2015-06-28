@@ -21,6 +21,7 @@ lsdyna-resample	lsdyna.txt	/*lsdyna-resample*
 lsdyna-reverse	lsdyna.txt	/*lsdyna-reverse*
 lsdyna-scale	lsdyna.txt	/*lsdyna-scale*
 lsdyna-shift	lsdyna.txt	/*lsdyna-shift*
+lsdyna-sortPart	lsdyna.txt	/*lsdyna-sortPart*
 lsdyna-start	lsdyna.txt	/*lsdyna-start*
 lsdyna-swap	lsdyna.txt	/*lsdyna-swap*
 lsdyna-syntax	lsdyna.txt	/*lsdyna-syntax*
