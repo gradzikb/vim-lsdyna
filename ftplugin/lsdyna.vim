@@ -4,11 +4,14 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  28th of June 2015
-" Version:      1.2.1
+" Last Change:  2nd of July 2015
+" Version:      1.2.2
 "
 " History of change:
 "
+" v1.2.2
+"   - LsDynaSortbyPart command updated to use search user pid
+"   - <M-r> mapping added (remove all comment line from selection)
 " v1.2.1
 "   - LsDynaSortbyPart command added
 " v1.2.0
@@ -137,6 +140,9 @@ nnoremap <silent><buffer> [[ ?^\*\a<CR>:nohlsearch<CR>zz
 " jump to next keyword
 nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
 
+" remove all comment lines from selection
+vnoremap <silent><buffer> <M-r> :g/^\$/d<CR>:nohlsearch<CR>
+"
 inoreabbrev bof $-------------------------------------BOF---------------------------------------
 inoreabbrev eof $-------------------------------------EOF---------------------------------------
 
@@ -285,7 +291,7 @@ command! -buffer -range LsDynaReverse
 "-------------------------------------------------------------------------------
 
 command! -buffer -range -nargs=* LsDynaSortbyPart
- \ :call lsdyna_sort#SortByPart(<line1>,<line2>)
+ \ :call lsdyna_sort#SortByPart(<line1>,<line2>,<f-args>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH
