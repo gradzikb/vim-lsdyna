@@ -4,11 +4,12 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  2nd of July 2015
-" Version:      1.2.2
+" Last Change:  26th of August 2015
+" Version:      1.2.3
 "
 " History of change:
-"
+" v1.2.3
+"   - LsDynaComment function updated, does not overwrite unnamed register now
 " v1.2.2
 "   - LsDynaSortbyPart command updated to use search user pid
 "   - <M-r> mapping added (remove all comment line from selection)
@@ -106,7 +107,10 @@ setlocal indentexpr=
 
 function! s:LsDynaComment()
   if getline('.')[0] == '4'
+
+    let tmpUnnamedReg = @@
     normal! hx
+    let @@ = tmpUnnamedReg
     return '$'
   else
     return ''
