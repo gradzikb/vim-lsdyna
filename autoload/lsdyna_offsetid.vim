@@ -1,0 +1,146 @@
+"-------------------------------------BOF---------------------------------------
+"
+" Vim filetype plugin file
+"
+" Language:     VIM Script
+" Filetype:     LS-Dyna FE solver input file
+" Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
+" Last Change:  10th of October 2015
+" Version:      1.0.0
+"
+" History of change:
+"
+" v1.0.0
+"   - initial version
+"
+"-------------------------------------------------------------------------------
+
+function! lsdyna_offsetid#OffsetId(line1, line2, ...)
+
+  "-----------------------------------------------------------------------------
+  " Function to offset Ls-Dyna node/element/part ids.
+  "
+  " Arguments:
+  " - a:line1  : first line of selection
+  " - a:line2  : last line of selection
+  " - ...      : user arguments (operation mode flag, offset)
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  "-----------------------------------------------------------------------------
+
+  " user parameters setup
+  if a:0 == 1
+
+    " set default flag
+    let arg = "DEFAULT"
+    " get user offset
+    let offset = str2nr(a:1)
+
+  elseif a:0 == 2
+
+    " check user arguments
+    if a:1 == "-n"
+      let arg = "NODE"
+    elseif a:1 == "-e"
+      let arg = "ELEMENT"
+    elseif a:1 == "-p"
+      let arg = "PART"
+    elseif a:1 == "-a"
+      let arg = "ALL"
+    endif
+
+    " get user offset
+    let offset = str2nr(a:2)
+
+  endif
+
+  "-----------------------------------------------------------------------------
+  " find keyword
+  call search('^\*[a-zA-Z]','b')
+  let keyword = getline('.')
+
+  "-----------------------------------------------------------------------------
+  if keyword =~? "^\*NODE\s*$"
+
+    for lnum in range(a:line1, a:line2)
+      " take current line
+      let oldLine = getline(lnum)
+      " offset node id
+      let newNid = str2nr(oldLine[:7]) + offset
+      " dump new line
+      let newline = printf("%8s", newNid) . oldLine[8:]
+      call setline(lnum, newline)
+    endfor
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "^\*ELEMENT_.*$"
+
+    for lnum in range(a:line1, a:line2)
+      " take current line & set line length
+      let line = getline(lnum)
+      let llen = len(line)
+
+      " number of columns
+      let cnum = llen / 8
+
+      " loop over columns
+      for i in range(0, cnum-1, 1)
+
+        " slice index
+        let s = i * 8
+
+        "-----------------------------------------------------------------------
+        if arg == "DEFAULT"
+        " offset node/elements id
+          if i == 1
+            let newId = strpart(line,s,8)
+          else
+            let newId = str2nr(strpart(line,s,8)) + offset
+          endif
+        elseif arg == "NODE"
+          " offset only nodes
+          if i == 0
+            let newId = str2nr(strpart(line,s,8)) + offset
+          else
+            let newId = strpart(line,s,8)
+          endif
+        elseif arg == "ELEMENT"
+          " offset only elements
+          if i >= 2
+            let newId = str2nr(strpart(line,s,8)) + offset
+          else
+            let newId = strpart(line,s,8)
+          endif
+        elseif arg == "PART"
+          " offset only parts
+          if i == 1
+            let newId = str2nr(strpart(line,s,8)) + offset
+          else
+            let newId = strpart(line,s,8)
+          endif
+        elseif arg == "ALL"
+          " offset all entities
+            let newId = str2nr(strpart(line,s,8)) + offset
+        endif
+        "-----------------------------------------------------------------------
+
+        " update line with new values
+        let line = strpart(line,0,s) . printf("%8s", newId) . strpart(line,s+8)
+
+      endfor
+
+      " dump new line
+      call setline(lnum, line)
+
+    endfor
+
+  endif
+
+  " restore cursor position
+  call cursor(a:line1, 0)
+
+endfunction
+
+"-------------------------------------EOF---------------------------------------

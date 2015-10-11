@@ -4,10 +4,12 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  26th of August 2015
-" Version:      1.2.3
+" Last Change:  11th of October 2015
+" Version:      1.2.4
 "
 " History of change:
+" v1.2.4
+"   - LsDynaOffsetId command added
 " v1.2.3
 "   - LsDynaComment function updated, does not overwrite unnamed register now
 " v1.2.2
@@ -296,6 +298,13 @@ command! -buffer -range LsDynaReverse
 
 command! -buffer -range -nargs=* LsDynaSortbyPart
  \ :call lsdyna_sort#SortByPart(<line1>,<line2>,<f-args>)
+
+"-------------------------------------------------------------------------------
+"    OFFSET COMMANDS
+"-------------------------------------------------------------------------------
+
+command! -buffer -range -nargs=* LsDynaOffsetId
+ \ :call lsdyna_offsetid#OffsetId(<line1>,<line2>,<f-args>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH
