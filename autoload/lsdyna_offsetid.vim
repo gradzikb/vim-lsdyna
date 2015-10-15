@@ -5,11 +5,13 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  10th of October 2015
-" Version:      1.0.0
+" Last Change:  15th of October 2015
+" Version:      1.0.1
 "
 " History of change:
 "
+" v1.0.1
+"   - trailing spaces in line are ignored
 " v1.0.0
 "   - initial version
 "
@@ -78,8 +80,9 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
   elseif keyword =~? "^\*ELEMENT_.*$"
 
     for lnum in range(a:line1, a:line2)
-      " take current line & set line length
-      let line = getline(lnum)
+      " take current line & remove trailing signs
+      let line = substitute(getline(lnum), "\\s*$", "", "")
+      " set line length
       let llen = len(line)
 
       " number of columns
