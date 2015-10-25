@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4			Last change: 2015 October 11th
+*lsdyna.txt*		For Vim version 7.4			Last change: 2015 October 25th
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -28,6 +28,7 @@ CONTENTS
        6.2. Comment/uncomment..................|lsdyna-comment|
        6.3. Data line autoformating............|lsdyna-autoFormat|
        6.4. Text objects.......................|lsdyna-textObject|
+       6.5. Column move........................|lsdyna-columnMove|
     7. Commands................................|lsdyna-commands|
        7.1. LsDynaScale........................|lsdyna-scale|
        7.2. LsDynaShift........................|lsdyna-shift|
@@ -601,7 +602,7 @@ Use <ll><ll> with selected lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-6.3. Text objects                                            *lsdyna-textObject*
+6.4. Text objects                                            *lsdyna-textObject*
 
 Ls-Dyna filetype plugin gives you two new VIM text objects. If you are not
 familiar with VIM text objects see ":help text-objects".
@@ -721,6 +722,47 @@ comment whole keyword:
     |~                                            |
     |~                                            |
     |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+6.5. Column move                                             *lsdyna-columnMove*
+
+You can move current column to left or right. It can be used to easy adjust of
+columns after use of autoformating function. The function does not overwrite
+values in columns you are only passing by!
+
+Mappings:
+- > : move current column to right
+- < : move current column to left
+
+*NOTE: Only 10 width columns are supported
+
+Examples of use:
+
+Put cursor at any position (marked with ^) in column you want to move:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DAMPING_GLOBAL                              |
+    |$#    lcid    valdmp       stx       sty     |
+    |  ^   0.67                                   |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Use > to move "0.67" value to one column right:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DAMPING_GLOBAL                              |
+    |$#    lcid    valdmp       stx       sty     |
+    |                0.67                         |
+    |$                                            |
+    |command-line=================================+
     |                                             |
     +---------------------------------------------+
 

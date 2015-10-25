@@ -4,10 +4,15 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  11th of October 2015
-" Version:      1.2.4
+" Last Change:  25th of October 2015
+" Version:      1.2.6
 "
 " History of change:
+"
+" v1.2.6
+"   - lsdyna_indent#Indent function added
+" v1.2.5
+"   - better autoformating *PARAMETER keyword
 " v1.2.4
 "   - LsDynaOffsetId command added
 " v1.2.3
@@ -108,8 +113,8 @@ setlocal indentexpr=
 "-------------------------------------------------------------------------------
 
 function! s:LsDynaComment()
-  if getline('.')[0] == '4'
 
+  if getline('.')[0] == '4'
     let tmpUnnamedReg = @@
     normal! hx
     let @@ = tmpUnnamedReg
@@ -117,6 +122,7 @@ function! s:LsDynaComment()
   else
     return ''
   endif
+
 endfunction
 " change 4 -> $ but only at the beginning of the line
 inoreabbrev 4 4<C-R>=<SID>LsDynaComment()<CR>
@@ -269,6 +275,12 @@ inoremap <buffer><silent><script><expr> <Up>
 
 noremap <buffer><script><silent> <LocalLeader><LocalLeader>
  \ :call lsdyna_autoformat#LsDynaLine()<CR>
+
+noremap <buffer><script><silent> >
+ \ :<c-u>call lsdyna_indent#Indent("Right")<CR>
+
+noremap <buffer><script><silent> <
+ \ :<c-u>call lsdyna_indent#Indent("Left")<CR>
 
 "-------------------------------------------------------------------------------
 "    CURVE COMMANDS
