@@ -330,6 +330,8 @@ Ls-Dyna keyword file.
 
 ]]       : jump to next keyword
 [[       : jump to previous keyword
+<        : move current column to left
+>        : move current column to right
 4<Space> : put "$" at the beginning of the line (works only if "4" is in 1st col)
 <ll><ll> : aurformating function
 <Alt-C>  : comment/uncomment line
