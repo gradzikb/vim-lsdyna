@@ -5,11 +5,16 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  15th of October 2015
-" Version:      1.0.1
+" Last Change:  8th of November 2015
+" Version:      1.0.2
 "
 " History of change:
 "
+" v1.0.2
+"   - incorrect argument behaviour fixed
+"   - comment lines are ignored
+"   - keyword lines are ignored
+"   - zero values at the end of element line are ignored
 " v1.0.1
 "   - trailing spaces in line are ignored
 " v1.0.0
@@ -80,8 +85,17 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
   elseif keyword =~? "^\*ELEMENT_.*$"
 
     for lnum in range(a:line1, a:line2)
+
+      " get line
+      let line = getline(lnum)
+
+      " skip comment/keyword lines
+      if line =~? "^[$*]"
+        continue
+      endif
+
       " take current line & remove trailing signs
-      let line = substitute(getline(lnum), "\\s*$", "", "")
+      let line = substitute(line, "\\s[ 0]*$", "", "")
       " set line length
       let llen = len(line)
 
@@ -102,14 +116,14 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
           else
             let newId = str2nr(strpart(line,s,8)) + offset
           endif
-        elseif arg == "NODE"
+        elseif arg == "ELEMENT"
           " offset only nodes
           if i == 0
             let newId = str2nr(strpart(line,s,8)) + offset
           else
             let newId = strpart(line,s,8)
           endif
-        elseif arg == "ELEMENT"
+        elseif arg == "NODE"
           " offset only elements
           if i >= 2
             let newId = str2nr(strpart(line,s,8)) + offset
