@@ -10,6 +10,9 @@
 "
 " History of change:
 "
+" v1.0.3
+"   - search pattern for keyword improved
+"   - *ELEMENT_MASS support
 " v1.0.2
 "   - incorrect argument behaviour fixed
 "   - comment lines are ignored
@@ -65,23 +68,53 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
 
   "-----------------------------------------------------------------------------
   " find keyword
-  call search('^\*[a-zA-Z]','b')
+  call search('^\*[a-zA-Z]','bcW')
   let keyword = getline('.')
 
   "-----------------------------------------------------------------------------
   if keyword =~? "^\*NODE\s*$"
 
     for lnum in range(a:line1, a:line2)
+
       " take current line
-      let oldLine = getline(lnum)
-      " offset node id
-      let newNid = str2nr(oldLine[:7]) + offset
-      " dump new line
-      let newline = printf("%8s", newNid) . oldLine[8:]
+      let line = getline(lnum)
+
+      " skip comment/keyword lines
+      if line =~? "^[$*]"
+        continue
+      endif
+
+      " dump line with new id
+      let newNid = str2nr(line[:7]) + offset
+      let newline = printf("%8s", newNid) . line[8:]
       call setline(lnum, newline)
+
     endfor
 
   "-----------------------------------------------------------------------------
+  "
+  elseif keyword =~? "^\*ELEMENT_MASS\s*$"
+
+    for lnum in range(a:line1, a:line2)
+
+      " take current line
+      let line = getline(lnum)
+
+      " skip comment/keyword lines
+      if line =~? "^[$*]"
+        continue
+      endif
+
+      " dump line with new id
+      let eid = str2nr(line[:7]) + offset
+      let nid = str2nr(line[8:15]) + offset
+      let newline = printf("%8s%8s", eid, nid) . line[16:]
+      call setline(lnum, newline)
+
+    endfor
+
+  "-----------------------------------------------------------------------------
+
   elseif keyword =~? "^\*ELEMENT_.*$"
 
     for lnum in range(a:line1, a:line2)
