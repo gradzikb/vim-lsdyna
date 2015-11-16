@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4			Last change: 2015 October 25th
+*lsdyna.txt*		For Vim version 7.4		Last change: 2015 November 16th
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -1345,18 +1345,21 @@ Description:
 Offset node/element/part ids.
 
 Syntax:
-:LsDynaOffsetId entity offset
+:LsDynaOffsetId -[enp] offset
 
 Arguments:
-entity - entity flag
-         -n : node id
-         -e : element id
-         -p : part id
-         -a : all (node, element, part id)
-         The flag is option, when not used function offsets:
-         - node ids under *NODE keyword
-         - node and element ids under *ELEMENT_ keyword
-offset - offset value
+    -n : offset node id
+    -e : offset element id
+    -p : offset part id
+offset : offset value
+
+Arguments can be collect in one:
+ -en  : offset element and node id
+ -pe  : offset part and element id
+ -nep : offset node, element and part id
+
+Order of arguments is unimportant. "-en" and "-ne" options work the same.
+If arguments will be not passed by default function is call with "-en" option.
 
 Example of use:
 
@@ -1421,6 +1424,22 @@ Make visual selection line with node/element lines:
     |    2002      10     5      6      7      8  |
     |    2003      11     9     10     11     12  |
     |    2004      11    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+	:LsDynaOffsetId -pen 2000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|    2001    2010  2001   2002   2003   2004  |<
+   >|    2002    2010  2005   2006   2007   2008  |<
+   >|    2003    2011  2009   2000   2011   2012  |<
+   >|    2004    2011  2013   2014   2015   2016  |<
     |$                                            |
     |command-line=================================+
     |                                             |

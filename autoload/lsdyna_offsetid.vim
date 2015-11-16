@@ -6,10 +6,12 @@
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
 " Last Change:  8th of November 2015
-" Version:      1.0.2
+" Version:      1.0.4
 "
 " History of change:
 "
+" v1.0.4
+"   - new user arguments supported
 " v1.0.3
 "   - search pattern for keyword improved
 "   - *ELEMENT_MASS support
@@ -44,22 +46,20 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
   if a:0 == 1
 
     " set default flag
-    let arg = "DEFAULT"
+    let arg = "en"
     " get user offset
     let offset = str2nr(a:1)
 
   elseif a:0 == 2
 
-    " check user arguments
-    if a:1 == "-n"
-      let arg = "NODE"
-    elseif a:1 == "-e"
-      let arg = "ELEMENT"
-    elseif a:1 == "-p"
-      let arg = "PART"
-    elseif a:1 == "-a"
-      let arg = "ALL"
-    endif
+    " get information what to renumber?
+    let argList = []
+    for i in range(1, len(a:1))
+      if a:1[i] =~? "[nep]"
+        call add(argList, a:1[i])
+      endif
+    endfor
+    let arg = join(sort(argList), "")
 
     " get user offset
     let offset = str2nr(a:2)
@@ -105,10 +105,41 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
         continue
       endif
 
+      " offset only element id
+      if arg == "e"
+        let eid = str2nr(line[:7]) + offset
+        let nid = str2nr(line[8:15])
+        let pid = str2nr(line[33:])
+      " offset only node id
+      elseif arg == "n"
+        let eid = str2nr(line[:7])
+        let nid = str2nr(line[8:15]) + offset
+        let pid = str2nr(line[33:])
+      " offset node and element id
+      elseif arg == "p"
+        let eid = str2nr(line[:7])
+        let nid = str2nr(line[8:15])
+        let pid = str2nr(line[33:]) + offset
+      elseif arg == "en"
+        let eid = str2nr(line[:7]) + offset
+        let nid = str2nr(line[8:15]) + offset
+        let pid = str2nr(line[33:])
+      elseif arg == "ep"
+        let eid = str2nr(line[:7]) + offset
+        let nid = str2nr(line[8:15])
+        let pid = str2nr(line[33:]) + offset
+      elseif arg == "np"
+        let eid = str2nr(line[:7])
+        let nid = str2nr(line[8:15]) + offset
+        let pid = str2nr(line[33:]) + offset
+      elseif arg == "enp"
+        let eid = str2nr(line[:7]) + offset
+        let nid = str2nr(line[8:15]) + offset
+        let pid = str2nr(line[33:]) + offset
+      endif
+
       " dump line with new id
-      let eid = str2nr(line[:7]) + offset
-      let nid = str2nr(line[8:15]) + offset
-      let newline = printf("%8s%8s", eid, nid) . line[16:]
+      let newline = printf("%8s%8s", eid, nid) . line[16:31] . printf("%8s", pid)
       call setline(lnum, newline)
 
     endfor
@@ -142,36 +173,50 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
         let s = i * 8
 
         "-----------------------------------------------------------------------
-        if arg == "DEFAULT"
-        " offset node/elements id
-          if i == 1
-            let newId = strpart(line,s,8)
-          else
-            let newId = str2nr(strpart(line,s,8)) + offset
-          endif
-        elseif arg == "ELEMENT"
-          " offset only nodes
+        " offset only nodes
+        if arg == "e"
           if i == 0
             let newId = str2nr(strpart(line,s,8)) + offset
           else
             let newId = strpart(line,s,8)
           endif
-        elseif arg == "NODE"
-          " offset only elements
+        " offset only elements
+        elseif arg == "n"
           if i >= 2
             let newId = str2nr(strpart(line,s,8)) + offset
           else
             let newId = strpart(line,s,8)
           endif
-        elseif arg == "PART"
-          " offset only parts
+        " offset only parts
+        elseif arg == "p"
           if i == 1
             let newId = str2nr(strpart(line,s,8)) + offset
           else
             let newId = strpart(line,s,8)
           endif
-        elseif arg == "ALL"
-          " offset all entities
+        " offset node/elements id
+        elseif arg == "en"
+          if i == 1
+            let newId = strpart(line,s,8)
+          else
+            let newId = str2nr(strpart(line,s,8)) + offset
+          endif
+        " offset elements/parts id
+        elseif arg == "ep"
+          if i <= 1
+            let newId = str2nr(strpart(line,s,8)) + offset
+          else
+            let newId = strpart(line,s,8)
+          endif
+        " offset node/parts id
+        elseif arg == "np"
+          if i == 0
+            let newId = strpart(line,s,8)
+          else
+            let newId = str2nr(strpart(line,s,8)) + offset
+          endif
+        " offset nodes/parts/elements id
+        elseif arg == "enp"
             let newId = str2nr(strpart(line,s,8)) + offset
         endif
         "-----------------------------------------------------------------------
