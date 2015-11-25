@@ -5,11 +5,13 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  8th of November 2015
-" Version:      1.0.4
+" Last Change:  25th of November 2015
+" Version:      1.0.5
 "
 " History of change:
 "
+" v1.0.5
+"   - ignore columns with real values, 0 value and white signs
 " v1.0.4
 "   - new user arguments supported
 " v1.0.3
@@ -171,53 +173,59 @@ function! lsdyna_offsetid#OffsetId(line1, line2, ...)
 
         " slice index
         let s = i * 8
+        " get line slice
+        let slice = strpart(line,s,8)
 
         "-----------------------------------------------------------------------
         " offset only nodes
         if arg == "e"
           if i == 0
-            let newId = str2nr(strpart(line,s,8)) + offset
+            let newId = str2nr(slice) + offset
           else
-            let newId = strpart(line,s,8)
+            let newId = slice
           endif
         " offset only elements
         elseif arg == "n"
-          if i >= 2
-            let newId = str2nr(strpart(line,s,8)) + offset
+          if i >= 2 && str2nr(slice) != 0
+            let newId = str2nr(slice) + offset
           else
-            let newId = strpart(line,s,8)
+            let newId = slice
           endif
         " offset only parts
         elseif arg == "p"
           if i == 1
-            let newId = str2nr(strpart(line,s,8)) + offset
+            let newId = str2nr(slice) + offset
           else
-            let newId = strpart(line,s,8)
+            let newId = slice
           endif
         " offset node/elements id
         elseif arg == "en"
-          if i == 1
-            let newId = strpart(line,s,8)
+          if i == 1 || str2nr(slice) == 0
+            let newId = slice
           else
-            let newId = str2nr(strpart(line,s,8)) + offset
+            let newId = str2nr(slice) + offset
           endif
         " offset elements/parts id
         elseif arg == "ep"
           if i <= 1
-            let newId = str2nr(strpart(line,s,8)) + offset
+            let newId = str2nr(slice) + offset
           else
-            let newId = strpart(line,s,8)
+            let newId = slice
           endif
         " offset node/parts id
         elseif arg == "np"
-          if i == 0
-            let newId = strpart(line,s,8)
+          if i == 0 || str2nr(slice) == 0
+            let newId = slice
           else
-            let newId = str2nr(strpart(line,s,8)) + offset
+            let newId = str2nr(slice) + offset
           endif
         " offset nodes/parts/elements id
         elseif arg == "enp"
-            let newId = str2nr(strpart(line,s,8)) + offset
+            if str2nr(slice) == 0
+              let newId = slice
+            else
+              let newId = str2nr(slice) + offset
+            endif
         endif
         "-----------------------------------------------------------------------
 
