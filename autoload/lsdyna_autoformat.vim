@@ -154,8 +154,8 @@ function! lsdyna_autoformat#LsDynaLine() range
       call cursor(a:lastline+1, 0)
 
   "-----------------------------------------------------------------------------
-  elseif keyword =~? "*PARAMETER\s*$" ||
-       \ keyword =~? "*PARAMETER_LOCAL\s*$"
+  elseif keyword =~? "*PARAMETER *$" ||
+       \ keyword =~? "*PARAMETER_LOCAL *$"
 
      for i in range(a:firstline, a:lastline)
 
