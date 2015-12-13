@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4		Last change: 2015 November 16th
+*lsdyna.txt*		For Vim version 7.4		Last change: 2015 December 13th
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -30,15 +30,16 @@ CONTENTS
        6.4. Text objects.......................|lsdyna-textObject|
        6.5. Column move........................|lsdyna-columnMove|
     7. Commands................................|lsdyna-commands|
-       7.1. LsDynaScale........................|lsdyna-scale|
-       7.2. LsDynaShift........................|lsdyna-shift|
-       7.3. LsDynaAddPoint.....................|lsdyna-addPoint|
-       7.4. LSDynaResample.....................|lsdyna-resample|
-       7.5. LSDynaSwap.........................|lsdyna-swap|
-       7.6. LSDynaReverse......................|lsdyna-reverse|
-       7.7. Number format......................|lsdyna-numberFormat|
-       7.8. LsDynaSortByPart...................|lsdyna-sortPart|
-       7.9. LsDynaOffsetId.....................|lsdyna-offsetId|
+       7.1.  LsDynaScale.......................|lsdyna-scale|
+       7.2.  LsDynaShift.......................|lsdyna-shift|
+       7.3.  LsDynaAddPoint....................|lsdyna-addPoint|
+       7.4.  LsDynaResample....................|lsdyna-resample|
+       7.5.  LsDynaSwap........................|lsdyna-swap|
+       7.6.  LsDynaReverse.....................|lsdyna-reverse|
+       7.7.  Number format.....................|lsdyna-numberFormat|
+       7.8.  LsDynaSortByPart..................|lsdyna-sortPart|
+       7.9.  LsDynaOffsetId....................|lsdyna-offsetId|
+       7.10. LsDynaChangePID...................|lsdyna-changepid|
     8. Include files...........................|lsdyna-includes|
        8.1. File name completion...............|lsdyna-includeName|
        8.2. Include jumps......................|lsdyna-includeJump|
@@ -1440,6 +1441,90 @@ Make visual selection line with node/element lines:
    >|    2002    2010  2005   2006   2007   2008  |<
    >|    2003    2011  2009   2000   2011   2012  |<
    >|    2004    2011  2013   2014   2015   2016  |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.10. LsDynaChangePID command                                  *lsdyna-changepid*
+
+Description:
+Change part id in element definition.
+
+Syntax:
+:LsDynaChangePID newPid
+:LsDynaChangePID oldPid newPid
+
+Arguments:
+newPID : new part id
+oldPID : part id to change (optional)
+
+NOTE Part ids can be defnied as parameter name as well.
+
+Example of use:
+
+Make visual selection line with element lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|       1      10     1      2      3      4  |<
+   >|       2      10     5      6      7      8  |<
+   >|       3      20     9     10     11     12  |<
+   >|       4      20    13     14     15     16  |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsDynaChangePID 1000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |       1    1000     1      2      3      4  |
+    |       2    1000     5      6      7      8  |
+    |       3    1000     9     10     11     12  |
+    |       4    1000    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+>
+	:LsDynaChangePID 20 1000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |       1      10     1      2      3      4  |
+    |       2      10     5      6      7      8  |
+    |       3    1000     9     10     11     12  |
+    |       4    1000    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+>
+	:LsDynaChangePID 10 pid1
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |       1   &pid1     1      2      3      4  |
+    |       2   &pid1     5      6      7      8  |
+    |       3      20     9     10     11     12  |
+    |       4      20    13     14     15     16  |
     |$                                            |
     |command-line=================================+
     |                                             |

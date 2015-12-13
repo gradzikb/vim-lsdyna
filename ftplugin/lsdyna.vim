@@ -305,18 +305,25 @@ command! -buffer -range LsDynaReverse
  \ :call lsdyna_curves#Reverse(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
-"    SORT COMMANDS
+"    SORT COMMAND
 "-------------------------------------------------------------------------------
 
 command! -buffer -range -nargs=* LsDynaSortbyPart
  \ :call lsdyna_sort#SortByPart(<line1>,<line2>,<f-args>)
 
 "-------------------------------------------------------------------------------
-"    OFFSET COMMANDS
+"    OFFSET COMMAND
 "-------------------------------------------------------------------------------
 
 command! -buffer -range -nargs=* LsDynaOffsetId
  \ :call lsdyna_offsetid#OffsetId(<line1>,<line2>,<f-args>)
+
+"-------------------------------------------------------------------------------
+"    CHANGEPID COMMAND
+"-------------------------------------------------------------------------------
+
+command! -buffer -range -nargs=* LsDynaChangePID
+ \ :call lsdyna_part#ChangePID(<line1>,<line2>,<f-args>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH
