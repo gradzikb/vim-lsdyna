@@ -5,7 +5,7 @@
 
 What is Ls-Dyna filetype plugin?
 
-It's just bunch of VIM scripts to speed up work with Ls-Dyna keyword file.
+It's just bunch of scripts to speed up work with Ls-Dyna keyword file and VIM text editor.
 
 ##Main features
 - Syntax highlighting
