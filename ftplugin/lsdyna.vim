@@ -4,11 +4,13 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  25th of October 2015
-" Version:      1.2.6
+" Last Change:  18th of December 2015
+" Version:      1.2.7
 "
 " History of change:
 "
+" v1.2.7
+"   - new commands structure
 " v1.2.6
 "   - lsdyna_indent#Indent function added
 " v1.2.5
@@ -286,44 +288,55 @@ noremap <buffer><script><silent> <
 "    CURVE COMMANDS
 "-------------------------------------------------------------------------------
 
-command! -buffer -range -nargs=* LsDynaShift
+command! -buffer -range -nargs=* LsCurveShift
  \ :call lsdyna_curves#Shift(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsDynaScale
+command! -buffer -range -nargs=* LsCurveScale
  \ :call lsdyna_curves#Scale(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsDynaResample
+command! -buffer -range -nargs=* LsCurveResample
  \ :call lsdyna_curves#Resample(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsDynaAddPoint
+command! -buffer -range -nargs=* LsCurveAddPoint
  \ :call lsdyna_curves#AddPoint(<line1>,<line2>,<f-args>)
 
-command! -buffer -range LsDynaSwap
- \ :call lsdyna_curves#Swap(<line1>,<line2>)
+command! -buffer -range LsCurveSwapXY
+ \ :call lsdyna_curves#SwapXY(<line1>,<line2>)
 
-command! -buffer -range LsDynaReverse
+command! -buffer -range LsCurveRevers
  \ :call lsdyna_curves#Reverse(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
-"    SORT COMMAND
+"    NODE COMMANDS
 "-------------------------------------------------------------------------------
 
-command! -buffer -range -nargs=* LsDynaSortbyPart
- \ :call lsdyna_sort#SortByPart(<line1>,<line2>,<f-args>)
+command! -buffer -range -nargs=* LsNodeScale
+ \ :call lsdyna_node#Scale(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsNodeShift
+ \ :call lsdyna_node#Shift(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsNodeReflect
+ \ :call lsdyna_node#Reflect(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsNodeOffsetId
+ \ :call lsdyna_element#OffsetId(<line1>,<line2>,<f-args>)
 
 "-------------------------------------------------------------------------------
-"    OFFSET COMMAND
+"    ELEMENT COMMANDS
 "-------------------------------------------------------------------------------
 
-command! -buffer -range -nargs=* LsDynaOffsetId
- \ :call lsdyna_offsetid#OffsetId(<line1>,<line2>,<f-args>)
+command! -buffer -range -nargs=* LsElemSort
+ \ :call lsdyna_element#Sort(<line1>,<line2>,<f-args>)
 
-"-------------------------------------------------------------------------------
-"    CHANGEPID COMMAND
-"-------------------------------------------------------------------------------
+command! -buffer -range -nargs=* LsElemOffsetId
+ \ :call lsdyna_element#OffsetId(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsDynaChangePID
- \ :call lsdyna_part#ChangePID(<line1>,<line2>,<f-args>)
+command! -buffer -range -nargs=* LsElemChangePid
+ \ :call lsdyna_element#ChangePid(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=0 LsElemReverseNormals
+ \ :call lsdyna_element#ReverseNormals(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH

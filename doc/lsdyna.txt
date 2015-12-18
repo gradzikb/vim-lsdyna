@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4		Last change: 2015 December 13th
+*lsdyna.txt*		For Vim version 7.4		Last change: 2015 December 18th
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -20,30 +20,37 @@ CONTENTS
     3. Syntax highlighting.....................|lsdyna-syntax|
     4. Folding.................................|lsdyna-folding|
     5. Keyword library.........................|lsdyna-keywordLibrary|
-       5.1. Inserting keywords.................|lsdyna-insertKeyword|
-       5.2. Extending the library..............|lsdyna-extendLibrary|
-       5.3. Keywords templates.................|lsdyna-templates|
+       5.1 Inserting keywords..................|lsdyna-insertKeyword|
+       5.2 Extending the library...............|lsdyna-extendLibrary|
+       5.3 Keywords templates..................|lsdyna-templates|
     6. Mappings & functions....................|lsdyna-mappings|
-       6.1. Mappings list......................|lsdyna-mapList|
-       6.2. Comment/uncomment..................|lsdyna-comment|
-       6.3. Data line autoformating............|lsdyna-autoFormat|
-       6.4. Text objects.......................|lsdyna-textObject|
-       6.5. Column move........................|lsdyna-columnMove|
+       6.1 Mappings list.......................|lsdyna-mapList|
+       6.2 Comment/uncomment...................|lsdyna-comment|
+       6.3 Data line autoformating.............|lsdyna-autoFormat|
+       6.4 Text objects........................|lsdyna-textObject|
+       6.5 Column move.........................|lsdyna-columnMove|
     7. Commands................................|lsdyna-commands|
-       7.1.  LsDynaScale.......................|lsdyna-scale|
-       7.2.  LsDynaShift.......................|lsdyna-shift|
-       7.3.  LsDynaAddPoint....................|lsdyna-addPoint|
-       7.4.  LsDynaResample....................|lsdyna-resample|
-       7.5.  LsDynaSwap........................|lsdyna-swap|
-       7.6.  LsDynaReverse.....................|lsdyna-reverse|
-       7.7.  Number format.....................|lsdyna-numberFormat|
-       7.8.  LsDynaSortByPart..................|lsdyna-sortPart|
-       7.9.  LsDynaOffsetId....................|lsdyna-offsetId|
-       7.10. LsDynaChangePID...................|lsdyna-changepid|
+       7.1 Curve commands......................|lsdyna-curveCommands|
+           7.1.1 LsCurveScale..................|lsdyna-curveScale|
+           7.1.2 LsCurveShift..................|lsdyna-curveShift|
+           7.1.3 LsCurveAddPoint...............|lsdyna-curveAddPoint|
+           7.1.4 LsCurveResample...............|lsdyna-curveResample|
+           7.1.5 LsCurveSwapXY.................|lsdyna-curveSwapXY|
+           7.1.6 LsCurveReverse................|lsdyna-curveReverse|
+       7.2 Node commands.......................|lsdyna-nodeCommands|
+           7.2.1 LsNodeScale...................|lsdyna-nodeScale|
+           7.2.2 LsNodeShift...................|lsdyna-nodeShift|
+           7.2.3 LsNodeOffsetId................|lsdyna-nodeOffsetId|
+           7.2.4 LsNodeReflect.................|lsdyna-nodeReflect|
+       7.3 Element commands....................|lsdyna-elemCommands|
+           7.3.1 LsElemSort....................|lsdyna-elemSort|
+           7.3.2 LsElemChangePid...............|lsdyna-elemChangePid|
+           7.3.3 LsElemOffsetId................|lsdyna-elemOffsetId|
+           7.3.4 LsElemReverseNormals..........|lsdyna-elemReverseNormals|
     8. Include files...........................|lsdyna-includes|
-       8.1. File name completion...............|lsdyna-includeName|
-       8.2. Include jumps......................|lsdyna-includeJump|
-       8.3. Include path.......................|lsdyna-includePath|
+       8.1 File name completion................|lsdyna-includeName|
+       8.2 Include jumps.......................|lsdyna-includeJump|
+       8.3 Include path........................|lsdyna-includePath|
     9. Credits.................................|lsdyna-credits|
    10. License.................................|lsdyna-license|
    11. Bugs....................................|lsdyna-bugs|
@@ -51,7 +58,7 @@ CONTENTS
 ================================================================================
 1. Introduction                                            *lsdyna-introduction*
 
-It is VIM filetype plugin for Ls-Dyna keyword file.
+It is offical documentation for Ls-Dyna VIM filetype plugin.
 
 Ls-Dyna is simulation software developed by Livermore Software Technology
 Corporation (www.lstc.com). The keyword file is used to store all model
@@ -90,7 +97,7 @@ VIM message should be:
 >
 	filetype=lsdyna
 <
-|Lsdyna-commands| require VIM version which support float operations.
+The plugin require VIM version which support float operations.
 You can test your VIM installation with command:
 >
 	echom has("float")
@@ -138,9 +145,9 @@ With keyword library you can:
 - create your own simple material database
 
 --------------------------------------------------------------------------------
-5.1. Inserting keywords                                   *lsdyna-insertKeyword*
+5.1 Inserting keywords                                    *lsdyna-insertKeyword*
 
-In insert mode start typing keyword you want to and use <Ctrl-Tab>:
+In insert mode start typing keyword you want to and use <Ctrl-Tab>.
 NOTE: Keyword completion can be trigged with <Ctrl-x><Ctrl-u> as well.
 
     +---------------------------------------------+
@@ -245,7 +252,7 @@ NOTE: To get list of all available keywords you can use:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-5.2. Extending the library                                *lsdyna-extendLibrary*
+5.2 Extending the library                                 *lsdyna-extendLibrary*
 
 The library does not have all Ls-Dyna keywords. If keyword you use often is
 missing you have to add it into the library. It is easy task and do not required
@@ -300,14 +307,14 @@ To define location of the keyword library put for all users in vimrc:
 	let g:lsdynaKeyLibPath = "/home/lsdyna/glbKeyLib/"
 <
 --------------------------------------------------------------------------------
-5.3. Keywords templates                                       *lsdyna-templates*
+5.3 Keywords templates                                        *lsdyna-templates*
 
 Keyword files does not have to include only one "empty" Ls-Dyna keyword.
 You can create your own keyword template.
 
-Keyword templates types:
+Keyword template types:
 1. Predefined keyword
-   - a keyword with predefined values
+   - keyword with predefined values
      - gravity load for different system unit
      - contact definition with non-default values
    - are stored in the library subdirectories like any other keywords
@@ -327,7 +334,7 @@ The plugin gives you a lot of useful mappings and functions to work with
 Ls-Dyna keyword file.
 
 --------------------------------------------------------------------------------
-6.1. Mappings list                                               *lsdyna-mapList*
+6.1 Mappings list                                               *lsdyna-mapList*
 
 ]]       : jump to next keyword
 [[       : jump to previous keyword
@@ -335,9 +342,9 @@ Ls-Dyna keyword file.
 >        : move current column to right
 4<Space> : put "$" at the beginning of the line (works only if "4" is in 1st col)
 <ll><ll> : aurformating function
-<Alt-C>  : comment/uncomment line
-<Ctrl-C> : comment/uncomment line
-<Alt-R>  : remove all comment lines from selection
+<Alt-c>  : comment/uncomment line
+<Ctrl-c> : comment/uncomment line (the same as <Alt-c>)
+<Alt-c>  : remove all comment lines from selection
 <ll>c    : put empty comment line below
 <ll>C    : put empty comment line above
 <ll>0    : separator with title below
@@ -350,9 +357,10 @@ Ls-Dyna keyword file.
 <ll>#    : separator line (type 3) above (is like <ll>3 with <Shift>)
 
 <ll> is <localleader> key in VIM. By default it is backslash "\".
+For details see VIM documentation ":help <localleade>".
 
 --------------------------------------------------------------------------------
-6.2. Comment/uncomment                                          *lsdyna-comment*
+6.2 Comment/uncomment                                           *lsdyna-comment*
 
 The function is used to comment/uncomment line/lines in Ls-Dyna keyword file.
 Function is mapped with <ALT-c> or <Ctrl-c>.
@@ -404,7 +412,7 @@ Use <Alt-c>:
 To uncomment select the same lines and use <Alt-c> once again.
 
 --------------------------------------------------------------------------------
-6.3. Data line autoformating                                 *lsdyna-autoFormat*
+6.3 Data line autoformating                                  *lsdyna-autoFormat*
 
 The plugin has simple autoformating function. The function is trigged with
 <ll><ll> mapping ("\\" for default VIM settings). The function try to guess
@@ -472,7 +480,7 @@ NOTE: Coma "," is used as special sign (not true under *DEFINE_CURVE).
     |$# title                                     |
     |Contact_parts                                |
     |$#    pid1      pid2      pid3      pid4     |
-   >|                             3               |<
+    |                             3               |
     |$                                            |
     |$                                            |
     |command-line=================================+
@@ -504,7 +512,7 @@ You can use prefix for coma as well:
     |$# title                                     |
     |Contact_parts                                |
     |$#    pid1      pid2      pid3      pid4     |
-   >|                                       3     |<
+    |                                       3     |
     |$                                            |
     |$                                            |
     |command-line=================================+
@@ -605,7 +613,7 @@ Use <ll><ll> with selected lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-6.4. Text objects                                            *lsdyna-textObject*
+6.4 Text objects                                             *lsdyna-textObject*
 
 Ls-Dyna filetype plugin gives you two new VIM text objects. If you are not
 familiar with VIM text objects see ":help text-objects".
@@ -729,7 +737,7 @@ comment whole keyword:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-6.5. Column move                                             *lsdyna-columnMove*
+6.5 Column move                                              *lsdyna-columnMove*
 
 You can move current column to left or right. It can be used to easy adjust of
 columns after use of autoformating function. The function does not overwrite
@@ -770,29 +778,153 @@ Use > to move "0.67" value to one column right:
     +---------------------------------------------+
 
 ================================================================================
-7. Commands                                                   *lsdyna-commands*
+7. Commands                                                    *lsdyna-commands*
 
-Ls-Dyna filetype plugin commands list:
+The plugin gives you many useful commands to work with Ls-Dyna keyword file.
 
-- :LsDynaScale    - scale x and/or y data
-- :LsDynaShift    - shift x and/or y data
-- :LsDynaAddpoint - used to extend a curve
-- :LsDynaResample - resample curve
-- :LsDynaSwap     - swap x & y column
-- :LsDynaReverse  - reverse curve points
+Commands sections:
+- curve commands   : works with x & y data under *DEFINE_CURVE
+- node commands    : works with data lines under *NODE
+- element commands : works with data lines under *ELEMENT_
 
 --------------------------------------------------------------------------------
-7.1. LsDynaScale command                                          *lsdyna-scale*
+7.1 Curve commands                                        *lsdyna-curveCommands*
+
+Curve commands are design to work with x & y points under *DEFINE_CURVE keyword.
+For instance you can do operation like scaling, shifting of the points, resample
+the curve with new number of points, extend your curve and many more.
+
+All curve commands unified number format of your points. First x-value control
+how all points will be saved into the file after operation. See example below to
+understand how it works.
+
+Select curve lines and run command
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|            0.00e+00                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsCurveScale 10.0 5.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |            0.00e+00            0.00e+00     |
+    |            1.00e+01            5.00e+00     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Vales after scaling operation are write with new number format.
+
+You can use this function to change number format only, not values.
+Just update first x value and scale it with factor of 1.0.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|          0.0000e+00                 0.0     |<
+   >|                 1.0                 1.0     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsCurveScale
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |          0.0000e+00          0.0000e+00     |
+    |          1.0000e+00          1.0000e+00     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+NOTE: Always keep in mind that format of first x value is important.
+      In some situations you can loose some data during curve operations.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+   >|                 0.0                 0.0     |<
+   >|               0.001               0.005     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsCurveShift 0.01
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+    |         1         0       1.0       1.0     |
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 0.0                 0.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+As you can see after shifting data precision have been lost since first x value
+has only one decimal place.
+
+--------------------------------------------------------------------------------
+7.1.1 LsCurveScale                                           *lsdyna-curveScale*
 
 Description:
 Scale x and/or y value on the curve.
 
 Syntax:
-:LsDynaScale x_sf y_sf
+:LsCurveScale x_sf y_sf
 
 Arguments:
-x_sf - scaling factor for x data (default value 1.0)
-y_sf - scaling factor for y data (default value 1.0)
+x_sf - scaling factor for x data (default value of 1.0)
+y_sf - scaling factor for y data (default value of 1.0)
 
 Example of use:
 
@@ -814,7 +946,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaScale 10.0 5.0
+	:LsCurveScale 10.0 5.0
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -833,17 +965,17 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.2. LsDynaShift command                                         *lsdyna-shift*
+7.1.2 LsCurveShift                                           *lsdyna-curveShift*
 
 Description:
-Shift x and/or y values on the curve,
+Shift x and/or y values on the curve.
 
 Syntax:
-:LsDynaShift x_shift y_shift
+:LsCurveShift x_shift y_shift
 
 Arguments:
-x_shift - offset value for x data (default value 0.0)
-y_shift - offset value for y data (default value 0.0)
+x_shift - offset value for x data (default value of 0.0)
+y_shift - offset value for y data (default value of 0.0)
 
 Example of use:
 
@@ -865,7 +997,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaShift 10.0 5.0
+	:LsCurveShift 10.0 5.0
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -884,15 +1016,16 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.3. LsDynaAddPoint command                                    *lsdyna-addPoint*
+7.1.3 LsCurveAddPoint                                     *lsdyna-curveAddPoint*
 
 Description:
-LsDynaAddPoint insert a new point for x user value. For points outside range new
-y value is linear extrapolated base on two first or two last points. For points
-inside the range new y value is linear interpolated base on the nearest points.
+LsCurveAddPoint insert a new y value for x user value. For points outside range
+new y value is linear extrapolated base on two first or two last points. For
+points inside the range new y value is linear interpolated base on the nearest
+points.
 
 Synatx:
-:LsDynaAddPoint x
+:LsCurveAddPoint x
 
 Arguments:
 x - user x value for new point
@@ -917,7 +1050,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaAddPoint -1.0
+	:LsCurveAddPoint -1.0
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -936,7 +1069,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaAddPoint 0.5
+	:LsCurveAddPoint 0.5
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -955,7 +1088,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaAddPoint 4.0
+	:LsCurveAddPoint 4.0
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -975,14 +1108,14 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.4. LsDynaResample command                                    *lsdyna-resample*
+7.1.4 LsCurveResample                                     *lsdyna-curveResample*
 
 Description:
 Command allow you to resample the curve with new number of points.
 
 Synatx:
-:LsDynaResample -i incr
-:LsDynaResample -p nump
+:LsCurveResample -i incr
+:LsCurveResample -p nump
 
 Arguments:
 incr - increment
@@ -1008,7 +1141,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaResample -i 0.2
+	:LsCurveResample -i 0.2
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1030,7 +1163,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaResample -p 6
+	:LsCurveResample -p 6
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1053,13 +1186,16 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.5. LsDynaSwap command                                            *lsdyna-swap*
+7.1.5 LsCurveSwapXY                                         *lsdyna-curveSwapXY*
 
 Description:
 Swap x and y columns.
 
 Syntax:
-:LsDynaSwap
+:LsCurveSwapXY
+
+Arguments:
+None
 
 Example of use:
 
@@ -1081,7 +1217,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaSwap
+	:LsCurveSwapXY
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1100,13 +1236,16 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.6. LsDynaReverse command                                      *lsdyna-reverse*
+7.1.6 LsCurveReverse                                       *lsdyna-curveReverse*
 
 Description:
 Reverse order of curve data points.
 
 Syntax:
-:LsDynaReverse
+:LsCurveReverse
+
+Arguments:
+None
 
 Example of use:
 
@@ -1132,7 +1271,7 @@ Make visual selection line with data lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaReverse
+	:LsCurveReverse
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1155,133 +1294,262 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.7. Number format                                         *lsdyna-numberFormat*
+7.2 Node commands                                          *lsdyna-nodeCommands*
 
-Curve commands use number format base on first x value.
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DEFINE_CURVE_TITLE                          |
-    |$# title                                     |
-    |Load                                         |
-    |$#    lcid      sidr       sfa       sfo     |
-    |         1         0       1.0       1.0     |
-    |$#                a1                  o1     |
-   >|            0.00e+00                 0.0     |<
-   >|                 1.0                 1.0     |<
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsDynaScale 10.0 5.0
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DEFINE_CURVE_TITLE                          |
-    |$# title                                     |
-    |Load                                         |
-    |$#    lcid      sidr       sfa       sfo     |
-    |         1         0       1.0       1.0     |
-    |$#                a1                  o1     |
-    |            0.00e+00            0.00e+00     |
-    |            1.00e+01            5.00e+00     |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-NOTE: If you do not want change curve values but only format, change
-      first x value and use LsDynaScale command with default parameters.
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DEFINE_CURVE_TITLE                          |
-    |$# title                                     |
-    |Load                                         |
-    |$#    lcid      sidr       sfa       sfo     |
-    |         1         0       1.0       1.0     |
-    |$#                a1                  o1     |
-   >|          0.0000e+00                 0.0     |<
-   >|                 1.0                 1.0     |<
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsDynaScale
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DEFINE_CURVE_TITLE                          |
-    |$# title                                     |
-    |Load                                         |
-    |$#    lcid      sidr       sfa       sfo     |
-    |         1         0       1.0       1.0     |
-    |$#                a1                  o1     |
-    |          0.0000e+00          0.0000e+00     |
-    |          1.0000e+00          1.0000e+00     |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-NOTE: Always keep in mind that format of first x-value is important.
-      In some situations you can loose some data during curve operations.
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DEFINE_CURVE_TITLE                          |
-    |$# title                                     |
-    |Load                                         |
-    |$#    lcid      sidr       sfa       sfo     |
-    |         1         0       1.0       1.0     |
-    |$#                a1                  o1     |
-   >|                 0.0                 0.0     |<
-   >|               0.001               0.005     |<
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsDynaShift 0.01
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DEFINE_CURVE_TITLE                          |
-    |$# title                                     |
-    |Load                                         |
-    |$#    lcid      sidr       sfa       sfo     |
-    |         1         0       1.0       1.0     |
-    |$#                a1                  o1     |
-    |                 0.0                 0.0     |
-    |                 0.0                 0.0     |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-As you can see after shifting data precision have been lost since first x value
-has only one decimal place.
+Node commands are design to work with data lines under *NODE keyword.
+For instance you can do operation like scale/shift node coordinates, offset
+node id, reflect nodes respect to a plane.
 
 --------------------------------------------------------------------------------
-7.8. LsDynaSortByPart command                                  *lsdyna-sortPart*
+7.2.1 LsNodeScale                                             *lsdyna-nodeScale*
+
+Description:
+Scale node coordinates.
+
+Syntax:
+:LsNodeScale x y z
+
+Arguments:
+x : x scale factor (default 1.0)
+y : y scale factor (default 1.0)
+z : z scale factor (default 1.0)
+
+Example of use (change system unit from m to mm):
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+   >|       1   0.001   0.001   0.001             |<
+   >|       2   0.002   0.002   0.002             |<
+   >|       3   0.003   0.003   0.003             |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsNodeScale 1000.0 1000.0 1000.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+    |       1     1.0     1.0     1.0             |
+    |       2     2.0     2.0     2.0             |
+    |       3     3.0     3.0     3.0             |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.2.2 LsNodeShift                                             *lsdyna-nodeShift*
+
+Description:
+Shift node coordinates in x, y, z direction.
+
+Syntax:
+:LsNodeShift x y z
+
+Arguments:
+x : x shift value (default 0.0)
+y : y shift value (default 0.0)
+z : z shift value (default 0.0)
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+    |       1     1.0     1.0     1.0             |
+    |       2     2.0     2.0     2.0             |
+    |       3     3.0     3.0     3.0             |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsNodeShift 10.0 0.0 -20.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+    |       1    11.0     1.0   -19.0             |
+    |       2    12.0     2.0   -18.0             |
+    |       3    13.0     3.0   -17.0             |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.2.3 LsNodeOffsetId                                       *lsdyna-nodeOffsetId*
+
+Description:
+Offset node ids.
+
+Syntax:
+:LsNodeOffsetId offset
+
+Arguments:
+offset : id offset value
+
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+   >|       1     1.0     1.0     1.0             |<
+   >|       2     2.0     2.0     2.0             |<
+   >|       3     3.0     3.0     3.0             |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsNodeOffsetId 1000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+    |    1000    11.0     1.0    -19.0            |
+    |    1000    12.0     2.0    -18.0            |
+    |    1000    13.0     3.0    -17.0            |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+NOTE: This command call |lsdyna-elemOffsetId| command i "n" option.
+
+--------------------------------------------------------------------------------
+7.2.4 LsNodeReflect                                         *lsdyna-nodeReflect*
+
+Description:
+Reflect node respect to defined plane.
+
+Syntax:
+:LsNodeReflect plane point
+
+Arguments:
+plane : plane definition
+point : point which the plane pass (default 0.0)
+
+Plane definition can be vector normal to user plane ("x", "y", "z") or plane
+description ("xy", "xz", "yz"). "xy" and "yx" both are accepted and works the
+same. The point is only one coordinate which lay on normal vector to the plane.
+
+Example of reflection respect to "yz" plane nad point 0.0.
+
+                            yz plane passing through 0
+                            |
+                            |
+        (-7, 10, 10) o      |      o (7, 10, 10)
+                            |
+                            |
+      ---------------+------+------+--------------->
+                    -7      0      7                x
+
+Example of reflection respect to "yz" plane nad point 2.0.
+
+                              yz plane passing through 2
+                              |
+                              |
+            (-3, 10, 10) o    |    o (7, 10, 10)
+                              |
+                              |
+      -------------------+----+----+--------------->
+                        -3    2    7                x
+Example of use:
+
+Make visual selection line with data lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+   >|       1     1.0     1.0     1.0             |<
+   >|       2     2.0     2.0     2.0             |<
+   >|       3     3.0     3.0     3.0             |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsNodeReflect y
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+    |       1     1.0    -1.0     1.0             |
+    |       2     2.0    -2.0     2.0             |
+    |       3     3.0    -3.0     3.0             |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsNodeReflect xy 10.0
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+    |       1     1.0     1.0    19.0             |
+    |       2     2.0     2.0    18.0             |
+    |       3     3.0     3.0    17.0             |
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.3 Element commands                                       *lsdyna-elemCommands*
+
+Element commands are design to work with data lines under *ELEMENT_ keyword.
+For instance you can do operation like sort element table respect to part id,
+update part id to new value, offset id of elements.
+
+--------------------------------------------------------------------------------
+7.3.1 LsElemSort                                               *lsdyna-elemSort*
 
 Description:
 Sort element table respect to part id.
 
 Syntax:
-:LsDynaSortByPart pid
+:LsElemSort pid
 
 Arguments:
-pid - part id to search (optional argument).
-      When used only user part id is searched.
+pid - part id to search (optional argument)
 
 Example of use:
 
@@ -1301,19 +1569,19 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaSortByPart
+	:LsElemSort
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
     |*ELEMENT_SHELL                               |
     |$#   eid     pid    n1     n2     n3     n4  |
-    |$ Part:     1000    n1     n2     n3     n4  |
+    |$ Part:     1000                             |
     |       2    1000     5      6      7      8  |
-    |$ Part:     2000    n1     n2     n3     n4  |
+    |$ Part:     2000                             |
     |       1    2000     1      2      3      4  |
     |       4    2000    13     14     15     16  |
-    |$ Part:     3000    n1     n2     n3     n4  |
+    |$ Part:     3000                             |
     |       3    3000     9     10     11     12  |
     |$                                            |
     |command-line=================================+
@@ -1321,7 +1589,7 @@ Make visual selection line with element lines:
     +---------------------------------------------+
 
 >
-	:LsDynaSortByPart 2000
+	:LsElemSort 2000
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1329,7 +1597,7 @@ Make visual selection line with element lines:
     |*ELEMENT_SHELL                               |
     |$#   eid     pid    n1     n2     n3     n4  |
     |       2    1000     5      6      7      8  |
-    |$ Part:     2000    n1     n2     n3     n4  |
+    |$ Part:     2000                             |
     |       1    2000     1      2      3      4  |
     |       4    2000    13     14     15     16  |
     |$                                            |
@@ -1340,127 +1608,22 @@ Make visual selection line with element lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.9. LsDynaOffsetId command                                    *lsdyna-offsetId*
-
-Description:
-Offset node/element/part ids.
-
-Syntax:
-:LsDynaOffsetId -[enp] offset
-
-Arguments:
-    -n : offset node id
-    -e : offset element id
-    -p : offset part id
-offset : offset value
-
-Arguments can be collect in one:
- -en  : offset element and node id
- -pe  : offset part and element id
- -nep : offset node, element and part id
-
-Order of arguments is unimportant. "-en" and "-ne" options work the same.
-If arguments will be not passed by default function is call with "-en" option.
-
-Example of use:
-
-Make visual selection line with node/element lines:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-   >|       1      10     1      2      3      4  |<
-   >|       2      10     5      6      7      8  |<
-   >|       3      11     9     10     11     12  |<
-   >|       4      11    13     14     15     16  |<
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsDynaOffsetId 1000
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-    |    1001      10  1001   1002   1003   1004  |
-    |    1002      10  1005   1006   1007   1008  |
-    |    1003      11  1009   1010   1011   1012  |
-    |    1004      11  1013   1014   1015   1016  |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
->
-	:LsDynaOffsetId -p 500
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-    |       1     510     1      2      3      4  |
-    |       2     510     5      6      7      8  |
-    |       3     511     9     10     11     12  |
-    |       4     511    13     14     15     16  |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
->
-	:LsDynaOffsetId -e 2000
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-    |    2001      10     1      2      3      4  |
-    |    2002      10     5      6      7      8  |
-    |    2003      11     9     10     11     12  |
-    |    2004      11    13     14     15     16  |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-	:LsDynaOffsetId -pen 2000
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-   >|    2001    2010  2001   2002   2003   2004  |<
-   >|    2002    2010  2005   2006   2007   2008  |<
-   >|    2003    2011  2009   2000   2011   2012  |<
-   >|    2004    2011  2013   2014   2015   2016  |<
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
---------------------------------------------------------------------------------
-7.10. LsDynaChangePID command                                  *lsdyna-changepid*
+7.3.2 LsElemChangePid                                     *lsdyna-elemChangePid*
 
 Description:
 Change part id in element definition.
 
 Syntax:
-:LsDynaChangePID newPid
-:LsDynaChangePID oldPid newPid
+:LsElemChangePid newPid
+:LsElemChangePid oldPid newPid
 
 Arguments:
 newPID : new part id
 oldPID : part id to change (optional)
 
-NOTE Part ids can be defnied as parameter name as well.
+With only newPid argument all pids will be updated, with oldPid argument only
+specific pids will be updated. Part ids can be defined as parameter name as well.
+Keyword and comment lines from selection are ignored.
 
 Example of use:
 
@@ -1480,7 +1643,7 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsDynaChangePID 1000
+	:LsElemChangePid 1000
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1495,9 +1658,8 @@ Make visual selection line with element lines:
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
-
 >
-	:LsDynaChangePID 20 1000
+	:LsElemChangePid 20 1000
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1512,7 +1674,6 @@ Make visual selection line with element lines:
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
-
 >
 	:LsDynaChangePID 10 pid1
 <
@@ -1530,6 +1691,163 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 
+Sign "&" before parameter name is not mandatory.
+
+--------------------------------------------------------------------------------
+7.3.3 LsElemOffsetId                                       *lsdyna-elemOffsetId*
+
+Description:
+Offset node/element/part ids.
+
+Syntax:
+:LsElemOffsetId [enp] offset
+
+Arguments:
+     n : offset node id
+     e : offset element id
+     p : offset part id
+offset : offset value
+
+Arguments can be collected in one:
+ en  : offset element and node id
+ pe  : offset part and element id
+ nep : offset node, element and part id
+
+Order of arguments is unimportant. "en" and "ne" options work the same.
+If arguments will be not passed by default function is call with "en" option.
+Keyword and comment lines from selection are ignored.
+
+Example of use:
+
+Make visual selection line with element lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|       1      10     1      2      3      4  |<
+   >|       2      10     5      6      7      8  |<
+   >|       3      11     9     10     11     12  |<
+   >|       4      11    13     14     15     16  |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsElemOffsetId 1000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |    1001      10  1001   1002   1003   1004  |
+    |    1002      10  1005   1006   1007   1008  |
+    |    1003      11  1009   1010   1011   1012  |
+    |    1004      11  1013   1014   1015   1016  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsElemOffsetId p 500
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |       1     510     1      2      3      4  |
+    |       2     510     5      6      7      8  |
+    |       3     511     9     10     11     12  |
+    |       4     511    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsElemOffsetId e 2000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |    2001      10     1      2      3      4  |
+    |    2002      10     5      6      7      8  |
+    |    2003      11     9     10     11     12  |
+    |    2004      11    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsElemOffsetId pen 2000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|    2001    2010  2001   2002   2003   2004  |<
+   >|    2002    2010  2005   2006   2007   2008  |<
+   >|    2003    2011  2009   2000   2011   2012  |<
+   >|    2004    2011  2013   2014   2015   2016  |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+NOTE: The command can be used with *NODE as well. In this case it is run with
+      "n" option and other options are ignored.
+
+--------------------------------------------------------------------------------
+7.3.4 LsElemReverseNormals                           *lsdyna-elemReverseNormals*
+
+Description:
+Reverse element normal orientation.
+
+Syntax:
+:LsElemReverseNormals
+
+Arguments:
+None
+
+Keyword and comment lines from selection are ignored.
+
+NOTE: Only tria and quad elements are supported.
+
+Example of use:
+
+Make visual selection line with element lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|       1       1     1      2      3      4  |<
+   >|       2       1     5      6      7      8  |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsElemReverseNormals
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |       1       1     1      4      3      2  |
+    |       2       1     5      8      7      6  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
 ================================================================================
 8. Include files                                               *lsdyna-includes*
 
@@ -1537,7 +1855,7 @@ VIM has a lot of options to work with many files. You can use them
 to work with Ls-Dyna include files if your model use them.
 
 --------------------------------------------------------------------------------
-8.1. File name completion                                   *lsdyna-includeName*
+8.1 File name completion                                    *lsdyna-includeName*
 
 With VIM build-in file completion <Ctrl-x><Ctrl-f> command you can in easy way
 add a new include file to your master deck.
@@ -1593,17 +1911,15 @@ Select include file:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-8.2. Include jumps                                          *lsdyna-includeJump*
+8.2 Include jumps                                           *lsdyna-includeJump*
 
 To jump from master deck into include file you can use <gf> or <gF> commands.
 
 Jump commands:
 - <gf> : open include file in current window
-- <gF> : open include file in new window
+- <gF> : open include file in new window (vertical split)
 
-NOTE gf is abbreviation from "go file"
-
-Put cursor on the line with include keyword:
+Put cursor on the line with include path:
 
     +---------------------------------------------+
     |lsdyna_model.k===============================|
@@ -1642,7 +1958,7 @@ Use <gf> to jump:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-8.3. Include path function                                   *lsdyna-includePath*
+8.3 Include path function                                   *lsdyna-includePath*
 
 Jump commands are VIM internal commands and works fine as long as we have full
 path and include file name in one line. But it is not true if we are using
@@ -1693,17 +2009,17 @@ Use <gf> normal command to open include file
     +---------------------------------------------+
 
 ================================================================================
-9. Credits                                                     *lsdyna-credits*
+9. Credits                                                      *lsdyna-credits*
 
  keyword library       Bartosz Gradzik
  mappings              Bartosz Gradzik
  functions             Bartosz Gradzik
- curve commands        Bartosz Gradzik
+ commands              Bartosz Gradzik
  syntax highlighting   Bartosz Gradzik / Jakub Pajerski
  folding               Jakub Pajerski
 
 ================================================================================
-10. License                                                    *lsdyna-license*
+10. License                                                     *lsdyna-license*
 
 Ls-Dyna filetype plugin for VIM
 Copyright (C) 2014 Bartosz Gradzik (bartosz.gradzik@hotmail.com)
@@ -1719,7 +2035,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ================================================================================
 11. Bugs                                                           *lsdyna-bugs*
@@ -1728,12 +2044,26 @@ It's not a bug is a feature ;-)
 
 Found a bug? Please let me know at bartosz.gradzik@hotmail.com.
 
-Bugs list:
-----------
+--------------------------------------------------------------------------------
 
-1.
-Description: Keyword library function overwrite VIM unnamed register.
-Fixed ver. : v1.0.1
+The last word from the author.
+
+Congratulations! This is end of reading, you made it. Or you hit <G>? ;-)
+
+Hope you will find the plugin useful in your daily work with VIM & Ls-Dyna.
+If you want to you can sent me short mail with a good word about it.
+Then I would know someone use it and I did not wast a lot of my time ;-)
+
+Something is missing and you feel it will be useful for you and other users?
+Let me know, I will see what I can do.
+
+The library is the most powerful feature in the plugin.
+More keywords in the library the more powerful plugin is.
+You are using plugin, you like it, you have some spare time?
+Find 5 missing keywords and add them to github or sent it to me directly.
+
+Thanks,
+Bartosz
 
 ================================================================================
 vim:tw=80:ts=4:ft=help:norl:

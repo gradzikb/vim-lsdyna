@@ -381,7 +381,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_curves#Swap(line1,line2)
+function! lsdyna_curves#SwapXY(line1,line2)
 
   "-----------------------------------------------------------------------------
   " Function to swap x and y vakues.
