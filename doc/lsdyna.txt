@@ -58,7 +58,7 @@ CONTENTS
 ================================================================================
 1. Introduction                                            *lsdyna-introduction*
 
-It is offical documentation for Ls-Dyna VIM filetype plugin.
+It is official documentation for Ls-Dyna VIM filetype plugin.
 
 Ls-Dyna is simulation software developed by Livermore Software Technology
 Corporation (www.lstc.com). The keyword file is used to store all model
@@ -1408,6 +1408,8 @@ Syntax:
 Arguments:
 offset : id offset value
 
+NOTE: This command call |lsdyna-elemOffsetId| command with "n" option.
+
 Example of use:
 
 Make visual selection line with data lines:
@@ -1433,16 +1435,15 @@ Make visual selection line with data lines:
     |$                                            |
     |*NODE                                        |
     |$#   nid       x       y       z             |
-    |    1000    11.0     1.0    -19.0            |
-    |    1000    12.0     2.0    -18.0            |
-    |    1000    13.0     3.0    -17.0            |
+    |    1000     1.0     1.0     1.0             |
+    |    1000     2.0     2.0     2.0             |
+    |    1000     3.0     3.0     3.0             |
     |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
 
-NOTE: This command call |lsdyna-elemOffsetId| command i "n" option.
 
 --------------------------------------------------------------------------------
 7.2.4 LsNodeReflect                                         *lsdyna-nodeReflect*
@@ -1461,7 +1462,7 @@ Plane definition can be vector normal to user plane ("x", "y", "z") or plane
 description ("xy", "xz", "yz"). "xy" and "yx" both are accepted and works the
 same. The point is only one coordinate which lay on normal vector to the plane.
 
-Example of reflection respect to "yz" plane nad point 0.0.
+Example of reflection respect to "yz" plane and point 0.0.
 
                             yz plane passing through 0
                             |
@@ -1472,7 +1473,7 @@ Example of reflection respect to "yz" plane nad point 0.0.
       ---------------+------+------+--------------->
                     -7      0      7                x
 
-Example of reflection respect to "yz" plane nad point 2.0.
+Example of reflection respect to "yz" plane and point 2.0.
 
                               yz plane passing through 2
                               |
@@ -1480,8 +1481,8 @@ Example of reflection respect to "yz" plane nad point 2.0.
             (-3, 10, 10) o    |    o (7, 10, 10)
                               |
                               |
-      -------------------+----+----+--------------->
-                        -3    2    7                x
+      -------------------+--+-+----+--------------->
+                        -3  0 2    7                x
 Example of use:
 
 Make visual selection line with data lines:
@@ -2052,10 +2053,10 @@ Congratulations! This is end of reading, you made it. Or you hit <G>? ;-)
 
 Hope you will find the plugin useful in your daily work with VIM & Ls-Dyna.
 If you want to you can sent me short mail with a good word about it.
-Then I would know someone use it and I did not wast a lot of my time ;-)
+Then I would know someone is use it and I did not wast a lot of my time ;-)
 
 Something is missing and you feel it will be useful for you and other users?
-Let me know, I will see what I can do.
+Please let me know, I will see what I can do.
 
 The library is the most powerful feature in the plugin.
 More keywords in the library the more powerful plugin is.
