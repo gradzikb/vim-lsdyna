@@ -50,7 +50,7 @@ CONTENTS
     8. Include files...........................|lsdyna-includes|
        8.1 File name completion................|lsdyna-includeName|
        8.2 Include jumps.......................|lsdyna-includeJump|
-       8.3 Include path........................|lsdyna-includePath|
+       8.3 LsCheckPath.........................|lsdyna-checkPath|
     9. Credits.................................|lsdyna-credits|
    10. License.................................|lsdyna-license|
    11. Bugs....................................|lsdyna-bugs|
@@ -1958,30 +1958,13 @@ Use <gf> to jump:
     |                                             |
     +---------------------------------------------+
 
---------------------------------------------------------------------------------
-8.3 Include path function                                   *lsdyna-includePath*
-
-Jump commands are VIM internal commands and works fine as long as we have full
-path and include file name in one line. But it is not true if we are using
-combination of *INCLUDE_PATH and *INCLUDE keywords in our model.
-In this situation VIM is not able make jump since the path is in one line and
-include file name in other line.
-
-To overcome the problem the plugin has "IncludePath" function. The function is
-run every time a user use <gf> or <gF> command. First current file is
-scanned and all paths under *INCLUDE_PATH, *INCLUDE_PATH_RELATIVE are collected.
-Next VIM variable "&path" is extended with those new paths so VIM knows where to
-look for include files.
-
-Example of use:
-
-Put cursor at line with include file name
+<gf> and <gF> normal commands support *INCLUDE_PATH keyword as well.
 
     +---------------------------------------------+
     |lsdyna_MASTER.key============================|
     |$                                            |
     |*INCLUDE_PATH                                |
-    |/FEM/LSDYNA/INCL/MAT/                        |
+    |/FEM/LSDYNA/INCL/MAT                         |
     |$                                            |
     |*INCLUDE                                     |
    >|matdbs_v01.inc                               |<
@@ -2007,6 +1990,55 @@ Use <gf> normal command to open include file
     |~                                            |
     |command-line=================================|
     |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+8.3 LsCheckPath                                               *lsdyna-checkPath*
+
+Command LsCheckPath can be used to test are all paths and include names valid.
+The command support *INCLUDE_PATH keyword.
+
+Example of use:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*INCLUDE_PATH                                |
+    |/FEM/LSDYNA/INCL/MAT                         |
+    |$                                            |
+    |*INCLUDE                                     |
+    |../OO_INC/include_A.inc                      |
+    |../OO_INC/include_X.inc                      |
+    |*INCLUDE                                     |
+    |matdbs_v01.inc                               |
+    |matdbs_v02.inc                               |
+    |$                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsCheckPath
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*INCLUDE_PATH                                |
+    |/FEM/LSDYNA/INCL/MAT                         |
+    |$                                            |
+    |*INCLUDE                                     |
+    |../OO_INC/include_A.inc                      |
+    |../OO_INC/include_X.inc                      |
+    |*INCLUDE                                     |
+    |matdbs_v01.inc                               |
+    |matdbs_v02.inc                               |
+    |$                                            |
+    |~                                            |
+    |command-line=================================|
+    |--- Included files not found in path ---     |
+    |../OO_INC/include_X.inc                      |
+    |matdbs_v02.inc                               |
+    |Press ENTER or type command to continue      |
     +---------------------------------------------+
 
 ================================================================================

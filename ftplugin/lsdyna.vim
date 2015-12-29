@@ -343,10 +343,13 @@ command! -buffer -range -nargs=0 LsElemReverseNormals
 "-------------------------------------------------------------------------------
 
 noremap <buffer><script><silent> gf
- \ :call lsdyna_includepath#IncludePath()<CR>gf
+ \ :call lsdyna_include#ExpandPath()<CR>gf
 
 noremap <buffer><script><silent> gF
- \ :call lsdyna_includepath#IncludePath()<CR><C-w>f<C-w>H
+ \ :call lsdyna_include#ExpandPath()<CR><C-w>f<C-w>H
+
+command! -buffer -nargs=0 LsCheckPath
+ \ :call lsdyna_include#CheckPath()
 
 "-------------------------------------------------------------------------------
 " restore vim functions
