@@ -5,11 +5,15 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  18th of December 2015
-" Version:      1.0.0
+" Last Change:  12th of December 2016
+" Version:      1.0.1
 "
 " History of change:
 "
+" v1.0.1
+"   - OffsetId function support new keywords:
+"     - *AIRBAG_SHELL_REFERENCE_GEOMETRY
+"     - *AIRBAG_REFERENCE_GEOMETRY
 " v1.0.0
 "   - initial version
 "
@@ -60,7 +64,7 @@ function! lsdyna_element#OffsetId(line1, line2, ...)
   let keyword = getline('.')
 
   "-----------------------------------------------------------------------------
-  if keyword =~? "^\*NODE\s*$"
+  if keyword =~? "^\*NODE\s*$" || keyword =~? "^\*AIRBAG_REFERENCE_GEOMETRY.*$"
 
     for lnum in range(a:line1, a:line2)
 
@@ -134,7 +138,7 @@ function! lsdyna_element#OffsetId(line1, line2, ...)
 
   "-----------------------------------------------------------------------------
 
-  elseif keyword =~? "^\*ELEMENT_.*$"
+  elseif keyword =~? "^\*ELEMENT_.*$" || keyword =~? "^\*AIRBAG_SHELL_REFERENCE_GEOMETRY.*$"
 
     for lnum in range(a:line1, a:line2)
 
