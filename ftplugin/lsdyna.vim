@@ -4,11 +4,13 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  18th of December 2015
-" Version:      1.2.7
+" Last Change:  30th of January 2016
+" Version:      1.2.8
 "
 " History of change:
 "
+" v1.2.8
+"   - folding improved (commented node/element lines folded as well)
 " v1.2.7
 "   - new commands structure
 " v1.2.6
@@ -98,8 +100,28 @@ setlocal virtualedit=all
 "    FOLDING
 "-------------------------------------------------------------------------------
 
-" Fold all lines that do not begin with * (keyword),# and $ (comment)
-setlocal foldexpr=getline(v:lnum)!~?\"\^[*#$]\"
+function! LsDynaFold(lnum)
+
+  " do not fold keyword line
+  if getline(a:lnum) =~? '^\*'
+    let foldlevel = 0
+  " fold comment line with node/element in 1st column
+  elseif getline(a:lnum) =~? '^\$\s\{0,7}\d'
+    let foldlevel = 1
+  " do not fold comment line
+  elseif getline(a:lnum) =~? '^\$'
+    let foldlevel = 0
+  " by default everything is folded
+  else
+    let foldlevel = 1
+  endif
+
+  return foldlevel
+
+endfunction
+
+" folding settings
+setlocal foldexpr=LsDynaFold(v:lnum)
 setlocal foldmethod=expr
 setlocal foldminlines=4
 
@@ -210,10 +232,8 @@ function! s:KeywordTextObj()
  let reKeyWord  = "^\*[A-Za-z_]"
  let reDataLine = "^[^$]\\|^$"
 
- " go to end of the line
-  normal! $
   " find keyword in backword
-  call search(reKeyWord,'bW')
+  call search(reKeyWord,'bWc')
   " start line visual mode
   normal! V
   " serach next keyword
