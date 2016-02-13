@@ -5,7 +5,15 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  17th of October 2015
+" Last Change:  13th of February 2016
+" Version:      1.0.1
+"
+" History of change:
+"
+" v1.0.1
+"   - *PARAMETER formating improved
+" v1.0.0
+"   - initial version
 "
 "-------------------------------------------------------------------------------
 
@@ -162,20 +170,22 @@ function! lsdyna_autoformat#LsDynaLine() range
        " take a line
        let line = split(getline(i))
 
+       echo line
        " prefix exists?
-       if line[0] =~? "[IRC]"
+       if len(line) == 3
          let line[0] = toupper(line[0])
          let newLine = printf("%1s%9s%10s",line[0],line[1],line[2])
+       " try to guess prefix and add one
        else
-         " character
-         if line[1] =~? '\h\w\+$'
-           let newLine = printf("%1s%9s%10s","C",line[0],line[1])
-         " real
-         elseif line[1] =~? '[.eE]'
-           let newLine = printf("%1s%9s%10s","R",line[0],line[1])
          " integer
-         else
+         if line[1] =~? '^[-+]\?\d\+$'
            let newLine = printf("%1s%9s%10s","I",line[0],line[1])
+         " real
+         elseif line[1] =~? '\d\.\?\d\?[eE][+-]\?\d'
+           let newLine = printf("%1s%9s%10s","R",line[0],line[1])
+         " character
+         else
+           let newLine = printf("%1s%9s%10s","C",line[0],line[1])
          endif
        endif
 
@@ -196,7 +206,7 @@ function! lsdyna_autoformat#LsDynaLine() range
        let line = split(getline(i))
 
        " prefix exists?
-       if line[0] =~? "[IR]"
+       if line[0] =~? '^[IR]$'
          let line[0] = toupper(line[0])
          let newLine = printf("%1s%9s%1s%1s",line[0],line[1]," ",join(line[2:]))
        else
