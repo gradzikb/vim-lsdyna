@@ -5,13 +5,13 @@
 
 What is Ls-Dyna filetype plugin?
 
-It's just bunch of VIM scripts to speed up work with Ls-Dyna keyword file.
+It's just bunch of scripts to speed up work with Ls-Dyna keyword file and VIM text editor.
 
 ##Main features
 - Syntax highlighting
 - Folding
 - Keyword library
-- Useful commands, functions and mappings
+- Useful mappings, functions and commands
 
 ###Syntax highlighting
 With color syntax it's easier to navigate through a keyword file.
@@ -29,8 +29,11 @@ With keyword library you can very quick add a new Ls-Dyna keyword into your mode
 ![libraryb](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/library.gif)
 
 
-###Curve commands
-You can use commands to operate with curve data directly in VIM.
+###Commands
+The plugin has many build-in commands to work with data directly for:
+- curves
+- nodes
+- elements
 
 ![commands](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/commands.gif)
 
@@ -41,7 +44,10 @@ The plugin has couple of great functions to make your work even faster:
 - comment/uncomment
 - data line autoformating
 - keyword text objects
-- include path
+
+##Example
+
+The plugin in action you can see [here](https://www.youtube.com/watch?v=5a62UACiBA0&feature=youtu.be).
 
 ##Documentation
 

@@ -4,10 +4,16 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  1st of March 2014
+" Last Change:  2nd of May 2015
+" Version:      1.1.0
 "
 "-------------------------------------------------------------------------------
-
+"
+" v1.1.0
+"   - lsdyna_curves#Reverse function fixed
+" v1.0.0
+"   - initial version
+"
 "-------------------------------------------------------------------------------
 
 function! lsdyna_curves#Read(firstLine, lastLine)
@@ -375,7 +381,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_curves#Swap(line1,line2)
+function! lsdyna_curves#SwapXY(line1,line2)
 
   "-----------------------------------------------------------------------------
   " Function to swap x and y vakues.
@@ -425,14 +431,33 @@ function! lsdyna_curves#Reverse(line1,line2)
   let line1 = split(getline(a:line1), '\s*,\s*\|\s\+')
   let strFormat = repeat(lsdyna_curves#WhatNumFormat(line1[0], 20), 2)
 
-  " collect the data and reverse them
-  let points = reverse(lsdyna_curves#Read(a:line1,a:line2))
+  " collect the data
+  let points = lsdyna_curves#Read(a:line1,a:line2)
+
+  " split (x,y) list into x & y vectors
+  let x = []
+  let y = []
+  for i in range(0,len(points)-1,2)
+    call add(x, points[i])
+    call add(y, points[i+1])
+  endfor
+
+  " revers x & y vectors
+  call reverse(x)
+  call reverse(y)
+
+  " combine x & y vectors
+  let revPoints = []
+  for i in range(len(x))
+    call add(revPoints, x[i])
+    call add(revPoints, y[i])
+  endfor
 
   " remove old lines
   execute a:line1 . "," . a:line2 . "delete"
 
   " save data
-  call lsdyna_curves#Write(a:line1, points, strFormat)
+  call lsdyna_curves#Write(a:line1, revPoints, strFormat)
 
 endfunction
 

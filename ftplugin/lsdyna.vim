@@ -4,27 +4,40 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  6th of December 2014
-" Version:      1.2.0
+" Last Change:  30th of January 2016
+" Version:      1.2.8
 "
 " History of change:
+"
+" v1.2.8
+"   - folding improved (commented node/element lines folded as well)
+" v1.2.7
+"   - new commands structure
+" v1.2.6
+"   - lsdyna_indent#Indent function added
+" v1.2.5
+"   - better autoformating *PARAMETER keyword
+" v1.2.4
+"   - LsDynaOffsetId command added
+" v1.2.3
+"   - LsDynaComment function updated, does not overwrite unnamed register now
+" v1.2.2
+"   - LsDynaSortbyPart command updated to use search user pid
+"   - <M-r> mapping added (remove all comment line from selection)
+" v1.2.1
+"   - LsDynaSortbyPart command added
 " v1.2.0
 "   - keyword library functions updated for new library organisation
 "   - updates for new autoload file names
 "   - LsDynaReverse command added
-"
-" History of change:
 " v1.1.1
 "   - enter button from numeric pad can be used with keyword library as well
-"
 " v1.1.0
 "   - most of functions moved to autoload
 "     - keyword library
 "     - include path
 "     - curves commands
 "     - autoformat function
-"
-" History of change:
 " v1.0.3
 "   - LsDynaLine function updated
 "     - folowing keywords are supported now
@@ -87,8 +100,28 @@ setlocal virtualedit=all
 "    FOLDING
 "-------------------------------------------------------------------------------
 
-" Fold all lines that do not begin with * (keyword),# and $ (comment)
-setlocal foldexpr=getline(v:lnum)!~?\"\^[*#$]\"
+function! LsDynaFold(lnum)
+
+  " do not fold keyword line
+  if getline(a:lnum) =~? '^\*'
+    let foldlevel = 0
+  " fold comment line with node/element in 1st column
+  elseif getline(a:lnum) =~? '^\$\s\{0,7}\d'
+    let foldlevel = 1
+  " do not fold comment line
+  elseif getline(a:lnum) =~? '^\$'
+    let foldlevel = 0
+  " by default everything is folded
+  else
+    let foldlevel = 1
+  endif
+
+  return foldlevel
+
+endfunction
+
+" folding settings
+setlocal foldexpr=LsDynaFold(v:lnum)
 setlocal foldmethod=expr
 setlocal foldminlines=4
 
@@ -103,16 +136,20 @@ setlocal indentexpr=
 "    USEFUL MAPPINGS
 "-------------------------------------------------------------------------------
 
-function! LsDynaComment()
+function! s:LsDynaComment()
+
   if getline('.')[0] == '4'
+    let tmpUnnamedReg = @@
     normal! hx
+    let @@ = tmpUnnamedReg
     return '$'
   else
     return ''
   endif
+
 endfunction
 " change 4 -> $ but only at the beginning of the line
-inoreabbrev 4 4<C-R>=LsDynaComment()<CR>
+inoreabbrev 4 4<C-R>=<SID>LsDynaComment()<CR>
 
 " mapping for separation lines
 nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
@@ -138,6 +175,12 @@ nnoremap <silent><buffer> <LocalLeader>) O$<ESC>79a-<ESC>yypO$<ESC>A
 nnoremap <silent><buffer> [[ ?^\*\a<CR>:nohlsearch<CR>zz
 " jump to next keyword
 nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
+
+" remove all comment lines from selection
+vnoremap <silent><buffer> <M-r> :g/^\$/d<CR>:nohlsearch<CR>
+"
+inoreabbrev bof $-------------------------------------BOF---------------------------------------
+inoreabbrev eof $-------------------------------------EOF---------------------------------------
 
 "-------------------------------------------------------------------------------
 "    INCLUDES
@@ -189,10 +232,8 @@ function! s:KeywordTextObj()
  let reKeyWord  = "^\*[A-Za-z_]"
  let reDataLine = "^[^$]\\|^$"
 
- " go to end of the line
-  normal! $
   " find keyword in backword
-  call search(reKeyWord,'bW')
+  call search(reKeyWord,'bWc')
   " start line visual mode
   normal! V
   " serach next keyword
@@ -245,7 +286,6 @@ inoremap <buffer><silent><script><expr> <kEnter>
  \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<kEnter>"
 
 " act <up> and <down> like Ctrl-p and Ctrl-n
-" it has nothing to do with keyword library, it's only because I like it
 inoremap <buffer><silent><script><expr> <Down>
  \ pumvisible() ? "\<C-n>" : "\<Down>"
 inoremap <buffer><silent><script><expr> <Up>
@@ -258,37 +298,78 @@ inoremap <buffer><silent><script><expr> <Up>
 noremap <buffer><script><silent> <LocalLeader><LocalLeader>
  \ :call lsdyna_autoformat#LsDynaLine()<CR>
 
+noremap <buffer><script><silent> >
+ \ :<c-u>call lsdyna_indent#Indent("Right")<CR>
+
+noremap <buffer><script><silent> <
+ \ :<c-u>call lsdyna_indent#Indent("Left")<CR>
+
 "-------------------------------------------------------------------------------
 "    CURVE COMMANDS
 "-------------------------------------------------------------------------------
 
-command! -buffer -range -nargs=* LsDynaShift
+command! -buffer -range -nargs=* LsCurveShift
  \ :call lsdyna_curves#Shift(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsDynaScale
+command! -buffer -range -nargs=* LsCurveScale
  \ :call lsdyna_curves#Scale(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsDynaResample
+command! -buffer -range -nargs=* LsCurveResample
  \ :call lsdyna_curves#Resample(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsDynaAddPoint
+command! -buffer -range -nargs=* LsCurveAddPoint
  \ :call lsdyna_curves#AddPoint(<line1>,<line2>,<f-args>)
 
-command! -buffer -range LsDynaSwap
- \ :call lsdyna_curves#Swap(<line1>,<line2>)
+command! -buffer -range LsCurveSwapXY
+ \ :call lsdyna_curves#SwapXY(<line1>,<line2>)
 
-command! -buffer -range LsDynaReverse
+command! -buffer -range LsCurveRevers
  \ :call lsdyna_curves#Reverse(<line1>,<line2>)
+
+"-------------------------------------------------------------------------------
+"    NODE COMMANDS
+"-------------------------------------------------------------------------------
+
+command! -buffer -range -nargs=* LsNodeScale
+ \ :call lsdyna_node#Scale(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsNodeShift
+ \ :call lsdyna_node#Shift(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsNodeReflect
+ \ :call lsdyna_node#Reflect(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsNodeOffsetId
+ \ :call lsdyna_element#OffsetId(<line1>,<line2>,<f-args>)
+
+"-------------------------------------------------------------------------------
+"    ELEMENT COMMANDS
+"-------------------------------------------------------------------------------
+
+command! -buffer -range -nargs=* LsElemSort
+ \ :call lsdyna_element#Sort(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsElemOffsetId
+ \ :call lsdyna_element#OffsetId(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsElemChangePid
+ \ :call lsdyna_element#ChangePid(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=0 LsElemReverseNormals
+ \ :call lsdyna_element#ReverseNormals(<line1>,<line2>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH
 "-------------------------------------------------------------------------------
 
 noremap <buffer><script><silent> gf
- \ :call lsdyna_includepath#IncludePath()<CR>gf
+ \ :call lsdyna_include#ExpandPath()<CR>gf
 
 noremap <buffer><script><silent> gF
- \ :call lsdyna_includepath#IncludePath()<CR><C-w>f<C-w>H
+ \ :call lsdyna_include#ExpandPath()<CR><C-w>f<C-w>H
+
+command! -buffer -nargs=0 LsCheckPath
+ \ :call lsdyna_include#CheckPath()
 
 "-------------------------------------------------------------------------------
 " restore vim functions

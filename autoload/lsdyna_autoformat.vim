@@ -5,7 +5,15 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  12th of August 2014
+" Last Change:  13th of February 2016
+" Version:      1.0.1
+"
+" History of change:
+"
+" v1.0.1
+"   - *PARAMETER formating improved
+" v1.0.0
+"   - initial version
 "
 "-------------------------------------------------------------------------------
 
@@ -154,20 +162,69 @@ function! lsdyna_autoformat#LsDynaLine() range
       call cursor(a:lastline+1, 0)
 
   "-----------------------------------------------------------------------------
-  elseif keyword =~? "*PARAMETER *$"
+  elseif keyword =~? "*PARAMETER *$" ||
+       \ keyword =~? "*PARAMETER_LOCAL *$"
 
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        " parameter prefix present
-        if len(line) == 3
-          let newLine = printf("%1s%9s%10s",line[0],line[1],line[2])
-        " parameter prefix missed (add R by default)
-        elseif len(line) == 2
-          let newLine = printf("%1s%9s%10s","R",line[0],line[1])
-        endif
-        call setline(i, newLine)
-      endfor
-      call cursor(a:lastline+1, 0)
+     for i in range(a:firstline, a:lastline)
+
+       " take a line
+       let line = split(getline(i))
+
+       echo line
+       " prefix exists?
+       if len(line) == 3
+         let line[0] = toupper(line[0])
+         let newLine = printf("%1s%9s%10s",line[0],line[1],line[2])
+       " try to guess prefix and add one
+       else
+         " integer
+         if line[1] =~? '^[-+]\?\d\+$'
+           let newLine = printf("%1s%9s%10s","I",line[0],line[1])
+         " real
+         elseif line[1] =~? '\d\.\?\d\?[eE][+-]\?\d'
+           let newLine = printf("%1s%9s%10s","R",line[0],line[1])
+         " character
+         else
+           let newLine = printf("%1s%9s%10s","C",line[0],line[1])
+         endif
+       endif
+
+       " dump new line
+       call setline(i, newLine)
+
+     endfor
+
+     call cursor(a:lastline+1, 0)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*PARAMETER_EXPRESSION\s*$" ||
+       \ keyword =~? "*PARAMETER_EXPRESSION_LOCAL\s*$"
+
+     for i in range(a:firstline, a:lastline)
+
+       " take a line
+       let line = split(getline(i))
+
+       " prefix exists?
+       if line[0] =~? '^[IR]$'
+         let line[0] = toupper(line[0])
+         let newLine = printf("%1s%9s%1s%1s",line[0],line[1]," ",join(line[2:]))
+       else
+         " real
+         if join(line[1:]) =~? '\.'
+           let newLine = printf("%1s%9s%1s%1s","R",line[0]," ",join(line[1:]))
+         " integer
+         else
+           let newLine = printf("%1s%9s%1s%1s","I",line[0]," ",join(line[1:]))
+         endif
+       endif
+
+       " dump new line
+       call setline(i, newLine)
+
+     endfor
+
+     call cursor(a:lastline+1, 0)
 
   "-----------------------------------------------------------------------------
   " standart format line (8x10)
