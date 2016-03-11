@@ -5,11 +5,14 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  12th of December 2016
-" Version:      1.0.1
+" Last Change:  24th of February 2016
+" Version:      1.0.2
 "
 " History of change:
 "
+" v1.0.2
+"   - OffsetId function support new keywords:
+"     - *SET_
 " v1.0.1
 "   - OffsetId function support new keywords:
 "     - *AIRBAG_SHELL_REFERENCE_GEOMETRY
@@ -79,6 +82,47 @@ function! lsdyna_element#OffsetId(line1, line2, ...)
       " dump line with new id
       let newNid = str2nr(line[:7]) + offset
       let newline = printf("%8s", newNid) . line[8:]
+      call setline(lnum, newline)
+
+    endfor
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "^\*SET_.*$"
+
+    for lnum in range(a:line1, a:line2)
+
+      " take current line
+      let line = getline(lnum)
+
+      " skip comment/keyword lines and any line with alphabetic sign (title)
+      if line =~? "^[$*]" || line =~? "\\a"
+        continue
+      endif
+
+      " take current line & remove trailing signs
+      let line = substitute(line, "\\s[ 0]*$", "", "")
+
+      " how many columns?
+      let cnum = len(line) / 10
+
+      " loop over columns
+      let newline = ""
+      for i in range(0, cnum-1, 1)
+
+        " get id from current line
+        let id = strpart(line,i*10,10)
+
+        " calc new id but skip empty fields
+        if id !~ "^\\s\\{10}"
+          let id = str2nr(id) + offset
+        endif
+
+        " extend new line
+        let newline = newline . printf("%10s", id)
+
+      endfor
+
+      " write new line to file
       call setline(lnum, newline)
 
     endfor

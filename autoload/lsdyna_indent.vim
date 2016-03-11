@@ -112,4 +112,80 @@ function! lsdyna_indent#Indent(dir)
 
 endfunction
 
+function! lsdyna_indent#JumpCol(dir)
+
+  "-----------------------------------------------------------------------------
+  " Function to jump to neighbour column.
+  "
+  " Arguments:
+  " - dir: move direction
+  "        "Right" : move to right side
+  "        "Left"  : move to left side
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  " current cursor position in line
+  let currCur = getpos(".")[2]+getpos(".")[3]
+  " current column in line
+  let currCol = ((currCur-1)/10)+1
+  " current line
+  let currLine = getline(".")
+
+  "-----------------------------------------------------------------------------
+  " move to the left
+  if a:dir == "Left"
+
+    " jump inside current column
+    if currCur != (currCol*10)-9 && currLine[currCur-2:currCur-1] =~? "\\S\\S"
+      execute "normal! " . lsdyna_indent#SetPos(currCol) . "|"
+    " jump to previous column
+    else
+      execute "normal! " . lsdyna_indent#SetPos(currCol-1) . "|"
+    endif
+
+  "-----------------------------------------------------------------------------
+  " move to the right
+  elseif a:dir == "Right"
+
+    " jump to next column
+    if currCur == currCol*10 || currLine[currCur-1] =~? "\\S"
+      execute "normal! " . lsdyna_indent#SetPos(currCol+1) . "|"
+    " jump inside current column
+    else
+      execute "normal! " . lsdyna_indent#SetPos(currCol) . "|"
+    endif
+
+  endif
+
+endfunction
+
+function! lsdyna_indent#SetPos(cnum)
+
+  "-----------------------------------------------------------------------------
+  " Function to set cursor position in specific column in current line.
+  "
+  " Arguments:
+  " - cnum: column number
+  " Return:
+  " - pos: cursor position in line
+  "-----------------------------------------------------------------------------
+
+  " get column from current line
+  let lineCol = strpart(getline("."), (a:cnum-1)*10, 10)
+
+  " find position to jump
+  " column is empty
+  if lineCol =~? '^\s*$'
+    let pos = a:cnum*10
+  " column not empty
+  else
+    let offset = len(matchstr(lineCol, '^\s*'))+1
+    let pos = ((a:cnum-1)*10)+offset
+  endif
+
+  " return position to jump
+  return pos
+
+endfunction
 "-------------------------------------EOF---------------------------------------

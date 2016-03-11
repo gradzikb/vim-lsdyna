@@ -28,7 +28,6 @@ CONTENTS
        6.2 Comment/uncomment...................|lsdyna-comment|
        6.3 Data line autoformating.............|lsdyna-autoFormat|
        6.4 Text objects........................|lsdyna-textObject|
-       6.5 Column move.........................|lsdyna-columnMove|
     7. Commands................................|lsdyna-commands|
        7.1 Curve commands......................|lsdyna-curveCommands|
            7.1.1 LsCurveScale..................|lsdyna-curveScale|
@@ -338,10 +337,10 @@ Ls-Dyna keyword file.
 
 ]]       : jump to next keyword
 [[       : jump to previous keyword
-<        : move current column to left
->        : move current column to right
+<        : jump to next column (only 10 width columns are supported)
+>        : jump to previous column (only 10 width columns are supported)
 4<Space> : put "$" at the beginning of the line (works only if "4" is in 1st col)
-<ll><ll> : aurformating function
+<ll><ll> : autoformating function
 <Alt-c>  : comment/uncomment line
 <Ctrl-c> : comment/uncomment line (the same as <Alt-c>)
 <Alt-c>  : remove all comment lines from selection
@@ -374,7 +373,6 @@ Select lines you want to comment:
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
    >|*DEFINE_CURVE_TITLE                          |<
    >|$# title                                     |<
    >|Load                                         |<
@@ -383,7 +381,6 @@ Select lines you want to comment:
    >|$#                a1                  o1     |<
    >|                 0.0                 0.0     |<
    >|                 1.0                 1.0     |<
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -394,7 +391,6 @@ Use <Alt-c>:
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |$*DEFINE_CURVE_TITLE                         |
     |$$# title                                    |
     |$Load                                        |
@@ -403,7 +399,6 @@ Use <Alt-c>:
     |$$#                a1                  o1    |
     |$                 0.0                 0.0    |
     |$                 1.0                 1.0    |
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -418,20 +413,18 @@ The plugin has simple autoformating function. The function is trigged with
 <ll><ll> mapping ("\\" for default VIM settings). The function try to guess
 under what keyword is and format data line according to syntax rules.
 
-Example of use:
+Autoformating with standard 10 width columns:
 
 Position of part ids in *SET_PART is incorrect, put cursor at the line:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |*SET_PART_TITLE                              |
     |$# title                                     |
     |Contact_parts                                |
     |$#    pid1      pid2      pid3      pid4     |
    >|1 2 3                                        |<
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -442,13 +435,11 @@ Run autoformating function <ll><ll> to adjust them in 10 wide columns:
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |*SET_PART_TITLE                              |
     |$# title                                     |
     |Contact_parts                                |
     |$#    pid1      pid2      pid3      pid4     |
     |         1         2         3               |
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -460,13 +451,11 @@ NOTE: Coma "," is used as special sign (not true under *DEFINE_CURVE).
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |*SET_PART_TITLE                              |
     |$# title                                     |
     |Contact_parts                                |
     |$#    pid1      pid2      pid3      pid4     |
    >| , , 3                                       |<
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -475,13 +464,11 @@ NOTE: Coma "," is used as special sign (not true under *DEFINE_CURVE).
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |*SET_PART_TITLE                              |
     |$# title                                     |
     |Contact_parts                                |
     |$#    pid1      pid2      pid3      pid4     |
     |                             3               |
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -492,13 +479,11 @@ You can use prefix for coma as well:
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |*SET_PART_TITLE                              |
     |$# title                                     |
     |Contact_parts                                |
     |$#    pid1      pid2      pid3      pid4     |
    >| 3, 3                                        |<
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -506,7 +491,6 @@ You can use prefix for coma as well:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
-    |$                                            |
     |$                                            |
     |*SET_PART_TITLE                              |
     |$# title                                     |
@@ -514,19 +498,16 @@ You can use prefix for coma as well:
     |$#    pid1      pid2      pid3      pid4     |
     |                                       3     |
     |$                                            |
-    |$                                            |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
 
-Autoformating functions is very useful to format *DEFINE_CURVE data lines from
-third part softwares.
+Autoformating functions with *DEFINE_CURVE keyword:
 
 Make visual line selection for data lines:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
-    |$                                            |
     |$                                            |
     |*DEFINE_CURVE_TITLE                          |
     |$# title                                     |
@@ -537,7 +518,6 @@ Make visual line selection for data lines:
    >| 0.0 0.0                                     |<
    >| 1.0 1.0                                     |<
     |$                                            |
-    |$                                            |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
@@ -547,7 +527,6 @@ Use <ll><ll> to format x and y values to correct positions:
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |*DEFINE_CURVE_TITLE                          |
     |$# title                                     |
     |Load                                         |
@@ -556,7 +535,6 @@ Use <ll><ll> to format x and y values to correct positions:
     |$#                a1                  o1     |
     |                 0.0                 0.0     |
     |                 1.0                 1.0     |
-    |$                                            |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -569,7 +547,6 @@ Abaqus will be converted in Ls-Dyna *DEFINE_CURVE format.
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |$                                            |
     |*DEFINE_CURVE_TITLE                          |
     |$# title                                     |
     |Load                                         |
@@ -580,7 +557,6 @@ Abaqus will be converted in Ls-Dyna *DEFINE_CURVE format.
    >| 4.0, 4.0, 5.0, 5.0, 6.0, 6.0, 7.0, 7.0      |<
    >| 8.0, 8.0                                    |<
     |$                                            |
-    |$                                            |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
@@ -589,7 +565,6 @@ Use <ll><ll> with selected lines:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
-    |$                                            |
     |$                                            |
     |*DEFINE_CURVE_TITLE                          |
     |$# title                                     |
@@ -607,10 +582,50 @@ Use <ll><ll> with selected lines:
     |                 7.0                 7.0     |
     |                 8.0                 8.0     |
     |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Autoformating with *PARAMETER keyword:
+
+The function is able recognise parameter type (integer, real, character) and
+set correct prefix (I, R, C). If prefix is defined it is not overwrite.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$#    name       val                         |
+   >|par1 100                                     |<
+   >|par2 -10                                     |<
+   >|par3 1.0                                     |<
+   >|par4 -5.0e-03                                |<
+   >|par5 name01                                  |<
+   >| R par6 100                                  |<
     |$                                            |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
+
+Use <ll><ll> with selected lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$#    name       val                         |
+    |I     par1       100                         |
+    |I     par2       -10                         |
+    |R     par3       1.0                         |
+    |R     par4  -5.0e-03                         |
+    |C     par5    name01                         |
+    |R     par6       100                         |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+NOTE: Only one parameter in line is supported.
 
 --------------------------------------------------------------------------------
 6.4 Text objects                                             *lsdyna-textObject*
@@ -733,47 +748,6 @@ comment whole keyword:
     |~                                            |
     |~                                            |
     |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
---------------------------------------------------------------------------------
-6.5 Column move                                              *lsdyna-columnMove*
-
-You can move current column to left or right. It can be used to easy adjust of
-columns after use of autoformating function. The function does not overwrite
-values in columns you are only passing by!
-
-Mappings:
-- > : move current column to right
-- < : move current column to left
-
-*NOTE: Only 10 width columns are supported
-
-Examples of use:
-
-Put cursor at any position (marked with ^) in column you want to move:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DAMPING_GLOBAL                              |
-    |$#    lcid    valdmp       stx       sty     |
-    |  ^   0.67                                   |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-Use > to move "0.67" value to one column right:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*DAMPING_GLOBAL                              |
-    |$#    lcid    valdmp       stx       sty     |
-    |                0.67                         |
-    |$                                            |
-    |command-line=================================+
     |                                             |
     +---------------------------------------------+
 

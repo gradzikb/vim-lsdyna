@@ -5,12 +5,10 @@
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
 " Last Change:  30th of January 2016
-" Version:      1.2.8
+" Version:      1.2.7
 "
 " History of change:
 "
-" v1.2.8
-"   - folding improved (commented node/element lines folded as well)
 " v1.2.7
 "   - new commands structure
 " v1.2.6
@@ -100,28 +98,8 @@ setlocal virtualedit=all
 "    FOLDING
 "-------------------------------------------------------------------------------
 
-function! LsDynaFold(lnum)
-
-  " do not fold keyword line
-  if getline(a:lnum) =~? '^\*'
-    let foldlevel = 0
-  " fold comment line with node/element in 1st column
-  elseif getline(a:lnum) =~? '^\$\s\{0,7}\d'
-    let foldlevel = 1
-  " do not fold comment line
-  elseif getline(a:lnum) =~? '^\$'
-    let foldlevel = 0
-  " by default everything is folded
-  else
-    let foldlevel = 1
-  endif
-
-  return foldlevel
-
-endfunction
-
 " folding settings
-setlocal foldexpr=LsDynaFold(v:lnum)
+setlocal foldexpr=getline(v:lnum)[0]!~'[*$]'
 setlocal foldmethod=expr
 setlocal foldminlines=4
 
@@ -299,10 +277,9 @@ noremap <buffer><script><silent> <LocalLeader><LocalLeader>
  \ :call lsdyna_autoformat#LsDynaLine()<CR>
 
 noremap <buffer><script><silent> >
- \ :<c-u>call lsdyna_indent#Indent("Right")<CR>
-
+ \ :<c-u>call lsdyna_indent#JumpCol("Right")<CR>
 noremap <buffer><script><silent> <
- \ :<c-u>call lsdyna_indent#Indent("Left")<CR>
+ \ :<c-u>call lsdyna_indent#JumpCol("Left")<CR>
 
 "-------------------------------------------------------------------------------
 "    CURVE COMMANDS
