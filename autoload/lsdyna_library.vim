@@ -5,10 +5,14 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  15th of November 2014
+" Last Change:  23th of March 2016
 "
 "-------------------------------------------------------------------------------
 "
+" v1.2.1
+"   - function GetCompletion updated
+"     - search function do not wrap around a file
+"     - code clean up
 " v1.2.0
 "   - new library structure supported (with subdirectories inside)
 " v1.1.0
@@ -101,9 +105,9 @@ function! lsdyna_library#GetCompletion()
 
   " get keyword from current line
   if getline('.')[0] == "*"
-    let keyword = tolower(strpart(getline('.'), 1))
+    let keyword = tolower(getline('.')[1:])
   else
-    let keyword = tolower(strpart(getline('.'), 0))
+    let keyword = tolower(getline('.')[0:])
   endif
 
   " extract sub directory name from keyword name
@@ -122,7 +126,7 @@ function! lsdyna_library#GetCompletion()
    execute "read " . file
    normal! kdd
    " jump to first dataline under the keyword
-   call search("^[^$]\\|^$")
+   call search("^[^$]\\|^$", "W")
   else
     normal! <C-Y>
   endif
