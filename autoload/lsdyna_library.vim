@@ -111,12 +111,7 @@ function! lsdyna_library#GetCompletion()
   endif
 
   " extract sub directory name from keyword name
-  if keyword =~? "^\*"
-    "let KeyLibSubDir = matchstr(keyword, "^.\\{-}\\ze_", 0) . "/"
-    let KeyLibSubDir = keyword[1] . "/"
-  else
-    let KeyLibSubDir = keyword[0] . "/"
-  endif
+  let KeyLibSubDir = keyword[0] . "/"
 
   " set keyword file path
   let file = g:lsdynaKeyLibPath . KeyLibSubDir . keyword . ".k"
