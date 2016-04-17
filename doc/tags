@@ -13,6 +13,7 @@ lsdyna-curveShift	lsdyna.txt	/*lsdyna-curveShift*
 lsdyna-curveSwapXY	lsdyna.txt	/*lsdyna-curveSwapXY*
 lsdyna-elemChangePid	lsdyna.txt	/*lsdyna-elemChangePid*
 lsdyna-elemCommands	lsdyna.txt	/*lsdyna-elemCommands*
+lsdyna-elemFindPid	lsdyna.txt	/*lsdyna-elemFindPid*
 lsdyna-elemOffsetId	lsdyna.txt	/*lsdyna-elemOffsetId*
 lsdyna-elemReverseNormals	lsdyna.txt	/*lsdyna-elemReverseNormals*
 lsdyna-elemSort	lsdyna.txt	/*lsdyna-elemSort*

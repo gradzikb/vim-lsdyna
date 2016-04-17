@@ -5,11 +5,14 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  24th of February 2016
-" Version:      1.0.2
+" Last Change:  16th of April 2016
+" Version:      1.1.0
 "
 " History of change:
 "
+" v1.1.0
+"   - FindPid function added
+"     - *SET_
 " v1.0.2
 "   - OffsetId function support new keywords:
 "     - *SET_
@@ -384,7 +387,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_element#Sort(line1, line2, ...)
+function! lsdyna_element#SortPid(line1, line2)
 
   "-----------------------------------------------------------------------------
   " Function sort Ls-Dyna elements in order of part id.
@@ -392,7 +395,6 @@ function! lsdyna_element#Sort(line1, line2, ...)
   " Arguments:
   " - a:line1 : first line of selection
   " - a:line2 : last line of selection
-  " - a:1     : user part id
   " Return:
   " - None
   "-----------------------------------------------------------------------------
@@ -400,82 +402,111 @@ function! lsdyna_element#Sort(line1, line2, ...)
   " sort lines respect to part id
   execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
 
+    " loop over element lines
+    let lnum = a:line1
+    let endline = a:line2
+    while (lnum <= endline)
 
-    " search for all part ids
-    if a:0 == 0
-
-      " loop over element lines
-      let lnum = a:line1
-      let endline = a:line2
-      while (lnum <= endline)
-
-        " write header for 1st part in the list
-        if (lnum == a:line1)
-          let str = '$ Part: ' . getline(lnum)[8:15]
-          call append(lnum-1, str)
-          let lnum += 1
-          continue
-        endif
-
-        " take current and next line
-        let line1 = getline(lnum)
-        let line2 = getline(lnum+1)
-
-        " compare part ids and put header line if not the same
-        if (line1[8:15] !~? line2[8:15])
-          " add header with part id
-          let str = '$ Part: ' . line2[8:15]
-          call append(lnum, str)
-          " one more line to complete whole loop
-          let endline += 1
-          " two extra line to skip header I just added
-          let lnum += 2
-          continue
-        endif
-
-        " move to next line (not used if I added header)
+      " write header for 1st part in the list
+      if (lnum == a:line1)
+        let str = '$ Part: ' . getline(lnum)[8:15]
+        call append(lnum-1, str)
         let lnum += 1
+        continue
+      endif
+
+      " take current and next line
+      let line1 = getline(lnum)
+      let line2 = getline(lnum+1)
+
+      " compare part ids and put header line if not the same
+      if (line1[8:15] !~? line2[8:15])
+        " add header with part id
+        let str = '$ Part: ' . line2[8:15]
+        call append(lnum, str)
+        " one more line to complete whole loop
+        let endline += 1
+        " two extra line to skip header I just added
+        let lnum += 2
+        continue
+      endif
+
+      " move to next line (not used if I added header)
+      let lnum += 1
 
       endwhile
 
-    " search only for user part id
+endfunction
+
+"-------------------------------------------------------------------------------
+"
+function! lsdyna_element#FindPid(line1, line2, ...)
+
+  "-----------------------------------------------------------------------------
+  " Function to find elements with specific part id in element table.
+  "
+  " Arguments:
+  " - a:line1 : first line of selection
+  " - a:line2 : last line of selection
+  " - ...     : user part ids
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  " take user pids
+  let pids = []
+  for arg in a:000
+    if match(arg, ":") != -1
+      let ids = split(arg, ":")
+      for i in range(ids[0], ids[1])
+        call add(pids, i)
+      endfor
     else
+      call add(pids, str2nr(arg))
+    endif
+  endfor
 
-      " user part id
-      let userPid = str2nr(a:1)
+  " sort pids
+  let pids = sort(pids, 'lsdyna_element#NumbersCompare')
 
-      " loop over element lines
-      let lnum = a:line1
-      let endline = a:line2
-      let pid = 0
-      while (lnum <= endline)
+  " set last line from selection
+  let lend = a:line2
 
-        " take line
-        let line1 = getline(lnum)
+  " sort lines respect to part id
+  execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
 
-        " compare part ids and put header line
-        if (pid ==0 && str2nr(line1[8:15]) == userPid)
-          " add header with part id
-          let str = '$ Part: ' . line1[8:15]
-          call append(lnum-1, str)
-          let pid = 1
-          " one more line to complete whole loop
-          let endline += 1
-        endif
+  " set cursor position to start search
+  call cursor(a:line1-1, 0)
 
-        " add end break
-        if (pid == 1 && line1[8:15] !~? a:1)
-          call append(lnum-1, '$')
-          break
-        endif
+  " loop over part ids
+  for pid in pids
 
-        " move to next line (not if I added header)
-        let lnum += 1
+    " find current pid
+    let snum = 8 - len(pid)
+    let regexp = '^.\{8}\s\{'. snum . '}'  . pid
+    let match = search(regexp, '', lend)
 
-      endwhile
+    " found pid
+    if (match != 0)
+
+      " put header
+      call append(match-1, '$ Part: ' . pid)
+
+      " find end of range
+      call cursor(lend+2, 0)
+      call append(search(regexp, 'b', a:line1), '$')
+
+      " for every pid I found two extra lines are added
+      let lend = lend + 2
 
     endif
 
+  endfor
+
+endfunction
+
+function! lsdyna_element#NumbersCompare(i1, i2)
+   return a:i1 - a:i2
 endfunction
 
 "-------------------------------------------------------------------------------
