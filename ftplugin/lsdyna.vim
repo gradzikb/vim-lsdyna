@@ -114,6 +114,15 @@ setlocal indentexpr=
 "    USEFUL MAPPINGS
 "-------------------------------------------------------------------------------
 
+function! s:VisualPID() range
+
+  let jump = a:lastline - a:firstline
+  execute "normal! 9|\<C-v>" . jump . "j7l"
+
+endfunction
+
+vnoremap ap :call <SID>VisualPID()<CR>
+
 function! s:LsDynaComment()
 
   if getline('.')[0] == '4'
@@ -323,8 +332,11 @@ command! -buffer -range -nargs=* LsNodeOffsetId
 "    ELEMENT COMMANDS
 "-------------------------------------------------------------------------------
 
-command! -buffer -range -nargs=* LsElemSort
- \ :call lsdyna_element#Sort(<line1>,<line2>,<f-args>)
+command! -buffer -range -nargs=0 LsElemSortPid
+ \ :call lsdyna_element#SortPid(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=+ LsElemFindPid
+ \ :call lsdyna_element#FindPid(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsElemOffsetId
  \ :call lsdyna_element#OffsetId(<line1>,<line2>,<f-args>)

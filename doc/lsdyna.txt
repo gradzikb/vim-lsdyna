@@ -42,7 +42,7 @@ CONTENTS
            7.2.3 LsNodeOffsetId................|lsdyna-nodeOffsetId|
            7.2.4 LsNodeReflect.................|lsdyna-nodeReflect|
        7.3 Element commands....................|lsdyna-elemCommands|
-           7.3.1 LsElemSort....................|lsdyna-elemSort|
+           7.3.1 LsElemSortPid.................|lsdyna-elemSortPid|
            7.3.2 LsElemFindPid.................|lsdyna-elemFindPid|
            7.3.3 LsElemChangePid...............|lsdyna-elemChangePid|
            7.3.4 LsElemOffsetId................|lsdyna-elemOffsetId|
@@ -1516,13 +1516,13 @@ For instance you can do operation like sort element table respect to part id,
 update part id to new value, offset id of elements.
 
 --------------------------------------------------------------------------------
-7.3.1 LsElemSort                                               *lsdyna-elemSort*
+7.3.1 LsElemSortPid                                         *lsdyna-elemSortPid*
 
 Description:
 Sort element table respect to part id.
 
 Syntax:
-:LsElemSort
+:LsElemSortPid
 
 Arguments:
 None
@@ -1545,7 +1545,7 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsElemSort
+	:LsElemSortPid
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
