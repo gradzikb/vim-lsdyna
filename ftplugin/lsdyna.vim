@@ -4,11 +4,15 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  30th of January 2016
-" Version:      1.2.7
+" Last Change:  18th of May 2016
+" Version:      1.2.8
 "
 " History of change:
 "
+" v1.2.8
+"   - visual block selection for PID column added
+"     - new function PIDTextObject()
+"     - new mapping ap/ip
 " v1.2.7
 "   - new commands structure
 " v1.2.6
@@ -114,14 +118,8 @@ setlocal indentexpr=
 "    USEFUL MAPPINGS
 "-------------------------------------------------------------------------------
 
-function! s:VisualPID() range
-
-  let jump = a:lastline - a:firstline
-  execute "normal! 9|\<C-v>" . jump . "j7l"
-
-endfunction
-
-vnoremap ap :call <SID>VisualPID()<CR>
+" change 4 -> $ but only at the beginning of the line
+inoreabbrev 4 4<C-R>=<SID>LsDynaComment()<CR>
 
 function! s:LsDynaComment()
 
@@ -135,9 +133,9 @@ function! s:LsDynaComment()
   endif
 
 endfunction
-" change 4 -> $ but only at the beginning of the line
-inoreabbrev 4 4<C-R>=<SID>LsDynaComment()<CR>
 
+"-------------------------------------------------------------------------------
+"
 " mapping for separation lines
 nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
 nnoremap <silent><buffer> <LocalLeader>C O$<ESC>0
@@ -231,6 +229,44 @@ function! s:KeywordTextObj()
   endif
   " move back to first data line
   call search(reDataLine,'bW')
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+vnoremap <buffer><script><silent> ap :call <SID>PIDTextObject()<CR>
+onoremap <buffer><script><silent> ap :call <SID>PIDTextObject()<CR>
+vnoremap <buffer><script><silent> ip :call <SID>PIDTextObject()<CR>
+onoremap <buffer><script><silent> ip :call <SID>PIDTextObject()<CR>
+
+function! s:PIDTextObject()
+
+  " ----------------------------------------------------------------------------
+  " Function to select pid column with visual block.
+  " ----------------------------------------------------------------------------
+
+  " keyword/comment regular expression
+  let rekw  = '^[$*]'
+  " dataline regular expression
+  let redl = '^[^$*]'
+
+  " set start of selection
+  call search(rekw, 'bcW')
+  let lnums = search(redl, 'W')
+
+  " set end of selection
+  let lnumtmp = search(rekw, 'W')
+  " go to end of the file if found nothing
+  if lnumtmp == 0
+    normal! G
+  endif
+  let lnume = search(redl, 'bW')
+
+  " go to first line in selection and 1st position in PID column
+  call cursor(lnums, 9)
+  " vertical selection by 'jump' lines
+  let jump = lnume - lnums
+  execute "normal! zo\<C-v>" . jump . "j7lo'"
 
 endfunction
 
