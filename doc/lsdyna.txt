@@ -28,6 +28,8 @@ CONTENTS
        6.2 Comment/uncomment...................|lsdyna-comment|
        6.3 Data line autoformating.............|lsdyna-autoFormat|
        6.4 Text objects........................|lsdyna-textObject|
+           6.4.1 Keyword objects...............|lsdyna-objectKeyword|
+           6.4.2 Part column objects...........|lsdyna-objectPartColumn|
     7. Commands................................|lsdyna-commands|
        7.1 Curve commands......................|lsdyna-curveCommands|
            7.1.1 LsCurveScale..................|lsdyna-curveScale|
@@ -631,15 +633,26 @@ NOTE: Only one parameter in line is supported.
 --------------------------------------------------------------------------------
 6.4 Text objects                                             *lsdyna-textObject*
 
-Ls-Dyna filetype plugin gives you two new VIM text objects. If you are not
-familiar with VIM text objects see ":help text-objects".
+The plugin gives you new VIM text objects useful with Ls-Dyna syntax.
+If you are not familiar with VIM text objects see ":help text-objects".
 
 Ls-Dyna filetype plugin text-objects:
-- <ik> : insert keyword
+- <ik> : inside keyword
 - <ak> : around keyword
+- <ip> : inside part column
+- <ap> : around part column
 
-Both text object work the same way! There is no distinguish like in <aw>/<iw>.
 You can use them with other VIM commands like <d>, <y>, <v>.
+Both text object work the same way! There is no distinguish like in <aw>/<iw>.
+
+--------------------------------------------------------------------------------
+6.4.1 Keyword objects                                     *lsdyna-objectKeyword*
+
+With keyword text object you can in easy way select whole keyword definition.
+
+Keyword test objects:
+- <ik> : inside keyword
+- <ak> : around keyword
 
 Examples of use:
 
@@ -734,8 +747,8 @@ Put cursor at any keyword line:
     |                                             |
     +---------------------------------------------+
 
-Use <vak>/<vik> for visual selection of the keyword, now you can use <Alt-c> to
-comment whole keyword:
+Use <vak>/<vik> for visual selection of the keyword,
+next use <Alt-c> to comment whole keyword:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -749,6 +762,51 @@ comment whole keyword:
     |~                                            |
     |~                                            |
     |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+6.4.2 Part column objects                              *lsdyna-objectPartColumn*
+
+With part column text object you can select all part ids in *ELEMENT_ keyword.
+
+Keyword test objects:
+- <ip> : inside part
+- <ap> : around part
+
+Examples of use:
+
+Put cursor at any keyword line:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |       1    2000     1      2      3      4  |
+   >|       2    1000     5      6      7      8  |<
+    |       3    3000     9     10     11     12  |
+    |       4    2000    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Use <vap>/<vip> to select whole part column
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+             vvvvvvvv
+    |       1    2000     1      2      3      4  |
+    |       2    1000     5      6      7      8  |
+    |       3    3000     9     10     11     12  |
+    |       4    2000    13     14     15     16  |
+             ^^^^^^^^
+    |$                                            |
+    |command-line=================================+
     |                                             |
     +---------------------------------------------+
 
