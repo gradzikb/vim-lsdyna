@@ -2150,7 +2150,7 @@ The last word from the author.
 Congratulations! This is end of reading, you made it. Or you hit <G>? ;-)
 
 Hope you will find the plugin useful in your daily work with VIM & Ls-Dyna.
-If you want to you can sent me short mail with a good word about it.
+If you want you can sent me short mail with a good word about it.
 Then I would know someone is use it and I did not wast a lot of my time ;-)
 
 Something is missing and you feel it will be useful for you and other users?

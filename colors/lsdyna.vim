@@ -2,68 +2,74 @@
 "
 " Vim color file
 "
-" Language:    LS-Dyna FE solver input file
-" Maintainer:  Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" "
-" Last Change: 13.05.2015
-" - non-default colors for popup menu set
+" Language:     Ls-Dyna FE solver input file
+" Maintainer:   Bartosz Gradzik (bartosz.gradzik@hotmail.com)
+" Version:      1.0.0
+" Last Change:  22th of May 2016
 "
-" Last Change: 1st of January 2014
-" - color scheme updated for Ls-Dyna filetye plugin
-"
-" Maintainer:  Thorsten Maerz <info@netztorte.de>
-" Last Change: 2006 Dec 07
-" - base color scheme
-" - grey on black
-" - optimized for TFT panels
+" History of change:
+" v1.0.0
+"   - initial release
 "
 "-------------------------------------------------------------------------------
 
 set background=dark
-hi clear
+highlight clear
 if exists("syntax_on")
   syntax reset
 endif
-"colorscheme default
 let g:colors_name = "lsdyna"
 
-" hardcoded colors :
-" GUI Comment : #80a0ff = Light blue
+"-------------------------------------------------------------------------------
+"    VIM GROUPS
+"-------------------------------------------------------------------------------
 
+"-------------------------------------------------------------------------------
 " GUI
-highlight Normal     guifg=Grey80	guibg=Black
-highlight Search     guifg=Black	guibg=Red	gui=bold
-highlight Visual     guifg=#404040			gui=bold
-highlight Cursor     guifg=Black	guibg=Green	gui=bold
-highlight Special    guifg=Orange
-highlight Comment    guifg=LightRed
-highlight StatusLine guifg=blue		guibg=white
-highlight Statement  guifg=Yellow			gui=NONE
-highlight Type						gui=NONE
 
-" Console
-highlight Normal     ctermfg=LightGrey	ctermbg=Black
-highlight Search     ctermfg=Black	ctermbg=Red	cterm=NONE
-highlight Visual					cterm=reverse
-highlight Cursor     ctermfg=Black	ctermbg=Green	cterm=bold
-highlight Special    ctermfg=Brown
-highlight Comment    ctermfg=LightRed
-highlight StatusLine ctermfg=blue	ctermbg=white
-highlight Statement  ctermfg=Yellow			cterm=NONE
-highlight Type						cterm=NONE
+highlight Normal     guifg=White     guibg=Black    gui=NONE
+highlight Search     guifg=Black     guibg=Red      gui=NONE
+highlight Visual     guifg=Black     guibg=DarkGray gui=NONE
+highlight Folded     guifg=LightGray guibg=Gray40   gui=NONE
+highlight Cursor     guifg=bg        guibg=fg       gui=NONE
+highlight CursorLine guifg=NONE      guibg=Gray20   gui=NONE
+highlight StatusLine guifg=White     guibg=Blue     gui=NONE
+highlight Pmenu      guifg=white     guibg=black    gui=NONE
+highlight PmenuSel   guifg=black     guibg=white    gui=NONE
 
-" popup menu colors
-highlight Pmenu guibg=black guifg=white
-highlight PmenuSel guibg=white guifg=black
+"-------------------------------------------------------------------------------
+" Terminal
 
-" only for vim 5
-if has("unix")
-  if v:version<600
-    highlight Normal  ctermfg=Grey	ctermbg=Black	cterm=NONE	guifg=Grey80      guibg=Black	gui=NONE
-    highlight Search  ctermfg=Black	ctermbg=Red	cterm=bold	guifg=Black       guibg=Red	gui=bold
-    highlight Visual  ctermfg=Black	ctermbg=yellow	cterm=bold	guifg=#404040			gui=bold
-    highlight Special ctermfg=LightBlue			cterm=NONE	guifg=LightBlue			gui=NONE
-    highlight Comment ctermfg=Cyan			cterm=NONE	guifg=LightBlue			gui=NONE
-  endif
-endif
+highlight Normal     ctermfg=Gray      ctermbg=Black     cterm=NONE
+highlight Search     ctermfg=Black     ctermbg=Red       cterm=NONE
+highlight Visual     ctermfg=Black     ctermbg=Gray      cterm=NONE
+highlight Folded     ctermfg=Black     ctermbg=Gray      cterm=NONE
+highlight Cursor     ctermfg=bg        ctermbg=fg        cterm=NONE
+highlight CursorLine ctermfg=NONE      ctermbg=NONE      cterm=Underline
+highlight StatusLine ctermfg=Black     ctermbg=White     cterm=NONE
+highlight Pmenu      ctermfg=white     ctermbg=black     cterm=NONE
+highlight PmenuSel   ctermfg=black     ctermbg=white     cterm=NONE
 
+"-------------------------------------------------------------------------------
+"    LS-DYNA HIGHLIGHT COLORS
+"-------------------------------------------------------------------------------
+
+"-------------------------------------------------------------------------------
+" GUI
+
+highlight lsdynaComment       guifg=LightRed guibg=bg    gui=NONE
+highlight lsdynaKeywordName   guifg=Yellow   guibg=bg    gui=NONE
+highlight lsdynaKeywordOption guifg=Green    guibg=bg    gui=NONE
+highlight lsdynaTitle         guifg=Cyan     guibg=bg    gui=NONE
+highlight lsdynaColumn        guifg=White    guibg=Brown gui=NONE
+
+"-------------------------------------------------------------------------------
+" Terminal
+
+highlight lsdynaComment       ctermfg=Red    ctermbg=bg  cterm=NONE
+highlight lsdynaKeywordName   ctermfg=Yellow ctermbg=bg  cterm=NONE
+highlight lsdynaKeywordOption ctermfg=Green  ctermbg=bg  cterm=NONE
+highlight lsdynaTitle         ctermfg=Cyan   ctermbg=bg  cterm=NONE
+highlight lsdynaColumn        ctermfg=Gray   ctermbg=Red cterm=NONE
+
+"-------------------------------------EOF---------------------------------------

@@ -4,10 +4,14 @@
 "
 " Language:     Ls-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik (bartosz.gradzik@hotmail.com)
-" Contribution: Jakub Pajerski
-" Last Change:  2nd of August 2014
+" Version:      1.2.1
+" Last Change:  24.05.2016
 "
 " History of change:
+" v1.2.1
+"   - *ELEMENT_SEATBELT supported
+" v1.2.0
+"   - new highlight groups used
 " v1.1.0
 "   - syntax highlight depends on keyword type now
 " v1.0.0
@@ -24,103 +28,93 @@ let b:current_syntax = "lsdyna"
 "    Items shared among keywords
 "-------------------------------------------------------------------------------
 
-syntax match LsDynaComment '^[$#].*$'
-syntax match LsDynaTitle '^\(\a\|?\|\.\).*$' contained
-syntax match LsDynaKeyword '^*\a.*$' contains=LsDynaKeywordOption
-syntax match LsDynaKeywordOption '_.*$' contained
+syntax match lsdynaComment '^\$.*$'
+syntax match lsdynaTitle '^\(\h\|?\).*$' contained
+syntax match lsdynaKeywordName '^\*\a.*$' contains=lsdynaKeywordOption
+syntax match lsdynaKeywordOption '_.*$' contained
 
-highlight default link LsDynaComment Comment
-highlight default link LsDynaKeyword Statement
-highlight default link LsDynaKeywordOption Type
-highlight default link LsDynaTitle Identifier
+highlight default link lsdynaComment lsdynaComment
+highlight default link lsdynaKeywordName lsdynaKeywordName
+highlight default link lsdynaKeywordOption lsdynaKeywordOption
+highlight default link lsdynaTitle lsdynaTitle
 
 "-------------------------------------------------------------------------------
 "    Standard Ls-Dyna keyword
 "-------------------------------------------------------------------------------
 
-syntax match LsDynaStdKeyword_02_Col '\%11c.\{10}' contained
-syntax match LsDynaStdKeyword_04_Col '\%31c.\{10}' contained
-syntax match LsDynaStdKeyword_06_Col '\%51c.\{10}' contained
-syntax match LsDynaStdKeyword_08_Col '\%71c.\{10}' contained
+syntax match lsdynaKeyword_02_Col '\%11c.\{10}' contained
+syntax match lsdynaKeyword_04_Col '\%31c.\{10}' contained
+syntax match lsdynaKeyword_06_Col '\%51c.\{10}' contained
+syntax match lsdynaKeyword_08_Col '\%71c.\{10}' contained
 
-highlight default link LsDynaStdKeyword_02_Col Error
-highlight default link LsDynaStdKeyword_04_Col Error
-highlight default link LsDynaStdKeyword_06_Col Error
-highlight default link LsDynaStdKeyword_08_Col Error
+highlight default link lsdynaKeyword_02_Col lsdynaColumn
+highlight default link lsdynaKeyword_04_Col lsdynaColumn
+highlight default link lsdynaKeyword_06_Col lsdynaColumn
+highlight default link lsdynaKeyword_08_Col lsdynaColumn
 
-syntax cluster LsDynaStdKeywordCluster add=LsDynaComment
-syntax cluster LsDynaStdKeywordCluster add=LsDynaKeyword
-syntax cluster LsDynaStdKeywordCluster add=LsDynaTitle
-syntax cluster LsDynaStdKeywordCluster add=LsDynaStdKeyword_02_Col
-syntax cluster LsDynaStdKeywordCluster add=LsDynaStdKeyword_04_Col
-syntax cluster LsDynaStdKeywordCluster add=LsDynaStdKeyword_06_Col
-syntax cluster LsDynaStdKeywordCluster add=LsDynaStdKeyword_08_Col
+syntax cluster lsdynaKeywordCluster add=lsdynaComment
+syntax cluster lsdynaKeywordCluster add=lsdynaKeywordName
+syntax cluster lsdynaKeywordCluster add=lsdynaTitle
+syntax cluster lsdynaKeywordCluster add=lsdynaKeyword_02_Col
+syntax cluster lsdynaKeywordCluster add=lsdynaKeyword_04_Col
+syntax cluster lsdynaKeywordCluster add=lsdynaKeyword_06_Col
+syntax cluster lsdynaKeywordCluster add=lsdynaKeyword_08_Col
 
-syntax region LsDynaStdKeyword start=/^\*\a/ end=/^\*/me=s-1
- \ contains=@LsDynaStdKeywordCluster
-
-"-------------------------------------------------------------------------------
-"    *NODE / *AIRBAG_REF_
-"-------------------------------------------------------------------------------
-
-syntax match LsDynaNode_02_Col '\%9c.\{16}'  contained
-syntax match LsDynaNode_04_Col '\%41c.\{16}' contained
-syntax match LsDynaNode_06_Col '\%65c.\{8}'  contained
-
-highlight default link LsDynaNode_02_Col Error
-highlight default link LsDynaNode_04_Col Error
-highlight default link LsDynaNode_06_Col Error
-
-syntax cluster LsDynaNodeCluster add=LsDynaComment
-syntax cluster LsDynaNodeCluster add=LsDynaKeyword
-syntax cluster LsDynaNodeCluster add=LsDynaNode_02_Col
-syntax cluster LsDynaNodeCluster add=LsDynaNode_04_Col
-syntax cluster LsDynaNodeCluster add=LsDynaNode_06_Col
-
-syntax region LsDynaNode start=/\c^\*NODE *$/ end=/^\*/me=s-1
- \ contains=@LsDynaNodeCluster
-syntax region LsDynaAirbagRef start=/\c^\*AIRBAG_REF.*$/ end=/^\*/me=s-1
- \ contains=@LsDynaNodeCluster
-
-" following two lines help with syntax highlighting synchronization
-" but they slow down VIM performance for big files
-
-"syntax sync match LsDynaNodeSync grouphere LsDynaNode '\c^\*NODE *$'
-"syntax sync match LsDynaAirbagRefSync grouphere LsDynaAirbagRef '\c^\*AIRBAG_REF.*$'
+syntax region lsdynaKeywordReg start=/^\*\a/ end=/^\*/me=s-1
+ \ contains=@lsdynaKeywordCluster
 
 "-------------------------------------------------------------------------------
-"    *ELEMENT_ / *AIRBAG_SHELL_
+"    Nodes
 "-------------------------------------------------------------------------------
 
-syntax match LsDynaElShell_02_Col '\%9c.\{8}'  contained
-syntax match LsDynaElShell_04_Col '\%25c.\{8}' contained
-syntax match LsDynaElShell_06_Col '\%41c.\{8}' contained
-syntax match LsDynaElShell_08_Col '\%57c.\{8}' contained
-syntax match LsDynaElShell_10_Col '\%73c.\{8}' contained
+syntax match lsdynaNode_02_Col '\%9c.\{16}'  contained
+syntax match lsdynaNode_04_Col '\%41c.\{16}' contained
+syntax match lsdynaNode_06_Col '\%65c.\{8}'  contained
 
-highlight default link LsDynaElShell_02_Col Error
-highlight default link LsDynaElShell_04_Col Error
-highlight default link LsDynaElShell_06_Col Error
-highlight default link LsDynaElShell_08_Col Error
-highlight default link LsDynaElShell_10_Col Error
+highlight default link lsdynaNode_02_Col lsdynaColumn
+highlight default link lsdynaNode_04_Col lsdynaColumn
+highlight default link lsdynaNode_06_Col lsdynaColumn
 
-syntax cluster LsDynaElShellCluster add=LsDynaComment
-syntax cluster LsDynaElShellCluster add=LsDynaKeyword
-syntax cluster LsDynaElShellCluster add=LsDynaElShell_02_Col
-syntax cluster LsDynaElShellCluster add=LsDynaElShell_04_Col
-syntax cluster LsDynaElShellCluster add=LsDynaElShell_06_Col
-syntax cluster LsDynaElShellCluster add=LsDynaElShell_08_Col
-syntax cluster LsDynaElShellCluster add=LsDynaElShell_10_Col
+syntax cluster lsdynaNodeCluster add=lsdynaComment
+syntax cluster lsdynaNodeCluster add=lsdynaKeywordName
+syntax cluster lsdynaNodeCluster add=lsdynaNode_02_Col
+syntax cluster lsdynaNodeCluster add=lsdynaNode_04_Col
+syntax cluster lsdynaNodeCluster add=lsdynaNode_06_Col
 
-syntax region LsDynaElShell start=/\c^\*ELEMENT_.\+ *$/ end=/^\*/me=s-1
- \ contains=@LsDynaElShellCluster
-syntax region LsDynaAirbagShell start=/\c^\*AIRBAG_SHELL_.\+ *$/ end=/^\*/me=s-1
- \ contains=@LsDynaElShellCluster
+syntax region lsdynaNodeReg start=/\c^\*NODE *$/ end=/^\*/me=s-1
+ \ contains=@lsdynaNodeCluster
+syntax region lsdynaAirbagRefReg start=/\c^\*AIRBAG_REF.*$/ end=/^\*/me=s-1
+ \ contains=@lsdynaNodeCluster
 
-" following two lines help with syntax highlighting synchronization
-" but they slow down VIM performance for big files
+"-------------------------------------------------------------------------------
+"    Elements
+"-------------------------------------------------------------------------------
 
-"syntax sync match LsDynaElShellSync grouphere LsDynaElShell '\c^\*ELEMENT_.\+ *$'
-"syntax sync match LsDynaAirbagShellSync grouphere LsDynaAirbagShell '\c^\*AIRBAG_SHELL_.\+ *$'
+syntax match lsdynaElem_02_Col '\%9c.\{8}'  contained
+syntax match lsdynaElem_04_Col '\%25c.\{8}' contained
+syntax match lsdynaElem_06_Col '\%41c.\{8}' contained
+syntax match lsdynaElem_08_Col '\%57c.\{8}' contained
+syntax match lsdynaElem_10_Col '\%73c.\{8}' contained
+
+highlight default link lsdynaElem_02_Col lsdynaColumn
+highlight default link lsdynaElem_04_Col lsdynaColumn
+highlight default link lsdynaElem_06_Col lsdynaColumn
+highlight default link lsdynaElem_08_Col lsdynaColumn
+highlight default link lsdynaElem_10_Col lsdynaColumn
+
+syntax cluster lsdynaElemCluster add=lsdynaComment
+syntax cluster lsdynaElemCluster add=lsdynaKeywordName
+syntax cluster lsdynaElemCluster add=lsdynaElem_02_Col
+syntax cluster lsdynaElemCluster add=lsdynaElem_04_Col
+syntax cluster lsdynaElemCluster add=lsdynaElem_06_Col
+syntax cluster lsdynaElemCluster add=lsdynaElem_08_Col
+syntax cluster lsdynaElemCluster add=lsdynaElem_10_Col
+
+syntax region lsdynaElemReg start=/\c^\*ELEMENT_.*$/ end=/^\*/me=s-1
+ \ contains=@lsdynaElemCluster
+syntax region lsdynaAirbagShellReg start=/\c^\*AIRBAG_SHELL_.\+ *$/ end=/^\*/me=s-1
+ \ contains=@lsdynaElemCluster
+syntax region lsdynaElemBeltSlipReg start=/\c^\*ELEMENT_SEATBELT_\a\+\s*$/ end=/^\*/me=s-1
+ \ contains=@lsdynaKeywordCluster
 
 "-------------------------------------EOF---------------------------------------
