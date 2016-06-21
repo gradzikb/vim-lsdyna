@@ -4,11 +4,13 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  18th of May 2016
-" Version:      1.2.8
+" Last Change:  21th of June 2016
+" Version:      1.2.9
 "
 " History of change:
 "
+" v1.2.9
+"   - LsDynaComment() function update to be more robust
 " v1.2.8
 "   - visual block selection for PID column added
 "     - new function PIDTextObject()
@@ -123,7 +125,7 @@ inoreabbrev 4 4<C-R>=<SID>LsDynaComment()<CR>
 
 function! s:LsDynaComment()
 
-  if getline('.')[0] == '4'
+  if col('.') == 2 && getline('.')[0] == '4'
     let tmpUnnamedReg = @@
     normal! hx
     let @@ = tmpUnnamedReg
