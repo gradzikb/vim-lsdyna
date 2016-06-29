@@ -5,11 +5,13 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  11th of March 2016
-" Version:      1.0.2
+" Last Change:  29th of June 2016
+" Version:      1.0.3
 "
 " History of change:
 "
+" v1.0.3
+"   - autoformationg for standard keyword (8*10) improved
 " v1.0.2
 "   - *PARAMETER formating improved (again)
 " v1.0.1
@@ -228,16 +230,38 @@ function! lsdyna_autoformat#LsDynaLine() range
      call cursor(a:lastline+1, 0)
 
   "-----------------------------------------------------------------------------
-  " standart format line (8x10)
+  " standard format line (8x10)
   " allow to use coma as empty col
   else
 
+    " loop over all selected lines
     for i in range(a:firstline, a:lastline)
-      let line = split(getline(i))
+
+      " get current line
+      let lstr = getline((i))
+
+      " find positions of 10th width empty col.
+      let emptcol = []
+      let ncol = float2nr(len(lstr)/10.0)
+      for col in range(ncol)
+         if strpart(lstr, col*10, 10) =~? '\s\{10}'
+           call add(emptcol, col)
+         endif
+      endfor
+
+      " split line
+      let line = split(lstr)
+
+      " add empty columns to line
+      for item in emptcol
+        call insert(line, ',', item)
+      endfor
+
+      " format all items in line to new format
       for j in range(len(line))
         let fStr = "%10s"
-        if line[j] =~# ","
-          if len(line[j]) !=# 1
+        if line[j] =~? ","
+          if len(line[j]) != 1
             let fStr = "%" . line[j][:-2] . "0s"
           endif
           let line[j] = printf(fStr, "")
