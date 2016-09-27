@@ -16,7 +16,6 @@ lsdyna-elemCommands	lsdyna.txt	/*lsdyna-elemCommands*
 lsdyna-elemFindPid	lsdyna.txt	/*lsdyna-elemFindPid*
 lsdyna-elemOffsetId	lsdyna.txt	/*lsdyna-elemOffsetId*
 lsdyna-elemReverseNormals	lsdyna.txt	/*lsdyna-elemReverseNormals*
-lsdyna-elemSortPid	lsdyna.txt	/*lsdyna-elemSortPid*
 lsdyna-extendLibrary	lsdyna.txt	/*lsdyna-extendLibrary*
 lsdyna-folding	lsdyna.txt	/*lsdyna-folding*
 lsdyna-includeJump	lsdyna.txt	/*lsdyna-includeJump*
@@ -33,8 +32,8 @@ lsdyna-nodeOffsetId	lsdyna.txt	/*lsdyna-nodeOffsetId*
 lsdyna-nodeReflect	lsdyna.txt	/*lsdyna-nodeReflect*
 lsdyna-nodeScale	lsdyna.txt	/*lsdyna-nodeScale*
 lsdyna-nodeShift	lsdyna.txt	/*lsdyna-nodeShift*
+lsdyna-objectColumn	lsdyna.txt	/*lsdyna-objectColumn*
 lsdyna-objectKeyword	lsdyna.txt	/*lsdyna-objectKeyword*
-lsdyna-objectPartColumn	lsdyna.txt	/*lsdyna-objectPartColumn*
 lsdyna-start	lsdyna.txt	/*lsdyna-start*
 lsdyna-syntax	lsdyna.txt	/*lsdyna-syntax*
 lsdyna-templates	lsdyna.txt	/*lsdyna-templates*

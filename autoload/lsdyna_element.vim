@@ -5,11 +5,14 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  16th of April 2016
-" Version:      1.1.0
+" Last Change:  27th of September 2016
+" Version:      1.1.1
 "
 " History of change:
 "
+" v1.1.1
+"   - FindPid function with no arguments works as SortPid function
+"   - SortPid function removed
 " v1.1.0
 "   - FindPid function added
 "     - *SET_
@@ -386,21 +389,24 @@ function! lsdyna_element#ChangePid(line1, line2, ...)
 endfunction
 
 "-------------------------------------------------------------------------------
-
-function! lsdyna_element#SortPid(line1, line2)
+"
+function! lsdyna_element#FindPid(line1, line2, ...)
 
   "-----------------------------------------------------------------------------
-  " Function sort Ls-Dyna elements in order of part id.
+  " Function to sort/find elements with specific part id in element table.
   "
   " Arguments:
   " - a:line1 : first line of selection
   " - a:line2 : last line of selection
+  " - ...     : user part ids
   " Return:
   " - None
   "-----------------------------------------------------------------------------
 
-  " sort lines respect to part id
-  execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
+  "-----------------------------------------------------------------------------
+  " if no arguments just sort element table with pids
+
+  if len(a:000) == 0
 
     " loop over element lines
     let lnum = a:line1
@@ -436,72 +442,61 @@ function! lsdyna_element#SortPid(line1, line2)
 
       endwhile
 
-endfunction
-
-"-------------------------------------------------------------------------------
-"
-function! lsdyna_element#FindPid(line1, line2, ...)
-
+  else
   "-----------------------------------------------------------------------------
-  " Function to find elements with specific part id in element table.
-  "
-  " Arguments:
-  " - a:line1 : first line of selection
-  " - a:line2 : last line of selection
-  " - ...     : user part ids
-  " Return:
-  " - None
-  "-----------------------------------------------------------------------------
+  " find only specific pids
 
-  " take user pids
-  let pids = []
-  for arg in a:000
-    if match(arg, ":") != -1
-      let ids = split(arg, ":")
-      for i in range(ids[0], ids[1])
-        call add(pids, i)
-      endfor
-    else
-      call add(pids, str2nr(arg))
-    endif
-  endfor
+    " take user pids
+    let pids = []
+    for arg in a:000
+      if match(arg, ":") != -1
+        let ids = split(arg, ":")
+        for i in range(ids[0], ids[1])
+          call add(pids, i)
+        endfor
+      else
+        call add(pids, str2nr(arg))
+      endif
+    endfor
 
-  " sort pids
-  let pids = sort(pids, 'lsdyna_element#NumbersCompare')
+    " sort pids
+    let pids = sort(pids, 'lsdyna_element#NumbersCompare')
 
-  " set last line from selection
-  let lend = a:line2
+    " set last line from selection
+    let lend = a:line2
 
-  " sort lines respect to part id
-  execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
+    " sort lines respect to part id
+    execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
 
-  " set cursor position to start search
-  call cursor(a:line1-1, 0)
+    " set cursor position to start search
+    call cursor(a:line1-1, 0)
 
-  " loop over part ids
-  for pid in pids
+    " loop over part ids
+    for pid in pids
 
-    " find current pid
-    let snum = 8 - len(pid)
-    let regexp = '^.\{8}\s\{'. snum . '}'  . pid
-    let match = search(regexp, '', lend)
+      " find current pid
+      let snum = 8 - len(pid)
+      let regexp = '^.\{8}\s\{'. snum . '}'  . pid
+      let match = search(regexp, '', lend)
 
-    " found pid
-    if (match != 0)
+      " found pid
+      if (match != 0)
 
-      " put header
-      call append(match-1, '$ Part: ' . pid)
+        " put header
+        call append(match-1, '$ Part: ' . pid)
 
-      " find end of range
-      call cursor(lend+2, 0)
-      call append(search(regexp, 'b', a:line1), '$')
+        " find end of range
+        call cursor(lend+2, 0)
+        call append(search(regexp, 'b', a:line1), '$')
 
-      " for every pid I found two extra lines are added
-      let lend = lend + 2
+        " for every pid I found two extra lines are added
+        let lend = lend + 2
 
-    endif
+      endif
 
-  endfor
+    endfor
+
+  endif
 
 endfunction
 

@@ -29,7 +29,7 @@ CONTENTS
        6.3 Data line autoformating.............|lsdyna-autoFormat|
        6.4 Text objects........................|lsdyna-textObject|
            6.4.1 Keyword objects...............|lsdyna-objectKeyword|
-           6.4.2 Part column objects...........|lsdyna-objectPartColumn|
+           6.4.2 Column objects................|lsdyna-objectColumn|
     7. Commands................................|lsdyna-commands|
        7.1 Curve commands......................|lsdyna-curveCommands|
            7.1.1 LsCurveScale..................|lsdyna-curveScale|
@@ -44,11 +44,10 @@ CONTENTS
            7.2.3 LsNodeOffsetId................|lsdyna-nodeOffsetId|
            7.2.4 LsNodeReflect.................|lsdyna-nodeReflect|
        7.3 Element commands....................|lsdyna-elemCommands|
-           7.3.1 LsElemSortPid.................|lsdyna-elemSortPid|
-           7.3.2 LsElemFindPid.................|lsdyna-elemFindPid|
-           7.3.3 LsElemChangePid...............|lsdyna-elemChangePid|
-           7.3.4 LsElemOffsetId................|lsdyna-elemOffsetId|
-           7.3.5 LsElemReverseNormals..........|lsdyna-elemReverseNormals|
+           7.3.1 LsElemFindPid.................|lsdyna-elemFindPid|
+           7.3.2 LsElemChangePid...............|lsdyna-elemChangePid|
+           7.3.3 LsElemOffsetId................|lsdyna-elemOffsetId|
+           7.3.4 LsElemReverseNormals..........|lsdyna-elemReverseNormals|
     8. Include files...........................|lsdyna-includes|
        8.1 File name completion................|lsdyna-includeName|
        8.2 Include jumps.......................|lsdyna-includeJump|
@@ -346,7 +345,7 @@ Ls-Dyna keyword file.
 <ll><ll> : autoformating function
 <Alt-c>  : comment/uncomment line
 <Ctrl-c> : comment/uncomment line (the same as <Alt-c>)
-<Alt-c>  : remove all comment lines from selection
+<Alt-r>  : remove all comment lines from selection
 <ll>c    : put empty comment line below
 <ll>C    : put empty comment line above
 <ll>0    : separator with title below
@@ -766,17 +765,20 @@ next use <Alt-c> to comment whole keyword:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-6.4.2 Part column objects                              *lsdyna-objectPartColumn*
+6.4.2 Column objects                                       *lsdyna-objectColumn*
 
-With part column text object you can select all part ids in *ELEMENT_ keyword.
+With column text object you can select column with cursor postion.
+Supported keywords:
+- *NODE
+- *ELEMENT_
 
-Keyword test objects:
-- <ip> : inside part
-- <ap> : around part
+Keyword test objects (both works the same):
+- <ic> : inside column
+- <ac> : around column
 
 Examples of use:
 
-Put cursor at any keyword line:
+Put cursor at column you want to select at any line:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -787,12 +789,13 @@ Put cursor at any keyword line:
    >|       2    1000     5      6      7      8  |<
     |       3    3000     9     10     11     12  |
     |       4    2000    13     14     15     16  |
-    |$                                            |
+    |$            ^                               |
+    |                                             |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
 
-Use <vap>/<vip> to select whole part column
+Use <vac>/<vic> to select whole the column
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1574,16 +1577,21 @@ For instance you can do operation like sort element table respect to part id,
 update part id to new value, offset id of elements.
 
 --------------------------------------------------------------------------------
-7.3.1 LsElemSortPid                                         *lsdyna-elemSortPid*
+7.3.1 LsElemFindPid                                         *lsdyna-elemFindPid*
 
 Description:
-Sort element table respect to part id.
+Find all elements with specific part id in element table.
 
 Syntax:
-:LsElemSortPid
+:LsElemFindPid pid
 
 Arguments:
-None
+pid - part id (optional)
+      With no argument all pids will be found.
+      Mulitiply items and ranges are supported:
+      :LsElemFindPid 100
+      :LsElemFindPid 5 100 200
+      :LsElemFindPid 1 10:99 200
 
 Example of use:
 
@@ -1603,7 +1611,7 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsElemSortPid
+	:LsElemFindPid
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1621,24 +1629,6 @@ Make visual selection line with element lines:
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
-
---------------------------------------------------------------------------------
-7.3.2 LsElemFindPid                                         *lsdyna-elemFindPid*
-
-Description:
-Find all elements with specific part id in element table.
-
-Syntax:
-:LsElemFindPid pid
-
-Arguments:
-pid - part id
-      Mulitiply items and ranges are supported:
-      :LsElemFindPid 100
-      :LsElemFindPid 5, 100, 200
-      :LsElemFindPid 1, 10:99, 200
-
-Example of use:
 
 Make visual selection line with element lines:
 
@@ -1675,7 +1665,7 @@ Make visual selection line with element lines:
     +---------------------------------------------+
 >
 --------------------------------------------------------------------------------
-7.3.3 LsElemChangePid                                     *lsdyna-elemChangePid*
+7.3.2 LsElemChangePid                                     *lsdyna-elemChangePid*
 
 Description:
 Change part id in element definition.
@@ -1761,7 +1751,7 @@ Make visual selection line with element lines:
 Sign "&" before parameter name is not mandatory.
 
 --------------------------------------------------------------------------------
-7.3.4 LsElemOffsetId                                       *lsdyna-elemOffsetId*
+7.3.3 LsElemOffsetId                                       *lsdyna-elemOffsetId*
 
 Description:
 Offset node/element/part ids.
@@ -1870,7 +1860,7 @@ NOTE: The command can be used with *NODE as well. In this case it is run with
       "n" option and other options are ignored.
 
 --------------------------------------------------------------------------------
-7.3.5 LsElemReverseNormals                           *lsdyna-elemReverseNormals*
+7.3.4 LsElemReverseNormals                           *lsdyna-elemReverseNormals*
 
 Description:
 Reverse element normal orientation.

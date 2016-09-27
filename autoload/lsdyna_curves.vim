@@ -57,7 +57,6 @@ function! lsdyna_curves#Write(startLine, points, strFormat)
 
   " set cursor position
   let lnum = a:startLine - 1
-  "execute "normal! " . lnum . "G"
 
   " save points into the file
   for i in range(0, len(a:points)-1, 2)

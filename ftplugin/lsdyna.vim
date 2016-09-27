@@ -4,11 +4,14 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  21th of June 2016
-" Version:      1.2.9
+" Last Change:  27th of September 2016
+" Version:      1.3.0
 "
 " History of change:
 "
+" v1.3.0
+"   - PIDTextObject() replaced with GetColumn() function
+"   - LsElemSortPid command removed
 " v1.2.9
 "   - LsDynaComment() function update to be more robust
 " v1.2.8
@@ -236,25 +239,36 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-vnoremap <buffer><script><silent> ap :call <SID>PIDTextObject()<CR>
-onoremap <buffer><script><silent> ap :call <SID>PIDTextObject()<CR>
-vnoremap <buffer><script><silent> ip :call <SID>PIDTextObject()<CR>
-onoremap <buffer><script><silent> ip :call <SID>PIDTextObject()<CR>
+vnoremap <buffer><script><silent> ac :call <SID>GetColumn()<CR>
+onoremap <buffer><script><silent> ac :call <SID>GetColumn()<CR>
+vnoremap <buffer><script><silent> ic :call <SID>GetColumn()<CR>
+onoremap <buffer><script><silent> ic :call <SID>GetColumn()<CR>
 
-function! s:PIDTextObject()
+function! s:GetColumn()
 
   " ----------------------------------------------------------------------------
-  " Function to select pid column with visual block.
+  " Function to select column with visual block.
   " ----------------------------------------------------------------------------
 
   " keyword/comment regular expression
-  let rekw  = '^[$*]'
+  let rekw  = '^[*]'
   " dataline regular expression
   let redl = '^[^$*]'
 
+  " get column number
+  if col("'<") < col(".")
+    let cnum = col(".")
+  else
+    let cnum = col("'<'")
+  endif
+
   " set start of selection
-  call search(rekw, 'bcW')
+  " find keyword line and move to first data line below
+  let kwlnum = search(rekw, 'bcW')
   let lnums = search(redl, 'W')
+
+  " get keyword
+  let keyword = getline(kwlnum)
 
   " set end of selection
   let lnumtmp = search(rekw, 'W')
@@ -264,11 +278,44 @@ function! s:PIDTextObject()
   endif
   let lnume = search(redl, 'bW')
 
-  " go to first line in selection and 1st position in PID column
-  call cursor(lnums, 9)
-  " vertical selection by 'jump' lines
-  let jump = lnume - lnums
-  execute "normal! zo\<C-v>" . jump . "j7lo'"
+  "-----------------------------------------------------------------------------
+  if keyword =~? "*NODE.*$"
+
+    " set column start and column move
+    if cnum <= 8
+      let cstart = 1
+      let cmove = 7
+    elseif cnum > 8 && cnum <= 24
+      let cstart = 9
+      let cmove = 15
+    elseif cnum > 24 && cnum <= 40
+      let cstart = 25
+      let cmove = 15
+    elseif cnum > 40 && cnum <= 56
+      let cstart = 41
+      let cmove = 15
+    elseif cnum > 56 && cnum <= 64
+      let cstart = 57
+      let cmove = 7
+    elseif cnum > 64
+      let cstart = 65
+      let cmove = 7
+    endif
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "*ELEMENT.*$"
+
+    " set column start and column move
+    let cstart = (float2nr(cnum/8)*8)+1
+    let cmove = 7
+
+  endif
+
+  " go to first line in selection and 1st position in column
+  call cursor(lnums, cstart)
+  " line move
+  let lmove = lnume - lnums
+  execute "normal! zo\<C-v>" . lmove . "j" . cmove . "lo'"
 
 endfunction
 
@@ -370,10 +417,7 @@ command! -buffer -range -nargs=* LsNodeOffsetId
 "    ELEMENT COMMANDS
 "-------------------------------------------------------------------------------
 
-command! -buffer -range -nargs=0 LsElemSortPid
- \ :call lsdyna_element#SortPid(<line1>,<line2>,<f-args>)
-
-command! -buffer -range -nargs=+ LsElemFindPid
+command! -buffer -range -nargs=* LsElemFindPid
  \ :call lsdyna_element#FindPid(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsElemOffsetId
