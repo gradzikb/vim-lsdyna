@@ -767,12 +767,12 @@ next use <Alt-c> to comment whole keyword:
 --------------------------------------------------------------------------------
 6.4.2 Column objects                                       *lsdyna-objectColumn*
 
-With column text object you can select column with cursor postion.
+With column text object you can select column under cursor postion.
 Supported keywords:
 - *NODE
 - *ELEMENT_
 
-Keyword test objects (both works the same):
+Column text objects (both works the same):
 - <ic> : inside column
 - <ac> : around column
 
@@ -795,7 +795,7 @@ Put cursor at column you want to select at any line:
     |                                             |
     +---------------------------------------------+
 
-Use <vac>/<vic> to select whole the column
+Use <vac>/<vic> to select whole column
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
