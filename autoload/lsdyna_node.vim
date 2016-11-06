@@ -52,9 +52,7 @@ function! lsdyna_node#Shift(line1, line2, ...)
     let line = getline(lnum)
 
     " skip comment/keyword lines
-    if line =~? "^[$*]"
-      continue
-    endif
+    if line =~? "^[$*]" | continu | endif
 
     " get and scale node coordinates
     let nid = line[0:7]

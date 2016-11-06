@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4		Last change: 2015 December 18th
+*lsdyna.txt*		For Vim version 7.4		Last change: 2016 October 16th
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -59,7 +59,7 @@ CONTENTS
 ================================================================================
 1. Introduction                                            *lsdyna-introduction*
 
-It is official documentation for Ls-Dyna VIM filetype plugin.
+It is documentation for Ls-Dyna VIM filetype plugin.
 
 Ls-Dyna is simulation software developed by Livermore Software Technology
 Corporation (www.lstc.com). The keyword file is used to store all model
@@ -69,10 +69,8 @@ Ls-Dyna filetype plugin gives you:
   - syntax highlighting
   - folding
   - keyword library
-  - useful mappings & functions
-  - useful commands
-
-The plugin is designed to work with fixed keyword format not with free format.
+  - mappings, functions and commands
+  - and much more
 
 ================================================================================
 2. Quick start                                                    *lsdyna-start*
@@ -94,17 +92,6 @@ To check if the plugin is loaded into VIM use:
 >
 	:set filetype?
 <
-VIM message should be:
->
-	filetype=lsdyna
-<
-The plugin require VIM version which support float operations.
-You can test your VIM installation with command:
->
-	echom has("float")
-<
-VIM prints 0 if float operations are not supported and 1 when they are.
-
 ================================================================================
 3. Syntax highlighting                                           *lsdyna-syntax*
 
@@ -121,7 +108,7 @@ Used type depends on Ls-Dyna keyword.
    - *NODE
    - *AIRBAG_REFERENCE_GEOMETRY
 2) 10x8 field
-   - *ELEMENT_ (*ELEMENT_SHELL, *ELEMENT_SOLID, ...)
+   - *ELEMENT_
    - *AIRBAG_SHELL_REFERENCE_GEOMETRY
 3) 8x10 field
    - all other keywords (*PART, *SECTION_, *CONTACT_ ...)
@@ -339,12 +326,9 @@ Ls-Dyna keyword file.
 
 ]]       : jump to next keyword
 [[       : jump to previous keyword
-<        : jump to next column (only 10 width columns are supported)
->        : jump to previous column (only 10 width columns are supported)
 4<Space> : put "$" at the beginning of the line (works only if "4" is in 1st col)
 <ll><ll> : autoformating function
 <Alt-c>  : comment/uncomment line
-<Ctrl-c> : comment/uncomment line (the same as <Alt-c>)
 <Alt-r>  : remove all comment lines from selection
 <ll>c    : put empty comment line below
 <ll>C    : put empty comment line above
@@ -412,12 +396,13 @@ To uncomment select the same lines and use <Alt-c> once again.
 6.3 Data line autoformating                                  *lsdyna-autoFormat*
 
 The plugin has simple autoformating function. The function is trigged with
-<ll><ll> mapping ("\\" for default VIM settings). The function try to guess
-under what keyword is and format data line according to syntax rules.
+<ll><ll> mapping ("\\" for default VIM settings). The function guesses under
+what keyword is and format data line according to syntax rules.
+It can be used also for conversion from free to fixed format.
 
-Autoformating with standard 10 width columns:
+Example: Column position adjusting
 
-Position of part ids in *SET_PART is incorrect, put cursor at the line:
+Put cursor at the line:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -432,7 +417,7 @@ Position of part ids in *SET_PART is incorrect, put cursor at the line:
     |                                             |
     +---------------------------------------------+
 
-Run autoformating function <ll><ll> to adjust them in 10 wide columns:
+Run <ll><ll> to adjust the line with 10 wide columns:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -447,64 +432,41 @@ Run autoformating function <ll><ll> to adjust them in 10 wide columns:
     |                                             |
     +---------------------------------------------+
 
-NOTE: Coma "," is used as special sign (not true under *DEFINE_CURVE).
-      Autoformating function insert empty 10 wide column for each coma.
+Example: Free to fixed format conversion
+
+Put cursor at the line:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |*SET_PART_TITLE                              |
-    |$# title                                     |
-    |Contact_parts                                |
-    |$#    pid1      pid2      pid3      pid4     |
-   >| , , 3                                       |<
+    |*SECTION_SHELL                               |
+    |$#   secid    elform      shrf       nip     |
+   >| 10, 2, , 5                                  |<
+    |$#      t1        t2        t3        t4     |
+    |       1.0                                   |
     |$                                            |
+    |~                                            |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
+
+Run <ll><ll> to adjust the line:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |*SET_PART_TITLE                              |
-    |$# title                                     |
-    |Contact_parts                                |
-    |$#    pid1      pid2      pid3      pid4     |
-    |                             3               |
+    |*SECTION_SHELL                               |
+    |$#   secid    elform      shrf       nip     |
+    |        10         2                   5     |
+    |$#      t1        t2        t3        t4     |
+    |       1.0                                   |
     |$                                            |
+    |~                                            |
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
 
-You can use prefix for coma as well:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*SET_PART_TITLE                              |
-    |$# title                                     |
-    |Contact_parts                                |
-    |$#    pid1      pid2      pid3      pid4     |
-   >| 3, 3                                        |<
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*SET_PART_TITLE                              |
-    |$# title                                     |
-    |Contact_parts                                |
-    |$#    pid1      pid2      pid3      pid4     |
-    |                                       3     |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-Autoformating functions with *DEFINE_CURVE keyword:
+Example: *DEFINE_CURVE abscissa and ordinate values
 
 Make visual line selection for data lines:
 
@@ -542,9 +504,7 @@ Use <ll><ll> to format x and y values to correct positions:
     |                                             |
     +---------------------------------------------+
 
-Autoformating function supports "," under *DEFINE_CURVE as separator.  You can
-have more than one point in line. In next example *AMPLITUDE data points from
-Abaqus will be converted in Ls-Dyna *DEFINE_CURVE format.
+The function support more than one point in line.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -588,10 +548,10 @@ Use <ll><ll> with selected lines:
     |                                             |
     +---------------------------------------------+
 
-Autoformating with *PARAMETER keyword:
+Example: Parameters autoformating
 
 The function is able recognise parameter type (integer, real, character) and
-set correct prefix (I, R, C). If prefix is defined it is not overwrite.
+set correct prefix (I, R, C). If prefix is defined it will not overwrite.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -621,7 +581,7 @@ Use <ll><ll> with selected lines:
     |R     par3       1.0                         |
     |R     par4  -5.0e-03                         |
     |C     par5    name01                         |
-    |R     par6       100                         |
+    |I     par6       100                         |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -638,8 +598,8 @@ If you are not familiar with VIM text objects see ":help text-objects".
 Ls-Dyna filetype plugin text-objects:
 - <ik> : inside keyword
 - <ak> : around keyword
-- <ip> : inside part column
-- <ap> : around part column
+- <ip> : inside keyword column
+- <ap> : around keyword column
 
 You can use them with other VIM commands like <d>, <y>, <v>.
 Both text object work the same way! There is no distinguish like in <aw>/<iw>.
@@ -767,7 +727,7 @@ next use <Alt-c> to comment whole keyword:
 --------------------------------------------------------------------------------
 6.4.2 Column objects                                       *lsdyna-objectColumn*
 
-With column text object you can select column under cursor postion.
+With column text object you can select column under cursor position.
 Supported keywords:
 - *NODE
 - *ELEMENT_
@@ -802,12 +762,12 @@ Use <vac>/<vic> to select whole column
     |$                                            |
     |*ELEMENT_SHELL                               |
     |$#   eid     pid    n1     n2     n3     n4  |
-             vvvvvvvv
+    |        vvvvvvv|
     |       1    2000     1      2      3      4  |
     |       2    1000     5      6      7      8  |
     |       3    3000     9     10     11     12  |
     |       4    2000    13     14     15     16  |
-             ^^^^^^^^
+    |        ^^^^^^^^                             |
     |$                                            |
     |command-line=================================+
     |                                             |
@@ -1771,7 +1731,6 @@ Arguments can be collected in one:
  nep : offset node, element and part id
 
 Order of arguments is unimportant. "en" and "ne" options work the same.
-If arguments will be not passed by default function is call with "en" option.
 Keyword and comment lines from selection are ignored.
 
 Example of use:
@@ -1792,7 +1751,7 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 >
-	:LsElemOffsetId 1000
+	:LsElemOffsetId ne 1000
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -1847,10 +1806,10 @@ Make visual selection line with element lines:
     |$                                            |
     |*ELEMENT_SHELL                               |
     |$#   eid     pid    n1     n2     n3     n4  |
-   >|    2001    2010  2001   2002   2003   2004  |<
-   >|    2002    2010  2005   2006   2007   2008  |<
-   >|    2003    2011  2009   2000   2011   2012  |<
-   >|    2004    2011  2013   2014   2015   2016  |<
+    |    2001    2010  2001   2002   2003   2004  |
+    |    2002    2010  2005   2006   2007   2008  |
+    |    2003    2011  2009   2000   2011   2012  |
+    |    2004    2011  2013   2014   2015   2016  |
     |$                                            |
     |command-line=================================+
     |                                             |

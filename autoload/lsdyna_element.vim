@@ -5,11 +5,14 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  27th of September 2016
-" Version:      1.1.1
+" Last Change:  5th of November 2016
+" Version:      1.1.2
 "
 " History of change:
 "
+" v1.1.2
+"   - element offset improved for *ELEMENT_BEAM
+"   - element offset improved for *ELEMENT_MASS
 " v1.1.1
 "   - FindPid function with no arguments works as SortPid function
 "   - SortPid function removed
@@ -27,7 +30,7 @@
 "   - initial version
 "
 "-------------------------------------------------------------------------------
-"
+
 function! lsdyna_element#OffsetId(line1, line2, ...)
 
   "-----------------------------------------------------------------------------
@@ -46,21 +49,21 @@ function! lsdyna_element#OffsetId(line1, line2, ...)
   " user parameters setup
   if a:0 == 1
 
-    " set default flag
-    let arg = "en"
-    " get user offset
-    let offset = str2nr(a:1)
+    echo "ERROR: Not enough arguments defined!"
+    return
 
-  elseif a:0 == 2
+  else
 
-    " get information what to renumber?
-    let argList = []
-    for i in range(0, len(a:1))
-      if a:1[i] =~? "[nep]"
-        call add(argList, a:1[i])
+    " get renumber flags
+    let flags = substitute(a:1, "\\s", "", "g")
+    " check renumber flags
+    for i in range(0, len(flags)-1)
+      if flags[i] !~? "[nep]"
+        echo "ERROR: Argument \"" . flags[i] . "\" is not supported!"
+        return
       endif
     endfor
-    let arg = join(sort(argList), "")
+    let arg = join(sort(split(flags, '\zs')), "")
 
     " get user offset
     let offset = str2nr(a:2)
@@ -140,48 +143,117 @@ function! lsdyna_element#OffsetId(line1, line2, ...)
     for lnum in range(a:line1, a:line2)
 
       " take current line
-      let line = getline(lnum)
+      let line = substitute(getline(lnum), "\\s*$", "", "")
 
       " skip comment/keyword lines
-      if line =~? "^[$*]"
-        continue
-      endif
+      if line =~? "^[$*]" | continue | endif
 
-      " offset only element id
+      " split line
+      let eid  = str2nr(line[:7])
+      let nid  = str2nr(line[8:15])
+      let mass = line[16:31]
+      let pid  = str2nr(line[32:39])
+
+      " element offset
       if arg == "e"
-        let eid = str2nr(line[:7]) + offset
-        let nid = str2nr(line[8:15])
-        let pid = str2nr(line[33:])
-      " offset only node id
+        let eid  = eid + offset
+      " node offset
       elseif arg == "n"
-        let eid = str2nr(line[:7])
-        let nid = str2nr(line[8:15]) + offset
-        let pid = str2nr(line[33:])
-      " offset node and element id
+        let nid  = nid + offset
+      " part offset
       elseif arg == "p"
-        let eid = str2nr(line[:7])
-        let nid = str2nr(line[8:15])
-        let pid = str2nr(line[33:]) + offset
+        let pid = pid + offset
       elseif arg == "en"
-        let eid = str2nr(line[:7]) + offset
-        let nid = str2nr(line[8:15]) + offset
-        let pid = str2nr(line[33:])
+      " element and node offset
+        let eid  =  eid + offset
+        let nid  =  eid + offset
       elseif arg == "ep"
-        let eid = str2nr(line[:7]) + offset
-        let nid = str2nr(line[8:15])
-        let pid = str2nr(line[33:]) + offset
-      elseif arg == "np"
-        let eid = str2nr(line[:7])
-        let nid = str2nr(line[8:15]) + offset
-        let pid = str2nr(line[33:]) + offset
+      " element and part offset
+        let eid  = eid + offset
+        let pid  = pid + offset
+      " part and node offset
+        let pid  =  pid + offset
+        let nid  =  pid + offset
+      " element, node and part offset
       elseif arg == "enp"
-        let eid = str2nr(line[:7]) + offset
-        let nid = str2nr(line[8:15]) + offset
-        let pid = str2nr(line[33:]) + offset
+        let eid  =  eid + offset
+        let pid  =  pid + offset
+        let nid  =  nid + offset
       endif
 
       " dump line with new id
-      let newline = printf("%8s%8s", eid, nid) . line[16:31] . printf("%8s", pid)
+      if len(line) <= 32
+        let newline = printf("%8s%8s%16s", eid, nid, mass)
+      else
+        if str2nr(line[32:39]) == 0 | let pid = line[32:39] | endif
+        let newline = printf("%8s%8s%16s%8s", eid, nid, mass, pid)
+      endif
+      call setline(lnum, newline)
+
+    endfor
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? "^\*ELEMENT_BEAM\s*$"
+
+    for lnum in range(a:line1, a:line2)
+
+      " get current line and remove trailing white signs
+      let line = substitute(getline(lnum), "\\s*$", "", "")
+
+      " skip comment/keyword lines
+      if line =~? "^[$*]" | continue | endif
+
+      " split line
+      let eid  = str2nr(line[:7])
+      let pid  = str2nr(line[8:15])
+      let n1id = str2nr(line[16:23])
+      let n2id = str2nr(line[24:31])
+      let n3id = str2nr(line[32:39])
+
+      " element offset
+      if arg == "e"
+        let eid  = eid + offset
+      " node offset
+      elseif arg == "n"
+        let n1id = n1id + offset
+        let n2id = n2id + offset
+        let n3id = n3id + offset
+      " part offset
+      elseif arg == "p"
+        let pid = pid + offset
+      elseif arg == "en"
+      " element and node offset
+        let eid  =  eid + offset
+        let n1id = n1id + offset
+        let n2id = n2id + offset
+        let n3id = n3id + offset
+      elseif arg == "ep"
+      " element and part offset
+        let eid  = eid + offset
+        let pid  = pid + offset
+      " part and node offset
+        let pid  =  pid + offset
+        let n1id = n1id + offset
+        let n2id = n2id + offset
+        let n3id = n3id + offset
+      " element, node and part offset
+      elseif arg == "enp"
+        let eid  =  eid + offset
+        let pid  =  pid + offset
+        let n1id = n1id + offset
+        let n2id = n2id + offset
+        let n3id = n3id + offset
+      endif
+
+      " dump only four columns
+      if len(line) <= 32
+        let newline = printf("%8s%8s%8s%8s", eid, pid, n1id, n2id)
+      " dump whole line
+      else
+        " if 3rd node was zero or not defined keep it
+        if str2nr(line[32:39]) == 0 | let n3id = line[32:39] | endif
+        let newline = printf("%8s%8s%8s%8s%8s", eid, pid, n1id, n2id, n3id) . line[40:]
+      endif
       call setline(lnum, newline)
 
     endfor

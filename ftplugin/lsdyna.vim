@@ -4,11 +4,13 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  27th of September 2016
-" Version:      1.3.0
+" Last Change:  5th of November 2016
+" Version:      1.3.1
 "
 " History of change:
 "
+" v1.3.1
+"   - File cleanup
 " v1.3.0
 "   - PIDTextObject() replaced with GetColumn() function
 "   - LsElemSortPid command removed
@@ -56,7 +58,7 @@
 "       - *ELEMENT_MASS, _PART, _PART_SET
 "       - *ELEMENT_BEAM
 "       - *ELEMENT_DISCRETE
-"       - *ELEMENT_PLOEL
+"       - *ELEMENT_PLOTEL
 "       - *ELEMENT_SEATBELT
 "       - *ELEMENT_SOLID
 "       - *ELEMENT_SHELL
@@ -89,7 +91,7 @@ set cpo&vim
 colorscheme lsdyna
 
 "-------------------------------------------------------------------------------
-"    PREFERED TAB SETTINGS
+"    MISC SETTINGS
 "-------------------------------------------------------------------------------
 
 " use spaces instead tab
@@ -98,10 +100,14 @@ setlocal expandtab
 setlocal tabstop=10
 " set width for < > commands
 setlocal shiftwidth=10
-" do not remove tab space equvivalent but only one sign
-setlocal softtabstop=0
 " allow for virtual columns
 setlocal virtualedit=all
+" command line completion (show all possibilities)
+setlocal wildmode=list,full
+" reset indent rules
+setlocal indentexpr=
+" always change current directory
+setlocal autochdir
 
 "-------------------------------------------------------------------------------
 "    FOLDING
@@ -113,34 +119,14 @@ setlocal foldmethod=expr
 setlocal foldminlines=4
 
 "-------------------------------------------------------------------------------
-"    INDENT
-"-------------------------------------------------------------------------------
-
-" reset indent rules
-setlocal indentexpr=
-
-"-------------------------------------------------------------------------------
 "    USEFUL MAPPINGS
 "-------------------------------------------------------------------------------
 
+" comment/uncomment line
+noremap <silent><buffer> <M-c> :call lsdyna_misc#CommentLine()<CR>j
 " change 4 -> $ but only at the beginning of the line
-inoreabbrev 4 4<C-R>=<SID>LsDynaComment()<CR>
+inoreabbrev 4 4<C-R>=lsdyna_misc#CommentSign()<CR>
 
-function! s:LsDynaComment()
-
-  if col('.') == 2 && getline('.')[0] == '4'
-    let tmpUnnamedReg = @@
-    normal! hx
-    let @@ = tmpUnnamedReg
-    return '$'
-  else
-    return ''
-  endif
-
-endfunction
-
-"-------------------------------------------------------------------------------
-"
 " mapping for separation lines
 nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
 nnoremap <silent><buffer> <LocalLeader>C O$<ESC>0
@@ -173,160 +159,41 @@ inoreabbrev bof $-------------------------------------BOF-----------------------
 inoreabbrev eof $-------------------------------------EOF---------------------------------------
 
 "-------------------------------------------------------------------------------
-"    INCLUDES
+"    AUTOGROUP
 "-------------------------------------------------------------------------------
 
 " always set current working directory respect to open file
 augroup lsdyna
   autocmd!
-  " set working directory to current file
-  cd %:p:h
-  autocmd BufNewFile * cd %:p:h
-  autocmd BufReadPost * cd %:p:h
-  autocmd WinEnter * cd %:p:h
-  autocmd TabEnter * cd %:p:h
+  " store file as unix
   autocmd BufWrite * set ff=unix
 augroup END
-
-"-------------------------------------------------------------------------------
-"    COMMENT FUNCTION
-"-------------------------------------------------------------------------------
-
-" prefered Alt-C but not always works ...
-noremap <silent><buffer> <M-c> :call <SID>Comment()<CR>j
-" ... use Ctrl-C instead
-noremap <silent><buffer> <C-c> :call <SID>Comment()<CR>j
-
-function! <SID>Comment() range
-
-  if getline(a:firstline) =~? "^\\$"
-    silent execute a:firstline . ',' . a:lastline . 's/^\$//'
-  else
-    silent execute a:firstline . ',' . a:lastline . 's/^/$/'
-  endif
-
-endfunction
 
 "-------------------------------------------------------------------------------
 "    TEXT OBJECTS
 "-------------------------------------------------------------------------------
 
 " around keyword (ak) and insert keyword (ik) works the same
-vnoremap <buffer><script><silent> ik :call <SID>KeywordTextObj()<CR>
-onoremap <buffer><script><silent> ik :call <SID>KeywordTextObj()<CR>
-vnoremap <buffer><script><silent> ak :call <SID>KeywordTextObj()<CR>
-onoremap <buffer><script><silent> ak :call <SID>KeywordTextObj()<CR>
+vnoremap <buffer><script><silent> ik :call lsdyna_misc#KeywordTextObject()<CR>
+onoremap <buffer><script><silent> ik :call lsdyna_misc#KeywordTextObject()<CR>
+vnoremap <buffer><script><silent> ak :call lsdyna_misc#KeywordTextObject()<CR>
+onoremap <buffer><script><silent> ak :call lsdyna_misc#KeywordTextObject()<CR>
 
-function! s:KeywordTextObj()
-
- let reKeyWord  = "^\*[A-Za-z_]"
- let reDataLine = "^[^$]\\|^$"
-
-  " find keyword in backword
-  call search(reKeyWord,'bWc')
-  " start line visual mode
-  normal! V
-  " serach next keyword
-  let res = search(reKeyWord, 'W')
-  " go to the end of file if you did not find the keyword
-  if res == 0
-    normal! G
-  endif
-  " move back to first data line
-  call search(reDataLine,'bW')
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-vnoremap <buffer><script><silent> ac :call <SID>GetColumn()<CR>
-onoremap <buffer><script><silent> ac :call <SID>GetColumn()<CR>
-vnoremap <buffer><script><silent> ic :call <SID>GetColumn()<CR>
-onoremap <buffer><script><silent> ic :call <SID>GetColumn()<CR>
-
-function! s:GetColumn()
-
-  " ----------------------------------------------------------------------------
-  " Function to select column with visual block.
-  " ----------------------------------------------------------------------------
-
-  " keyword/comment regular expression
-  let rekw  = '^[*]'
-  " dataline regular expression
-  let redl = '^[^$*]'
-
-  " get column number
-  if col("'<") < col(".")
-    let cnum = col(".")
-  else
-    let cnum = col("'<'")
-  endif
-
-  " set start of selection
-  " find keyword line and move to first data line below
-  let kwlnum = search(rekw, 'bcW')
-  let lnums = search(redl, 'W')
-
-  " get keyword
-  let keyword = getline(kwlnum)
-
-  " set end of selection
-  let lnumtmp = search(rekw, 'W')
-  " go to end of the file if found nothing
-  if lnumtmp == 0
-    normal! G
-  endif
-  let lnume = search(redl, 'bW')
-
-  "-----------------------------------------------------------------------------
-  if keyword =~? "*NODE.*$"
-
-    " set column start and column move
-    if cnum <= 8
-      let cstart = 1
-      let cmove = 7
-    elseif cnum > 8 && cnum <= 24
-      let cstart = 9
-      let cmove = 15
-    elseif cnum > 24 && cnum <= 40
-      let cstart = 25
-      let cmove = 15
-    elseif cnum > 40 && cnum <= 56
-      let cstart = 41
-      let cmove = 15
-    elseif cnum > 56 && cnum <= 64
-      let cstart = 57
-      let cmove = 7
-    elseif cnum > 64
-      let cstart = 65
-      let cmove = 7
-    endif
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT.*$"
-
-    " set column start and column move
-    let cstart = (float2nr(cnum/8)*8)+1
-    let cmove = 7
-
-  endif
-
-  " go to first line in selection and 1st position in column
-  call cursor(lnums, cstart)
-  " line move
-  let lmove = lnume - lnums
-  execute "normal! zo\<C-v>" . lmove . "j" . cmove . "lo'"
-
-endfunction
+" around column (ak) and insert column (ik) works the same
+vnoremap <buffer><script><silent> ac :call lsdyna_misc#ColumnTextObject()<CR>
+onoremap <buffer><script><silent> ac :call lsdyna_misc#ColumnTextObject()<CR>
+vnoremap <buffer><script><silent> ic :call lsdyna_misc#ColumnTextObject()<CR>
+onoremap <buffer><script><silent> ic :call lsdyna_misc#ColumnTextObject()<CR>
 
 "-------------------------------------------------------------------------------
 "    KEYWORDS LIBRARY
 "-------------------------------------------------------------------------------
 
+" set user completion function to run with <C-X><C-U>
+setlocal completefunc=lsdyna_library#CompleteKeywords
 " allow to use Ctrl-Tab for user completion
 inoremap <C-Tab> <C-X><C-U>
-
-" set using popupmenu for completion
+" set using popup menu for completion
 setlocal completeopt+=menu
 setlocal completeopt+=menuone
 
@@ -336,16 +203,13 @@ if !exists("g:lsdynaKeyLibPath")
 endif
 
 " initialize lsdyna keyword library
-" the library is initilized only once per Vim session
+" the library is initialized only once per Vim session
 if !exists("g:lsdynaKeyLib")
   let g:lsdynaKeyLib =lsdyna_library#initLib(g:lsdynaKeyLibPath)
 endif
 
 " set user completion flag
 let b:lsDynaUserComp = 0
-
-" set user completion function to run with <C-X><C-U>
-setlocal completefunc=lsdyna_library#CompleteKeywords
 
 " mapping for <CR>/<C-Y>/<kEnter>
 " if g:lsDynaUserComp is true run GetCompletion function
@@ -364,16 +228,11 @@ inoremap <buffer><silent><script><expr> <Up>
  \ pumvisible() ? "\<C-p>" : "\<Up>"
 
 "-------------------------------------------------------------------------------
-"    LINE FORMATING
+"    LINE FORMATTING
 "-------------------------------------------------------------------------------
 
 noremap <buffer><script><silent> <LocalLeader><LocalLeader>
- \ :call lsdyna_autoformat#LsDynaLine()<CR>
-
-noremap <buffer><script><silent> >
- \ :<c-u>call lsdyna_indent#JumpCol("Right")<CR>
-noremap <buffer><script><silent> <
- \ :<c-u>call lsdyna_indent#JumpCol("Left")<CR>
+ \ :call lsdyna_autoformat#Autoformat()<CR>
 
 "-------------------------------------------------------------------------------
 "    CURVE COMMANDS
@@ -443,6 +302,7 @@ command! -buffer -nargs=0 LsCheckPath
  \ :call lsdyna_include#CheckPath()
 
 "-------------------------------------------------------------------------------
+
 " restore vim functions
 let &cpo = s:cpo_save
 

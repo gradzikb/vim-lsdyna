@@ -5,26 +5,30 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  29th of June 2016
-" Version:      1.0.3
+" Last Change:  16th of October 2016
+" Version:      1.1.0
 "
 " History of change:
 "
+" v1.1.0
+"   - script new layout
+"   - keyword and comment lines are ignored
+"   - free format (with coma) is now converted to fixed format
 " v1.0.3
 "   - autoformationg for standard keyword (8*10) improved
 " v1.0.2
-"   - *PARAMETER formating improved (again)
+"   - *PARAMETER formatting improved (again)
 " v1.0.1
-"   - *PARAMETER formating improved
+"   - *PARAMETER formatting improved
 " v1.0.0
 "   - initial version
 "
 "-------------------------------------------------------------------------------
 
-function! lsdyna_autoformat#LsDynaLine() range
+function! lsdyna_autoformat#Autoformat() range
 
   "-----------------------------------------------------------------------------
-  " Function to autformat Ls-Dyna line.
+  " Function to autformat Ls-Dyna lines.
   "
   " Arguments:
   " - None
@@ -33,247 +37,397 @@ function! lsdyna_autoformat#LsDynaLine() range
   "-----------------------------------------------------------------------------
 
   " find keyword
-  call search('^\*[a-zA-Z]','b')
-  let keyword = getline('.')
+  let keyword = getline(search('^\*\a','bcnW'))
 
   "-----------------------------------------------------------------------------
   if keyword =~? "*DEFINE_CURVE.*$"
 
-    let line = getline(a:firstline)
-    let lenLine = len(split(line, '\s*,\s*\|\s\+'))
+    call lsdyna_autoformat#define_curve(a:firstline, a:lastline)
 
-    " format 8x10 (first line under the keyword)
-    if lenLine !=2 && line !~ ","
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*NODE\s*$' ||
+       \ keyword =~? '^\*AIRBAG_REFERENCE_GEOMETRY\s*$'
 
-      let oneline = split(getline(a:firstline))
-      for j in range(len(oneline))
-        let oneline[j] = printf("%10s", oneline[j])
-      endfor
-      call setline(a:firstline, join(oneline, ""))
-      call cursor(a:firstline, 0)
+    call lsdyna_autoformat#node(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*ELEMENT_PLOTEL\s*$' ||
+       \ keyword =~? '^\*ELEMENT_BEAM\s*$' ||
+       \ keyword =~? '^\*ELEMENT_SHELL\s*$' ||
+       \ keyword =~? '^\*ELEMENT_SOLID\s*$'
+
+    call lsdyna_autoformat#element(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '\*ELEMENT_MASS\s*$'
+
+    call lsdyna_autoformat#element_mass(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '\*ELEMENT_MASS_PART.*$'
+
+    call lsdyna_autoformat#element_mass_part(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*ELEMENT_DISCRETE\s*$'
+
+    call lsdyna_autoformat#element_discrete(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*ELEMENT_SEATBELT\s*$'
+
+    call lsdyna_autoformat#element_seatbelt(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*PARAMETER\s*$' ||
+       \ keyword =~? '^\*PARAMETER_LOCAL\s*$'
+
+    call lsdyna_autoformat#parameter(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*PARAMETER_EXPRESSION\s*$' ||
+       \ keyword =~? '^\*PARAMETER_EXPRESSION_LOCAL\s*$'
+
+    call lsdyna_autoformat#parameter_expr(a:firstline, a:lastline)
+
+  "-----------------------------------------------------------------------------
+  else
+
+    call lsdyna_autoformat#keyword(a:firstline, a:lastline)
+
+  endif
+
+endfunction
+
+"-------------------------------------------------------------------------------
+"    INTERNAL FUNCTIONS
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#node(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " loop inside line
+    for j in range(len(line))
+      if j == 1 || j == 2 || j == 3
+        let line[j] = printf("%16s", line[j])
+      else
+        let line[j] = printf("%8s", line[j])
+      endif
+    endfor
+    call setline(i, join(line, ""))
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+"
+function! lsdyna_autoformat#element(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " set 8 length string for each item
+    call map(line, 'printf("%8s", v:val)')
+    " dump the line
+    call setline(i, join(line, ""))
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#element_discrete(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " loop inside line
+    for j in range(len(line))
+      if j == 5 || j == 7
+        let line[j] = printf("%16s", line[j])
+      else
+        let line[j] = printf("%8s", line[j])
+      endif
+    endfor
+    call setline(i, join(line, ""))
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#element_seatbelt(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " loop inside line
+    for j in range(len(line))
+      if j == 5
+        let line[j] = printf("%16s", line[j])
+      else
+        let line[j] = printf("%8s", line[j])
+      endif
+    endfor
+    call setline(i, join(line, ""))
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#element_mass(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " loop inside line
+    for j in range(len(line))
+      if j == 2
+        let line[j] = printf("%16s", line[j])
+      else
+        let line[j] = printf("%8s", line[j])
+      endif
+    endfor
+    call setline(i, join(line, ""))
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#element_mass_part(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " loop inside line
+    for j in range(len(line))
+      if j == 0
+        let line[j] = printf("%8s", line[j])
+      else
+        let line[j] = printf("%16s", line[j])
+      endif
+    endfor
+    call setline(i, join(line, ""))
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#parameter(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " prefix exists?
+    if len(line) == 3
+      let line[0] = toupper(line[0])
+      let newLine = printf("%1s%9s%10s",line[0],line[1],line[2])
+    " try to guess prefix and add one
+    else
+      " character
+      if line[1] =~? '^\h.*$'
+        let newLine = printf("%1s%9s%10s","C",line[0],line[1])
+      " integer
+      elseif line[1] =~? '^[-+]\?\d\+$'
+        let newLine = printf("%1s%9s%10s","I",line[0],line[1])
+      " real
+      else
+        let newLine = printf("%1s%9s%10s","R",line[0],line[1])
+      endif
+    endif
+
+    " dump new line
+    call setline(i, newLine)
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#parameter_expr(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " prefix exists?
+    if line[0] =~? '^[IR]$'
+      let newLine = printf("%1s%9s%1s%1s",toupper(line[0]),line[1]," ",join(line[2:]))
+    else
+      let newLine = printf("%1s%9s%1s%1s","R",line[0]," ",join(line[1:]))
+    endif
+
+    " dump new line
+    call setline(i, newLine)
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#keyword(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " set 10 length string for each item
+    call map(line, 'printf("%10s", v:val)')
+    " dump the line
+    call setline(i, join(line, ""))
+
+
+  endfor
+
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_autoformat#define_curve(line1, line2)
+
+  " loop over all selected lines
+  for i in range(a:line1, a:line2)
+
+    " take current line
+    let lineStr = getline(i)
+    " ignore keyword and comment line
+    if lineStr =~? '^[*$]' | continue | endif
+    " split the line
+    let line = split(lineStr, '\s*,\s*\|\s\+')
+
+    " format 8x10 (1st line under the keyword)
+    if len(line) !=2 && lineStr !~ ","
+
+      call lsdyna_autoformat#keyword(a:line1, a:line1)
 
     " format 2x20
     else
 
       " get all lines with points
       let points = []
-      for i in range(a:firstline, a:lastline)
+      for i in range(a:line1, a:line2)
         let points = points + split(getline(i), '\s*,\s*\|\s\+')
       endfor
 
-      " remove old lines
-      execute a:firstline . "," . a:lastline . "delete"
-      normal! k
+      " remove old lines, keep unnamed register
+      let tmpReg = @@
+      execute a:line1 . "," . a:line2 . "delete"
+      let @@ = tmpReg
 
-      " save new lines
+      " format and dump all points
+      let points2 = []
       for i in range(0, len(points)-1, 2)
-        let newLine = printf("%20s%20s", points[i], points[i+1])
-        normal! o
-        call setline(".", newLine)
+        call add(points2, printf("%20s%20s", points[i], points[i+1]))
       endfor
-
-      call cursor(a:firstline+1, 0)
+      call append(a:line1-1, points2)
 
     endif
 
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*NODE *$"
+  endfor
 
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        let newLine = printf("%8s%16s%16s%16s",line[0],line[1],line[2],line[3])
-        call setline(i, newLine)
-      endfor
-      call cursor(a:lastline+1, 0)
+  " go to next line after the last one
+  call cursor(a:line2+1, 0)
 
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_SHELL *$" ||
-       \ keyword =~? "*ELEMENT_SOLID *$" ||
-       \ keyword =~? "*ELEMENT_BEAM *$" ||
-       \ keyword =~? "*ELEMENT_PLOTEL *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          let line[j] = printf("%8s", line[j])
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_MASS *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 2
-            let line[j] = printf("%16s", line[j])
-          else
-            let line[j] = printf("%8s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_MASS_PART.*$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 0
-            let line[j] = printf("%8s", line[j])
-          else
-            let line[j] = printf("%16s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_DISCRETE *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 5 || j == 7
-            let line[j] = printf("%16s", line[j])
-          else
-            let line[j] = printf("%8s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT_SEATBELT *$"
-
-      for i in range(a:firstline, a:lastline)
-        let line = split(getline(i))
-        for j in range(len(line))
-          if j == 5
-            let line[j] = printf("%16s", line[j])
-          else
-            let line[j] = printf("%8s", line[j])
-          endif
-        endfor
-        call setline(i, join(line, ""))
-      endfor
-      call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*PARAMETER *$" ||
-       \ keyword =~? "*PARAMETER_LOCAL *$"
-
-     for i in range(a:firstline, a:lastline)
-
-       " take a line
-       let line = split(getline(i))
-
-       " prefix exists?
-       if len(line) == 3
-         let line[0] = toupper(line[0])
-         let newLine = printf("%1s%9s%10s",line[0],line[1],line[2])
-       " try to guess prefix and add one
-       else
-         " character
-         if line[1] =~? '^\h.*$'
-           let newLine = printf("%1s%9s%10s","C",line[0],line[1])
-         " integer
-         elseif line[1] =~? '^[-+]\?\d\+$'
-           let newLine = printf("%1s%9s%10s","I",line[0],line[1])
-         " real
-         else
-           let newLine = printf("%1s%9s%10s","R",line[0],line[1])
-         endif
-       endif
-
-       " dump new line
-       call setline(i, newLine)
-
-     endfor
-
-     call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  elseif keyword =~? "*PARAMETER_EXPRESSION\s*$" ||
-       \ keyword =~? "*PARAMETER_EXPRESSION_LOCAL\s*$"
-
-     for i in range(a:firstline, a:lastline)
-
-       " take a line
-       let line = split(getline(i))
-
-       " prefix exists?
-       if line[0] =~? '^[IR]$'
-         let line[0] = toupper(line[0])
-         let newLine = printf("%1s%9s%1s%1s",line[0],line[1]," ",join(line[2:]))
-       else
-         " real
-         if join(line[1:]) =~? '\.'
-           let newLine = printf("%1s%9s%1s%1s","R",line[0]," ",join(line[1:]))
-         " integer
-         else
-           let newLine = printf("%1s%9s%1s%1s","I",line[0]," ",join(line[1:]))
-         endif
-       endif
-
-       " dump new line
-       call setline(i, newLine)
-
-     endfor
-
-     call cursor(a:lastline+1, 0)
-
-  "-----------------------------------------------------------------------------
-  " standard format line (8x10)
-  " allow to use coma as empty col
-  else
-
-    " loop over all selected lines
-    for i in range(a:firstline, a:lastline)
-
-      " get current line
-      let lstr = getline((i))
-
-      " find positions of 10th width empty col.
-      let emptcol = []
-      let ncol = float2nr(len(lstr)/10.0)
-      for col in range(ncol)
-         if strpart(lstr, col*10, 10) =~? '\s\{10}'
-           call add(emptcol, col)
-         endif
-      endfor
-
-      " split line
-      let line = split(lstr)
-
-      " add empty columns to line
-      for item in emptcol
-        call insert(line, ',', item)
-      endfor
-
-      " format all items in line to new format
-      for j in range(len(line))
-        let fStr = "%10s"
-        if line[j] =~? ","
-          if len(line[j]) != 1
-            let fStr = "%" . line[j][:-2] . "0s"
-          endif
-          let line[j] = printf(fStr, "")
-        else
-          let line[j] = printf(fStr, line[j])
-        endif
-      endfor
-      call setline(i, join(line, ""))
-    endfor
-    call cursor(a:lastline+1, 0)
-
-  endif
 endfunction
-
 "-------------------------------------EOF---------------------------------------
