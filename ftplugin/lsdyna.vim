@@ -162,7 +162,6 @@ inoreabbrev eof $-------------------------------------EOF-----------------------
 "    AUTOGROUP
 "-------------------------------------------------------------------------------
 
-" always set current working directory respect to open file
 augroup lsdyna
   autocmd!
   " store file as unix
@@ -179,7 +178,7 @@ onoremap <buffer><script><silent> ik :call lsdyna_misc#KeywordTextObject()<CR>
 vnoremap <buffer><script><silent> ak :call lsdyna_misc#KeywordTextObject()<CR>
 onoremap <buffer><script><silent> ak :call lsdyna_misc#KeywordTextObject()<CR>
 
-" around column (ak) and insert column (ik) works the same
+" around column (ac) and insert column (ic) works the same
 vnoremap <buffer><script><silent> ac :call lsdyna_misc#ColumnTextObject()<CR>
 onoremap <buffer><script><silent> ac :call lsdyna_misc#ColumnTextObject()<CR>
 vnoremap <buffer><script><silent> ic :call lsdyna_misc#ColumnTextObject()<CR>
