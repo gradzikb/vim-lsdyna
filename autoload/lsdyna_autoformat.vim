@@ -5,11 +5,13 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  16th of October 2016
-" Version:      1.1.0
+" Last Change:  21th of October 2016
+" Version:      1.1.1
 "
 " History of change:
 "
+" v1.1.1
+"   - define_curve function fixed
 " v1.1.0
 "   - script new layout
 "   - keyword and comment lines are ignored
@@ -386,45 +388,38 @@ endfunction
 
 function! lsdyna_autoformat#define_curve(line1, line2)
 
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
+  " take 1st line current line
+  let lineStr = getline(a:line1)
+  " split the line
+  let line = split(lineStr, '\s*,\s*\|\s\+')
 
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
+  " format 8x10
+  if len(line) !=2 && lineStr !~ ","
 
-    " format 8x10 (1st line under the keyword)
-    if len(line) !=2 && lineStr !~ ","
+    call lsdyna_autoformat#keyword(a:line1, a:line1)
 
-      call lsdyna_autoformat#keyword(a:line1, a:line1)
+  " format 2x20
+  else
 
-    " format 2x20
-    else
+    " get all lines with points
+    let points1 = []
+    for i in range(a:line1, a:line2)
+      let points1 = points1 + split(getline(i), '\s*,\s*\|\s\+')
+    endfor
 
-      " get all lines with points
-      let points = []
-      for i in range(a:line1, a:line2)
-        let points = points + split(getline(i), '\s*,\s*\|\s\+')
-      endfor
+    " remove old lines, keep unnamed register
+    let tmpReg = @@
+    silent execute a:line1 . "," . a:line2 . "delete"
+    let @@ = tmpReg
 
-      " remove old lines, keep unnamed register
-      let tmpReg = @@
-      execute a:line1 . "," . a:line2 . "delete"
-      let @@ = tmpReg
+    " format and dump all points
+    let points2 = []
+    for i in range(0, len(points1)-1, 2)
+      call add(points2, printf("%20s%20s", points1[i], points1[i+1]))
+    endfor
+    call append(a:line1-1, points2)
 
-      " format and dump all points
-      let points2 = []
-      for i in range(0, len(points)-1, 2)
-        call add(points2, printf("%20s%20s", points[i], points[i+1]))
-      endfor
-      call append(a:line1-1, points2)
-
-    endif
-
-  endfor
+  endif
 
   " go to next line after the last one
   call cursor(a:line2+1, 0)
