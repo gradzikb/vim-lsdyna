@@ -14,7 +14,6 @@ lsdyna-curveSwapXY	lsdyna.txt	/*lsdyna-curveSwapXY*
 lsdyna-elemChangePid	lsdyna.txt	/*lsdyna-elemChangePid*
 lsdyna-elemCommands	lsdyna.txt	/*lsdyna-elemCommands*
 lsdyna-elemFindPid	lsdyna.txt	/*lsdyna-elemFindPid*
-lsdyna-elemOffsetId	lsdyna.txt	/*lsdyna-elemOffsetId*
 lsdyna-elemReverseNormals	lsdyna.txt	/*lsdyna-elemReverseNormals*
 lsdyna-extendLibrary	lsdyna.txt	/*lsdyna-extendLibrary*
 lsdyna-folding	lsdyna.txt	/*lsdyna-folding*
@@ -27,13 +26,14 @@ lsdyna-keywordLibrary	lsdyna.txt	/*lsdyna-keywordLibrary*
 lsdyna-license	lsdyna.txt	/*lsdyna-license*
 lsdyna-mapList	lsdyna.txt	/*lsdyna-mapList*
 lsdyna-mappings	lsdyna.txt	/*lsdyna-mappings*
+lsdyna-miscCommands	lsdyna.txt	/*lsdyna-miscCommands*
 lsdyna-nodeCommands	lsdyna.txt	/*lsdyna-nodeCommands*
-lsdyna-nodeOffsetId	lsdyna.txt	/*lsdyna-nodeOffsetId*
 lsdyna-nodeReflect	lsdyna.txt	/*lsdyna-nodeReflect*
 lsdyna-nodeScale	lsdyna.txt	/*lsdyna-nodeScale*
 lsdyna-nodeShift	lsdyna.txt	/*lsdyna-nodeShift*
 lsdyna-objectColumn	lsdyna.txt	/*lsdyna-objectColumn*
 lsdyna-objectKeyword	lsdyna.txt	/*lsdyna-objectKeyword*
+lsdyna-offsetId	lsdyna.txt	/*lsdyna-offsetId*
 lsdyna-start	lsdyna.txt	/*lsdyna-start*
 lsdyna-syntax	lsdyna.txt	/*lsdyna-syntax*
 lsdyna-templates	lsdyna.txt	/*lsdyna-templates*

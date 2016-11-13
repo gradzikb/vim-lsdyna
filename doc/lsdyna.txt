@@ -41,13 +41,13 @@ CONTENTS
        7.2 Node commands.......................|lsdyna-nodeCommands|
            7.2.1 LsNodeScale...................|lsdyna-nodeScale|
            7.2.2 LsNodeShift...................|lsdyna-nodeShift|
-           7.2.3 LsNodeOffsetId................|lsdyna-nodeOffsetId|
-           7.2.4 LsNodeReflect.................|lsdyna-nodeReflect|
+           7.2.3 LsNodeReflect.................|lsdyna-nodeReflect|
        7.3 Element commands....................|lsdyna-elemCommands|
            7.3.1 LsElemFindPid.................|lsdyna-elemFindPid|
            7.3.2 LsElemChangePid...............|lsdyna-elemChangePid|
-           7.3.3 LsElemOffsetId................|lsdyna-elemOffsetId|
-           7.3.4 LsElemReverseNormals..........|lsdyna-elemReverseNormals|
+           7.3.3 LsElemReverseNormals..........|lsdyna-elemReverseNormals|
+       7.4 Miscellaneous commands..............|lsdyna-miscCommands|
+           7.4.1 LsOffsetId....................|lsdyna-offsetId|
     8. Include files...........................|lsdyna-includes|
        8.1 File name completion................|lsdyna-includeName|
        8.2 Include jumps.......................|lsdyna-includeJump|
@@ -1393,56 +1393,7 @@ Make visual selection line with data lines:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
-7.2.3 LsNodeOffsetId                                       *lsdyna-nodeOffsetId*
-
-Description:
-Offset node ids.
-
-Syntax:
-:LsNodeOffsetId offset
-
-Arguments:
-offset : id offset value
-
-NOTE: This command call |lsdyna-elemOffsetId| command with "n" option.
-
-Example of use:
-
-Make visual selection line with data lines:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*NODE                                        |
-    |$#   nid       x       y       z             |
-   >|       1     1.0     1.0     1.0             |<
-   >|       2     2.0     2.0     2.0             |<
-   >|       3     3.0     3.0     3.0             |<
-    |$                                            |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsNodeOffsetId 1000
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*NODE                                        |
-    |$#   nid       x       y       z             |
-    |    1000     1.0     1.0     1.0             |
-    |    1000     2.0     2.0     2.0             |
-    |    1000     3.0     3.0     3.0             |
-    |$                                            |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-
---------------------------------------------------------------------------------
-7.2.4 LsNodeReflect                                         *lsdyna-nodeReflect*
+7.2.3 LsNodeReflect                                         *lsdyna-nodeReflect*
 
 Description:
 Reflect node respect to defined plane.
@@ -1711,115 +1662,7 @@ Make visual selection line with element lines:
 Sign "&" before parameter name is not mandatory.
 
 --------------------------------------------------------------------------------
-7.3.3 LsElemOffsetId                                       *lsdyna-elemOffsetId*
-
-Description:
-Offset node/element/part ids.
-
-Syntax:
-:LsElemOffsetId [enp] offset
-
-Arguments:
-     n : offset node id
-     e : offset element id
-     p : offset part id
-offset : offset value
-
-Arguments can be collected in one:
- en  : offset element and node id
- pe  : offset part and element id
- nep : offset node, element and part id
-
-Order of arguments is unimportant. "en" and "ne" options work the same.
-Keyword and comment lines from selection are ignored.
-
-Example of use:
-
-Make visual selection line with element lines:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-   >|       1      10     1      2      3      4  |<
-   >|       2      10     5      6      7      8  |<
-   >|       3      11     9     10     11     12  |<
-   >|       4      11    13     14     15     16  |<
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsElemOffsetId ne 1000
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-    |    1001      10  1001   1002   1003   1004  |
-    |    1002      10  1005   1006   1007   1008  |
-    |    1003      11  1009   1010   1011   1012  |
-    |    1004      11  1013   1014   1015   1016  |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsElemOffsetId p 500
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-    |       1     510     1      2      3      4  |
-    |       2     510     5      6      7      8  |
-    |       3     511     9     10     11     12  |
-    |       4     511    13     14     15     16  |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsElemOffsetId e 2000
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-    |    2001      10     1      2      3      4  |
-    |    2002      10     5      6      7      8  |
-    |    2003      11     9     10     11     12  |
-    |    2004      11    13     14     15     16  |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
->
-	:LsElemOffsetId pen 2000
-<
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*ELEMENT_SHELL                               |
-    |$#   eid     pid    n1     n2     n3     n4  |
-    |    2001    2010  2001   2002   2003   2004  |
-    |    2002    2010  2005   2006   2007   2008  |
-    |    2003    2011  2009   2000   2011   2012  |
-    |    2004    2011  2013   2014   2015   2016  |
-    |$                                            |
-    |command-line=================================+
-    |                                             |
-    +---------------------------------------------+
-
-NOTE: The command can be used with *NODE as well. In this case it is run with
-      "n" option and other options are ignored.
-
---------------------------------------------------------------------------------
-7.3.4 LsElemReverseNormals                           *lsdyna-elemReverseNormals*
+7.3.3 LsElemReverseNormals                           *lsdyna-elemReverseNormals*
 
 Description:
 Reverse element normal orientation.
@@ -1864,6 +1707,181 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 >
+--------------------------------------------------------------------------------
+7.4 Miscellaneous commands                                 *lsdyna-miscCommands*
+
+--------------------------------------------------------------------------------
+7.4.1 LsOffsetId                                               *lsdyna-offsetId*
+
+Description:
+Offset node/element/part ids under misc keywords (*NODE, *ELEMENT_, *SET_).
+
+Syntax:
+:LsOffsetId [enp] offset
+
+Arguments:
+ [nep]  : flag for offset
+          n : offset node id
+          e : offset element id
+          p : offset part id
+ offset : offset value
+
+Offset flags can be collected in one:
+ en  : offset element and node id
+ pe  : offset part and element id
+ nep : offset node, element and part id
+
+Order of arguments is unimportant. "en" and "ne" works the same.
+Keyword and comment lines are ignored.
+
+NOTE: For keywords where only one id can be offset (*NODE) [nep] flags are not required.
+      If used will be ignored.
+
+Example of use:
+
+Make visual selection line with node lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+   >|       1     1.0     1.0     1.0             |<
+   >|       2     2.0     2.0     2.0             |<
+   >|       3     3.0     3.0     3.0             |<
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsOffsetId 1000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+    |    1000     1.0     1.0     1.0             |
+    |    1000     2.0     2.0     2.0             |
+    |    1000     3.0     3.0     3.0             |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Make visual selection with *SET keyword:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+   >|*SET_NODE_LIST                               |
+   >|$#   sid                                     |<
+   >|       1                                     |<
+   >|$#  nid1    nid2    nid3    nid4             |<
+   >|       1       2       3       4             |<
+   >|      10      20                             |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsOffsetId 1000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*SET_NODE_LIST                               |
+    |$#   sid                                     |
+    |    1001                                     |
+    |$#  nid1    nid2    nid3    nid4             |
+    |    1001    1002    1003    1004             |
+    |    1010    1020                             |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Make visual selection line with element lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|       1      10     1      2      3      4  |<
+   >|       2      10     5      6      7      8  |<
+   >|       3      11     9     10     11     12  |<
+   >|       4      11    13     14     15     16  |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsOffsetId p 500
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |       1     510     1      2      3      4  |
+    |       2     510     5      6      7      8  |
+    |       3     511     9     10     11     12  |
+    |       4     511    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsOffsetId e 2000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |    2001      10     1      2      3      4  |
+    |    2002      10     5      6      7      8  |
+    |    2003      11     9     10     11     12  |
+    |    2004      11    13     14     15     16  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsOffsetId ne 1000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |    1001      10  1001   1002   1003   1004  |
+    |    1002      10  1005   1006   1007   1008  |
+    |    1003      11  1009   1010   1011   1012  |
+    |    1004      11  1013   1014   1015   1016  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:LsOffsetId pen 2000
+<
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+    |    2001    2010  2001   2002   2003   2004  |
+    |    2002    2010  2005   2006   2007   2008  |
+    |    2003    2011  2009   2000   2011   2012  |
+    |    2004    2011  2013   2014   2015   2016  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
 ================================================================================
 8. Include files                                               *lsdyna-includes*
 

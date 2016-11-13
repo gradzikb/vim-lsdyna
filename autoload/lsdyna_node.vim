@@ -5,16 +5,52 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  6th of December 2015
-" Version:      1.0.1
+" Last Change:  10th of November 2016
+" Version:      1.1.0
 "
 " History of change:
 "
+" v1.1.0
+"   - lsdyna_node#OffsetId function added
 " v1.0.1
 "   - origin of reflection can be defined by user
 " v1.0.0
 "   - initial version
 "
+"-------------------------------------------------------------------------------
+
+function! lsdyna_node#OffsetId(line1, line2, ...)
+
+  "-----------------------------------------------------------------------------
+  " Function to offset node id.
+  "
+  " Arguments:
+  " - a:line1  : first line of selection
+  " - a:line2  : last line of selection
+  " - ...      : offset id
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  for lnum in range(a:line1, a:line2)
+
+    " take current line
+    let line = getline(lnum)
+
+    " skip comment/keyword lines
+    if line =~? "^[$*]" | continue | endif
+
+    " dump line with new id
+    let newNid = str2nr(line[:7]) + a:1
+    call setline(lnum, printf("%8s", newNid) . line[8:])
+
+  endfor
+
+  " restore cursor position
+  call cursor(a:line1, 0)
+
+endfunction
+
 "-------------------------------------------------------------------------------
 
 function! lsdyna_node#Shift(line1, line2, ...)

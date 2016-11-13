@@ -268,9 +268,6 @@ command! -buffer -range -nargs=* LsNodeShift
 command! -buffer -range -nargs=* LsNodeReflect
  \ :call lsdyna_node#Reflect(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsNodeOffsetId
- \ :call lsdyna_element#OffsetId(<line1>,<line2>,<f-args>)
-
 "-------------------------------------------------------------------------------
 "    ELEMENT COMMANDS
 "-------------------------------------------------------------------------------
@@ -278,14 +275,18 @@ command! -buffer -range -nargs=* LsNodeOffsetId
 command! -buffer -range -nargs=* LsElemFindPid
  \ :call lsdyna_element#FindPid(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsElemOffsetId
- \ :call lsdyna_element#OffsetId(<line1>,<line2>,<f-args>)
-
 command! -buffer -range -nargs=* LsElemChangePid
  \ :call lsdyna_element#ChangePid(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=0 LsElemReverseNormals
  \ :call lsdyna_element#ReverseNormals(<line1>,<line2>)
+
+"-------------------------------------------------------------------------------
+"    OFFSET COMMAND
+"-------------------------------------------------------------------------------
+
+command! -buffer -range -nargs=+ LsOffsetId
+ \ :call lsdyna_offset#Offset(<line1>,<line2>,<f-args>)
 
 "-------------------------------------------------------------------------------
 "    INCLUDE PATH
