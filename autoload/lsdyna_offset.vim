@@ -5,12 +5,14 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  11th of November 2016
-" Version:      1.0.0
+" Last Change:  20th of November 2016
+" Version:      1.0.1
 "
 " History of change:
 "
 " v1.0.0
+"   - element_mass fix
+" v1.0.1
 "   - initial version
 "
 "-------------------------------------------------------------------------------
@@ -183,17 +185,18 @@ function! lsdyna_offset#ElementMass(line1, line2, arg, offset)
     " part offset
     elseif a:arg == "p"
       let pid = pid + a:offset
-    elseif a:arg == "en"
     " element and node offset
+    elseif a:arg == "en"
       let eid  =  eid + a:offset
-      let nid  =  eid + a:offset
-    elseif a:arg == "ep"
+      let nid  =  nid + a:offset
     " element and part offset
+    elseif a:arg == "ep"
       let eid  = eid + a:offset
       let pid  = pid + a:offset
     " part and node offset
+    elseif a:arg == "np"
       let pid  =  pid + a:offset
-      let nid  =  pid + a:offset
+      let nid  =  nid + a:offset
     " element, node and part offset
     elseif a:arg == "enp"
       let eid  =  eid + a:offset
@@ -244,17 +247,18 @@ function! lsdyna_offset#ElementBeam(line1, line2, arg, offset)
     " part offset
     elseif a:arg == "p"
       let pid = pid + a:offset
-    elseif a:arg == "en"
     " element and node offset
+    elseif a:arg == "en"
       let eid  =  eid + a:offset
       let n1id = n1id + a:offset
       let n2id = n2id + a:offset
       let n3id = n3id + a:offset
-    elseif a:arg == "ep"
     " element and part offset
+    elseif a:arg == "ep"
       let eid  = eid + a:offset
       let pid  = pid + a:offset
     " part and node offset
+    elseif a:arg == "np"
       let pid  =  pid + a:offset
       let n1id = n1id + a:offset
       let n2id = n2id + a:offset
@@ -311,16 +315,17 @@ function! lsdyna_offset#ElementDiscrete(line1, line2, arg, offset)
     " part offset
     elseif a:arg == "p"
       let pid = pid + a:offset
-    elseif a:arg == "en"
     " element and node offset
+    elseif a:arg == "en"
       let eid  =  eid + a:offset
       let n1id = n1id + a:offset
       let n2id = n2id + a:offset
-    elseif a:arg == "ep"
     " element and part offset
+    elseif a:arg == "ep"
       let eid  = eid + a:offset
       let pid  = pid + a:offset
     " part and node offset
+    elseif a:arg == "np"
       let pid  =  pid + a:offset
       let n1id = n1id + a:offset
       let n2id = n2id + a:offset
