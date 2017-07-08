@@ -26,7 +26,7 @@ Node & element table folding, no more never ending scrolling!
 ###Keyword library
 With keyword library you can very quick add a new Ls-Dyna keyword into your model.
 
-![libraryb](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/library.gif)
+![libraryb](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/omni-completion.gif)
 
 
 ###Commands
