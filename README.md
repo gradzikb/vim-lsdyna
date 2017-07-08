@@ -22,7 +22,7 @@ No more never ending scrolling.
 ![folding](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
 
 ### Omni-completion
-Insert keywords/option/ids/parameters like a pro.
+Insert keywords/options/ids/parameters like a pro.
 
 ![libraryb](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/omni-completion.gif)
 
