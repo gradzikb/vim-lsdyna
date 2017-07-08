@@ -4,11 +4,14 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  5th of November 2016
-" Version:      1.3.1
+" Last Change:  18th of February 2017
+" Version:      1.4.0
 "
 " History of change:
 "
+" v1.4.0
+"   - omni completion added
+"   - tags for dyna added
 " v1.3.1
 "   - File cleanup
 " v1.3.0
@@ -84,6 +87,16 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 "-------------------------------------------------------------------------------
+"    VARIABLES
+"-------------------------------------------------------------------------------
+
+if has('win32') || has ('win64')
+  let $VIMHOME = $HOME."/vimfiles"
+else
+  let $VIMHOME = $HOME."/.vim"
+endif
+
+"-------------------------------------------------------------------------------
 "    COLORS
 "-------------------------------------------------------------------------------
 
@@ -94,6 +107,8 @@ colorscheme lsdyna
 "    MISC SETTINGS
 "-------------------------------------------------------------------------------
 
+" allow to change buffers w/o write
+setlocal hidden
 " use spaces instead tab
 setlocal expandtab
 " set tab width to 10
@@ -108,6 +123,8 @@ setlocal wildmode=list,full
 setlocal indentexpr=
 " always change current directory
 setlocal autochdir
+" set tags file
+set tags=$VIMHOME/.dynatags
 
 "-------------------------------------------------------------------------------
 "    FOLDING
@@ -157,6 +174,16 @@ vnoremap <silent><buffer> <M-r> :g/^\$/d<CR>:nohlsearch<CR>
 "
 inoreabbrev bof $-------------------------------------BOF---------------------------------------
 inoreabbrev eof $-------------------------------------EOF---------------------------------------
+inoreabbrev nh $#   nid               x               y               z      tc      rc
+inoreabbrev eh $#   eid     pid      n1      n2      n3      n4      n5      n6      n7      n8
+
+" tags mappings
+nnoremap <C-]> g<C-]>
+nnoremap <c-leftmouse> g<c-]>
+
+" check includes before write
+cnoremap w<CR> <C-u>call lsdyna_include#quit("w")<CR>
+cnoremap wq<CR> <C-u>call lsdyna_include#quit("wq")<CR>
 
 "-------------------------------------------------------------------------------
 "    AUTOGROUP
@@ -164,8 +191,12 @@ inoreabbrev eof $-------------------------------------EOF-----------------------
 
 augroup lsdyna
   autocmd!
+
   " store file as unix
   autocmd BufWrite * set ff=unix
+  " check includes for :q
+  "autocmd QuitPre * if lsdyna_include#checkPath(0) != 0 | call getchar() | endif
+  "autocmd QuitPre * lsdyna_include#quit()
 augroup END
 
 "-------------------------------------------------------------------------------
@@ -188,43 +219,43 @@ onoremap <buffer><script><silent> ic :call lsdyna_misc#ColumnTextObject()<CR>
 "    KEYWORDS LIBRARY
 "-------------------------------------------------------------------------------
 
-" set user completion function to run with <C-X><C-U>
-setlocal completefunc=lsdyna_library#CompleteKeywords
-" allow to use Ctrl-Tab for user completion
-inoremap <C-Tab> <C-X><C-U>
+" set tags method
+" g:lsdynaSearchMode = 0 : search is turn off
+" g:lsdynaSearchMode = 1 : search only in current buffer
+" g:lsdynaSearchMode = 2 : search in all open buffers
+" g:lsdynaSearchMode = 3 : like 2 but add *INCLUDE as new buffers
+if !exists("g:lsdynaSearchMode")
+  let g:lsdynaSearchMode = 3
+endif
+
+" set omni completion functions
+setlocal omnifunc=lsdyna_complete#LsdynaComplete
 " set using popup menu for completion
-setlocal completeopt+=menu
-setlocal completeopt+=menuone
-
-" set path to keyword library directory
-if !exists("g:lsdynaKeyLibPath")
-  let g:lsdynaKeyLibPath = expand('<sfile>:p:h:h') . '/keywords/'
+if v:version == '800'
+  setlocal completeopt=menu,menuone,noinsert
+else
+  setlocal completeopt=menu,menuone
 endif
 
-" initialize lsdyna keyword library
-" the library is initialized only once per Vim session
-if !exists("g:lsdynaKeyLib")
-  let g:lsdynaKeyLib =lsdyna_library#initLib(g:lsdynaKeyLibPath)
-endif
+" map Ctrl-Tab for Ls-Dyna completion
+inoremap <C-Tab> <C-X><C-O>
+nnoremap <C-Tab> :call lsdyna_complete#extendLine()<CR>R<C-X><C-O>
 
-" set user completion flag
-let b:lsDynaUserComp = 0
+if !exists("g:lsdynaTagsPath")   | let g:lsdynaTagsPath = $VIMHOME."/.dynatags" | endif
+if !exists("g:lsdynaKeyLibPath") | let g:lsdynaKeyLibPath = expand('<sfile>:p:h:h') . '/keywords/' | endif
+if !exists("g:lsdynaOptLibPath") | let g:lsdynaOptLibPath = expand('<sfile>:p:h:h') . '/keywords/dynaOptLib' | endif
+
+" initialize lsdyna keyword & option library
+if !exists("g:lsdynaKeyLib") | let g:lsdynaKeyLib=lsdyna_complete#InitKeyLib(g:lsdynaKeyLibPath) | endif
+if !exists("g:lsdynaOptLib") | let g:lsdynaOptLib=lsdyna_complete#InitOptLib(g:lsdynaOptLibPath) | endif
+
+" initialize completion type
+if !exists("b:lsdynaCompleteType") | let b:lsdynaCompleteType = 'none' | endif
 
 " mapping for <CR>/<C-Y>/<kEnter>
-" if g:lsDynaUserComp is true run GetCompletion function
-" if g:lsDynaUserComp is false act like <CR>/<C-Y>/<kEnter>
-inoremap <buffer><silent><script><expr> <CR>
- \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<CR>"
-inoremap <buffer><silent><script><expr> <C-Y>
- \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<C-Y>"
-inoremap <buffer><silent><script><expr> <kEnter>
- \ b:lsDynaUserComp ? "\<ESC>:call lsdyna_library#GetCompletion()\<CR>" : "\<kEnter>"
-
-" act <up> and <down> like Ctrl-p and Ctrl-n
-inoremap <buffer><silent><script><expr> <Down>
- \ pumvisible() ? "\<C-n>" : "\<Down>"
-inoremap <buffer><silent><script><expr> <Up>
- \ pumvisible() ? "\<C-p>" : "\<Up>"
+inoremap <buffer><silent><expr> <CR>     lsdyna_complete#LsDynaMapEnter()
+inoremap <buffer><silent><expr> <kEnter> lsdyna_complete#LsDynaMapEnter()
+inoremap <buffer><silent><expr> <C-Y>    lsdyna_complete#lsdynamapCtrly()
 
 "-------------------------------------------------------------------------------
 "    LINE FORMATTING
@@ -289,19 +320,29 @@ command! -buffer -range -nargs=+ LsOffsetId
  \ :call lsdyna_offset#Offset(<line1>,<line2>,<f-args>)
 
 "-------------------------------------------------------------------------------
-"    INCLUDE PATH
+"    INCLUDE COMMANDS
 "-------------------------------------------------------------------------------
+
+command! -buffer -nargs=0 LsInclCheckPath
+ \ :call lsdyna_include#checkPath(1)
+
+command! -buffer -nargs=0 LsIncl2Buff
+ \ :call lsdyna_include#incl2buff()
+
+command! -buffer -nargs=0 LsTags
+ \ :call lsdyna_complete#tags(g:lsdynaTagsPath, 3)
 
 noremap <buffer><script><silent> gf
- \ :call lsdyna_include#ExpandPath()<CR>gf
+ \ :call lsdyna_include#expandPath()<CR>gf
 
 noremap <buffer><script><silent> gF
- \ :call lsdyna_include#ExpandPath()<CR><C-w>f<C-w>H
+ \ :call lsdyna_include#expandPath()<CR><C-w>f<C-w>H
 
-command! -buffer -nargs=0 LsCheckPath
- \ :call lsdyna_include#CheckPath()
+noremap <buffer><script><silent> gd
+ \ :execute "edit ".fnamemodify(getline("."), ":p:h")<CR>
 
-"-------------------------------------------------------------------------------
+noremap <buffer><script><silent> gD
+ \ :execute "vertical split ".fnamemodify(getline("."), ":p:h")<CR><C-w>L
 
 " restore vim functions
 let &cpo = s:cpo_save

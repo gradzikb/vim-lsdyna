@@ -121,7 +121,8 @@ function! lsdyna_misc#ColumnTextObject()
     endif
 
   "-----------------------------------------------------------------------------
-  elseif keyword =~? "*ELEMENT.*$"
+  "elseif keyword =~? "*ELEMENT.*$"
+  else
 
     " set column start and column move
     let cstart = (float2nr(cnum/8)*8)+1

@@ -69,7 +69,7 @@ function! lsdyna_curves#Write(startLine, points, strFormat)
 
     " remove empty line if added
     if (lnum == 0 && getline('.') =~ "^$")
-      execute "normal! dd"
+      silent execute "normal! dd"
     endif
 
     " increment line number
@@ -135,9 +135,9 @@ function! lsdyna_curves#Shift(line1,line2,...)
   let points = lsdyna_curves#Read(a:line1,a:line2)
 
   " remove old lines
-  execute a:line1 . "," . a:line2 . "delete"
+  silent execute a:line1 . "," . a:line2 . "delete"
 
-  " scale data
+  " shift data
   for i in range(0, len(points)-1, 2)
     let points[i]   = xOff + points[i]
     let points[i+1] = yOff + points[i+1]
@@ -183,7 +183,7 @@ function! lsdyna_curves#Scale(line1,line2,...)
   let points = lsdyna_curves#Read(a:line1,a:line2)
 
   " remove old lines
-  execute a:line1 . "," . a:line2 . "delete"
+  silent execute a:line1 . "," . a:line2 . "delete"
 
   " scale data
   for i in range(0, len(points)-1, 2)
@@ -241,7 +241,7 @@ function! lsdyna_curves#Resample(line1,line2,...)
   endif
 
   " remove old lines
-  execute a:line1 . "," . a:line2 . "delete"
+  silent execute a:line1 . "," . a:line2 . "delete"
 
   " set first step
   let x = points[0]
@@ -406,7 +406,7 @@ function! lsdyna_curves#SwapXY(line1,line2)
   endfor
 
   " remove old lines
-  execute a:line1 . "," . a:line2 . "delete"
+  silent execute a:line1 . "," . a:line2 . "delete"
 
   " save data
   call lsdyna_curves#Write(a:line1, points, strFormat)
@@ -453,7 +453,7 @@ function! lsdyna_curves#Reverse(line1,line2)
   endfor
 
   " remove old lines
-  execute a:line1 . "," . a:line2 . "delete"
+  silent execute a:line1 . "," . a:line2 . "delete"
 
   " save data
   call lsdyna_curves#Write(a:line1, revPoints, strFormat)

@@ -5,11 +5,13 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  10th of November 2016
+" Last Change:  6th of April 2017
 " Version:      1.1.3
 "
 " History of change:
 "
+" v1.1.3
+"   - FindPid function fixed
 " v1.1.2
 "   - offset function moved to lsdyna_offset
 " v1.1.2
@@ -151,6 +153,9 @@ function! lsdyna_element#FindPid(line1, line2, ...)
   " if no arguments just sort element table with pids
 
   if len(a:000) == 0
+
+    " sort lines respect to part id
+    execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
 
     " loop over element lines
     let lnum = a:line1

@@ -1,4 +1,6 @@
-*DEFINE_TRANSFORMATION
+*DEFINE_TRANSFORMATION_TITLE
+$# title
+?title?
 $#  tranid
          ?
 $#  option        a1        a2        a3

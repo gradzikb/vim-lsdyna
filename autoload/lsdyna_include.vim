@@ -5,97 +5,136 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  28th of December 2015
+" Last Change:  6th of May 2017
 "
 " History of change:
 "
+" v1.1.0
+"   - use vimgrep and quickfix list for search
 " v1.0.0
 "   - initial version
 "
 "-------------------------------------------------------------------------------
 
-function! lsdyna_include#CollectPaths()
+function! lsdyna_include#getIncludes()
 
   "-----------------------------------------------------------------------------
-  " Function to scan Ls-Dyna keyword file for *INCLUDE_PATH keywords.
+  " Function to find all includes in current file
   "
   " Arguments:
   " - None
   " Return:
-  " - paths : list of paths
+  " - includes (list) : list with includes paths
   "-----------------------------------------------------------------------------
 
-  " initialize empty list for paths
-  let paths = []
+  "-------------------------------------------------------------------------------
+  " find *INCLUDE
+  silent! vimgrep /^\*INCLUDE\s*$/j %
 
-  " store start position
-  let startlnum = line('.')
-
-  " store number of last line in the file
-  let lastlnum = line('$')
-
-  " jump to beginning of the file / start position for search
-  normal! gg0
-
-  " loop over the file (used to find all *INCLUDE_PATH)
-  while 1
-
-    " find *INCLUDE_PATH and store line number
-    let lnumFind = search("\\c^\\*INCLUDE_PATH.*$", 'cW')
-
-    "found nothing -> stop loop
-    if lnumFind == 0 | break | endif
-
-    "move to next line, line after *INCLUDE_PATH
-    normal! j
-
-    " loop used to collect all paths
+  " collect all paths
+  let includes = []
+  for item in getqflist()
+    let i = 1
     while 1
-
-       " get current line
-       let line = getline(".")
-
-       " keyword line
-       if line =~? '^\*'
-
-         break
-
-       " comment line
-       elseif line =~? '^\$'
-
-         " last line in the file? -> break loop
-         if line(".") == lastlnum | break | endif
-         " go to next line
-         normal! j
-
-       " get path
-       else
-
-         " substitution (\ -> /) is made according to :help path
-         let line = substitute(line, "\\", "/", "g")
-         " add path only when does not exist
-         if count(paths, line) == 0 | call add(paths, line) | endif
-         " last line in the file? -> break loop
-         if line(".") == lastlnum | break | endif
-         " go to next line
-         normal! j
-
-       endif
-
+      " take line
+      let line = getline(item['lnum']+i)
+      " keyword line --> break loop
+      if line[0] == '*' | break | endif
+      " comment line --> go to next line
+      if line[0] == '$' | let i = i + 1 | continue | endif
+      " get include path
+      call add(includes, getline(item['lnum']+i))
+      let i = i + 1
     endwhile
+  endfor
 
-  endwhile
+  "-------------------------------------------------------------------------------
+  " find *INCLUDE_TRANSFORM
+  silent! vimgrep /^\*INCLUDE_TRANSFORM\s*$/j %
 
-  " restore start position
-  call cursor(startlnum, 0)
+  " collect all paths
+  for item in getqflist()
+    let i = 1
+    while 1
+      " take line
+      let line = getline(item['lnum']+i)
+      " comment line --> go to next line
+      if line[0] == '$' | let i = i + 1 | continue | endif
+      " get include path
+      call add(includes, getline(item['lnum']+i))
+      break
+    endwhile
+  endfor
 
-  return paths
+  return includes
 
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_include#ExpandPath()
+function! lsdyna_include#getIncludePaths()
+
+  "-----------------------------------------------------------------------------
+  " Function to find all include paths in current file
+  "
+  " Arguments:
+  " - None
+  " Return:
+  " - includes (list) : list with includes paths
+  "-----------------------------------------------------------------------------
+
+  " find all keywords used to create tags
+  silent! vimgrep /^\*INCLUDE_PATH/j %
+
+  " collect all paths
+  let includes = []
+  for item in getqflist()
+    let i = 1
+    while 1
+      " take line
+      let line = getline(item['lnum']+i)
+      " last line in file --> break loop
+      if line('.') == line('$') | break | endif
+      " keyword line --> break loop
+      if line[0] == '*' | break | endif
+      " comment line --> go to next line
+      if line[0] == '$' | let i = i + 1 | continue | endif
+      " get include path
+      call add(includes, getline(item['lnum']+i))
+      let i = i + 1
+    endwhile
+  endfor
+
+  return includes
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_include#incl2buff()
+
+  "-----------------------------------------------------------------------------
+  " Function to open all include files in new buffers.
+  "
+  " Arguments:
+  " - files (list) : file paths
+  " Return:
+  " None
+  "-----------------------------------------------------------------------------
+
+  call lsdyna_include#expandPath()
+  let files = lsdyna_include#getIncludes()
+  for file in files
+    execute "badd " . file
+  endfor
+
+  echo len(files) . " new buffer(s) added."
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_include#expandPath()
 
   "-----------------------------------------------------------------------------
   " Function to expand VIM &path variable.
@@ -107,10 +146,13 @@ function! lsdyna_include#ExpandPath()
   "-----------------------------------------------------------------------------
 
   " scan file for include paths
-  let paths = lsdyna_include#CollectPaths()
+  let paths = lsdyna_include#getIncludePaths()
 
   " expand &path variable
   for path in paths
+    " substitution (\ -> /) is made according to :help path
+    let path = substitute(path, "\\", "/", "g")
+    " if path does not exist add it
     if match(&path, path) == -1
       let &path = &path . "," . path
     endif
@@ -120,113 +162,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_include#CollectIncludes()
-
-  "-----------------------------------------------------------------------------
-  " Function to check include file paths.
-  "
-  " Arguments:
-  " - None
-  " Return:
-  " - includes : list of includes
-  "-----------------------------------------------------------------------------
-
-  " includes list
-  let includes = []
-
-  " store start position
-  let startlnum = line('.')
-
-  " store number of last line in the file
-  let lastlnum = line('$')
-
-  " jump to beginning of the file / start position for search
-  normal! gg0
-
-  " loop over the file (used to find all *INCLUDE_)
-  while 1
-
-    " find *INCLUDE keywords
-    let inclnum = search('\c^\*INCLUDE\(_TRANSFORM\)\?\s*$', 'cW')
-
-    " found nothing -> stop loop
-    if inclnum == 0 | break | endif
-
-    " include or include_transform?
-    if getline(inclnum) =~? 'include_transform'
-      let inckw = 'include_transform'
-    else
-      let inckw = 'include'
-    endif
-
-    "---------------------------------------------------------------------------
-    if inckw ==# 'include'
-
-      "move to next line, line after *INCLUDE
-      normal! j
-
-      " loop over *INCLUDE (used to collect all paths)
-      while 1
-
-         " get current line
-         let line = getline(".")
-
-         " keyword line -> break loop
-         if line =~? '^\*'
-           break
-         " do it only for non comment lines
-         elseif line =~? '^[^$]'
-           " add include line
-          let line = substitute(line, "\\", "/", "g")
-          call add(includes, line)
-         endif
-
-         "last line in the file ? -> stop loop
-         if line(".") == lastlnum | break | endif
-
-         " go to next line
-         normal! j
-
-      endwhile
-
-    "---------------------------------------------------------------------------
-    elseif inckw ==# 'include_transform'
-
-      " move to 1st line after *INCLUDE_TRANSFORM
-      normal! j
-
-      while 1
-
-        " get current line
-        let line = getline(".")
-
-        " skip comment line
-        if line =~? "^\\$"
-          " move forward
-          normal! j
-        else
-           " add include line
-          let line = substitute(line, "\\", "/", "g")
-          call add(includes, line)
-          break
-        endif
-
-      endwhile
-
-    endif
-
-  endwhile
-
-  " restore start position
-  call cursor(startlnum, 0)
-
-  return includes
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! lsdyna_include#CheckPath()
+function! lsdyna_include#checkIncl()
 
   "-----------------------------------------------------------------------------
   " Function to check include file paths.
@@ -238,10 +174,10 @@ function! lsdyna_include#CheckPath()
   "-----------------------------------------------------------------------------
 
   " collect paths
-  let paths = lsdyna_include#CollectPaths()
+  let paths = lsdyna_include#getIncludePaths()
 
   " collect includes
-  let includes = lsdyna_include#CollectIncludes()
+  let includes = lsdyna_include#getIncludes()
 
   " list of missing includes
   let missing = []
@@ -272,10 +208,51 @@ function! lsdyna_include#CheckPath()
   if len(missing) == 0
     echom "All include files were found."
   else
-    echohl Title | echom "--- Included files not found in path ---" | echohl None
+    echohl Title | echom "--- Included files not found in path ---" | echohl Directory
     for include in missing
-      echohl Directory | echom include | echohl None
+      echom include
     endfor
+  echohl None
+  endif
+
+  return len(missing)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_include#quit(cmd)
+
+  "-----------------------------------------------------------------------------
+  " Fundtion to check includes at write/quit.
+  "
+  " Arguments:
+  " - None
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  " check includes
+  let incl = lsdyna_include#checkIncl()
+
+  " if include missing --> confirm write
+  if incl !=0
+    let choice = confirm("Include files missings!\nDo you want to write/quit anyway?", "&Yes\n&No", 2, "Warrning")
+    if choice == 1
+      if a:cmd == "w"
+        write
+      elseif a:cmd == "wq"
+        write
+        quit
+      endif
+    endif
+  else
+    if a:cmd == "w"
+      write
+    elseif a:cmd == "wq"
+      write
+      quit
+    endif
   endif
 
 endfunction

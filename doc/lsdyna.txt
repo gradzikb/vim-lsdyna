@@ -1,4 +1,4 @@
-*lsdyna.txt*		For Vim version 7.4		Last change: 2016 October 16th
+*lsdyna.txt*		For Vim version 8.0		Last change: 2017 July 7th
 ================================================================================
                    _               ____                                        ~
                   | |    ___      |  _ \ _   _ _ __   __ _                     ~
@@ -19,10 +19,11 @@ CONTENTS
     2. Quick start.............................|lsdyna-start|
     3. Syntax highlighting.....................|lsdyna-syntax|
     4. Folding.................................|lsdyna-folding|
-    5. Keyword library.........................|lsdyna-keywordLibrary|
-       5.1 Inserting keywords..................|lsdyna-insertKeyword|
-       5.2 Extending the library...............|lsdyna-extendLibrary|
-       5.3 Keywords templates..................|lsdyna-templates|
+    5. Ls-Dyna omni-completion.................|lsdyna-omniComplete|
+       5.1 Keyword completion..................|lsdyna-completeKeyword|
+       5.2 Option completion...................|lsdyna-completeOption|
+       5.3 Id completion.......................|lsdyna-completeId|
+       5.4 Parameter completion................|lsdyna-completeParameter|
     6. Mappings & functions....................|lsdyna-mappings|
        6.1 Mappings list.......................|lsdyna-mapList|
        6.2 Comment/uncomment...................|lsdyna-comment|
@@ -30,6 +31,9 @@ CONTENTS
        6.4 Text objects........................|lsdyna-textObject|
            6.4.1 Keyword objects...............|lsdyna-objectKeyword|
            6.4.2 Column objects................|lsdyna-objectColumn|
+       6.5 Tags................................|lsdyna-tags|
+       6.6 File name completion................|lsdyna-includeName|
+       6.7 Include jump........................|lsdyna-includeJump|
     7. Commands................................|lsdyna-commands|
        7.1 Curve commands......................|lsdyna-curveCommands|
            7.1.1 LsCurveScale..................|lsdyna-curveScale|
@@ -48,13 +52,10 @@ CONTENTS
            7.3.3 LsElemReverseNormals..........|lsdyna-elemReverseNormals|
        7.4 Miscellaneous commands..............|lsdyna-miscCommands|
            7.4.1 LsOffsetId....................|lsdyna-offsetId|
-    8. Include files...........................|lsdyna-includes|
-       8.1 File name completion................|lsdyna-includeName|
-       8.2 Include jumps.......................|lsdyna-includeJump|
-       8.3 LsCheckPath.........................|lsdyna-checkPath|
-    9. Credits.................................|lsdyna-credits|
-   10. License.................................|lsdyna-license|
-   11. Bugs....................................|lsdyna-bugs|
+           7.4.2 LsInclCheckPath...............|lsdyna-inclCheckPath|
+           7.4.3 LsIncl2Buff...................|lsdyna-incl2Buff|
+           7.4.4 LsTags........................|lsdyna-commandsTags|
+    8. License.................................|lsdyna-license|
 
 ================================================================================
 1. Introduction                                            *lsdyna-introduction*
@@ -62,20 +63,19 @@ CONTENTS
 It is documentation for Ls-Dyna VIM filetype plugin.
 
 Ls-Dyna is simulation software developed by Livermore Software Technology
-Corporation (www.lstc.com). The keyword file is used to store all model
-information. It is text file with keywords which follow specific syntax rules.
+Corporation (www.lstc.com). The plugin support Ls-Dyna is designed to work
+with Ls-Dyna keyword file used to store model information.
 
-Ls-Dyna filetype plugin gives you:
+Ls-Dyna filetype plugin overview:
   - syntax highlighting
-  - folding
-  - keyword library
-  - mappings, functions and commands
-  - and much more
+  - node/elements tables folding
+  - omni-completion for keywords/parameters/options/ids
+  - useful mappings, functions and commands
 
 ================================================================================
 2. Quick start                                                    *lsdyna-start*
 
-To use filetype plugin in VIM you must add following lines into your vimrc file:
+To use file type plugin add following lines to vimrc file:
 >
 	filetype plugin on
 	syntax on
@@ -84,7 +84,7 @@ The plugin loads automatic for files with extension:
   - *.k
   - *.key
 
-If necessary the plugin can be load manually with command:
+To load the plugin manually use:
 >
 	:set filetype=lsdyna
 <
@@ -101,9 +101,7 @@ Syntax highlighting supports:
   - title line
   - data line
 
-The plugin supports three types of data line syntax highlighting.
-Used type depends on Ls-Dyna keyword.
-
+The plugin supports three types of data line syntax highlighting:
 1) 1x8,3x16,2x8 field
    - *NODE
    - *AIRBAG_REFERENCE_GEOMETRY
@@ -120,23 +118,29 @@ All lines not started with "*" (keyword lines) or "$" (comment lines) are folded
 Minimal number of lines to fold is four.
 
 In practise node/element lines and curves data points with more than four
-lines are folded. To break folding put empty comment line.
+lines are folded. To break folding put comment line.
 
 ================================================================================
-5. Keyword library                                       *lsdyna-keywordLibrary*
+5. Ls-Dyna omni-completion                                 *lsdyna-omniComplete*
 
-With keyword library you can:
-- add standard Ls-Dyna keyword into your keyword file
-- use keywords with your predefined settings
-- build templates (group of keywords) to speed up your work
-- setup the same keyword for different system units
-- create your own simple material database
+Filetype plugin has omni-completion for Ls-Dyna keyword file.
+The completion is trigged with <Ctrl-Tab> or <Ctrl-x><Ctrl-o>.
+
+Depend on context you can complete:
+- keyword (*NODE, *ELEMENT_, ...)
+- keyword option (elform, dof, vad, ...)
+- id (pat, section, material, set, curve, ...)
+- parameters (any names starting with "&" sign)
 
 --------------------------------------------------------------------------------
-5.1 Inserting keywords                                    *lsdyna-insertKeyword*
+5.1 Keyword completion                                    *lsdyna-insertKeyword*
 
-In insert mode start typing keyword you want to and use <Ctrl-Tab>.
-NOTE: Keyword completion can be trigged with <Ctrl-x><Ctrl-u> as well.
+Keyword completion add keyword to your inputdeck from library.
+
+--------------------------------------------------------------------------------
+5.1.1 Inserting keywords
+
+In insert mode start typing keyword name and complete with <Ctrl-Tab>:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -153,7 +157,7 @@ NOTE: Keyword completion can be trigged with <Ctrl-x><Ctrl-u> as well.
     |                                             |
     +---------------------------------------------+
 
-VIM will show you list of available keywords with popup menu:
+Menu with available keywords will pop up:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -170,24 +174,7 @@ VIM will show you list of available keywords with popup menu:
     |                                             |
     +---------------------------------------------+
 
-Select keyword from list:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*pa                                          |
-    ||parameter            |                      |
-    ||parameter_expression |                      |
-   >||part                 |<                     |
-    ||part_inertia         |                      |
-    |+---------------------+                      |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-Accept selection with <CR>, <C-y>, <kEnter>:
+Select keyword from the list to add the keyword into your keyword file:
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -204,50 +191,31 @@ Accept selection with <CR>, <C-y>, <kEnter>:
     |                                             |
     +---------------------------------------------+
 
-Asterisk sign "*" at the beginning is not mandatory, also it does not matter
-if the keyword is lowercase or uppercase. All following examples work the same:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*pa<Ctrl-Tab>                                |
-    |*Pa<Ctrl-Tab>                                |
-    |*PA<Ctrl-Tab>                                |
-    |pa<Ctrl-Tab>                                 |
-    |Pa<Ctrl-Tab>                                 |
-    |PA<Ctrl-Tab>                                 |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-NOTE: To get list of all available keywords you can use:
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*<Ctrl-Tab>                                  |
-    |<Ctrl-Tab>                                   |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
+*NOTE: Asterisk sign "*" at the beginning is not mandatory.
+       Keyword name is not case sensitive.
 
 --------------------------------------------------------------------------------
-5.2 Extending the library                                 *lsdyna-extendLibrary*
+5.1.2 Keywords templates
 
-The library does not have all Ls-Dyna keywords. If keyword you use often is
-missing you have to add it into the library. It is easy task and do not required
-any script modifications.
+You can create your own instance of keywords and store them in the library.
 
-Whole library is "keywords" directory. Inside are subdirectories with Ls-Dyna
-keywords. The subdirectories are organized in alphabetical order. Finally inside
+1. Predefined keywords
+   - keyword with predefined values like
+     - gravity load for different system unit
+     - contact definition with non-default values
+   - stored in the library subdirectories
+2. Templates
+   - group of keywords often used
+     - like master deck with *CONTROL_ and *DATABASE_ keywords
+   - stored in "_" subdirectory in the library
+   - template file names must start with "_"
+   - to insert a template from the library use _<Ctrl-Tab>
+
+--------------------------------------------------------------------------------
+5.1.3 Add new keywords to library
+
+Library is "keywords" directory with subdirectories and Ls-Dyna keywords.
+The subdirectories are organized in alphabetical order, in each subdirectory
 are *.k files with keywords definitions.
 
 Keyword library structure:
@@ -269,11 +237,7 @@ Keyword library structure:
 	      - ...
 	    - ...
 <
-To add a new keyword into the library:
-1. Create a new *.k file with all lines necessary to define new keyword
-2. Copy file to correct subdirectory
-
-There are couple rules you have to keep in mind:
+Library rules:
 - file names must be lowercase
 - do not use any white signs (space bar)
 - file names must start with subdirectory letter
@@ -282,44 +246,297 @@ There are couple rules you have to keep in mind:
 NOTE: Keyword library are initialized once per VIM session.
       New keyword will be available after VIM session restart.
 
-Default location of "keywords" folder you can check with command:
->
-	:echom g:lsdynaKeyLibPath
-<
-Location of keyword library can be change, it lets use one library among many
-users.
-
-To define location of the keyword library put for all users in vimrc:
->
-	let g:lsdynaKeyLibPath = "C:\\lsdyna\\glbKeyLib\\"
-	let g:lsdynaKeyLibPath = "/home/lsdyna/glbKeyLib/"
-<
 --------------------------------------------------------------------------------
-5.3 Keywords templates                                        *lsdyna-templates*
+5.2 Option completion                                    *lsdyna-completeOption*
 
-Keyword files does not have to include only one "empty" Ls-Dyna keyword.
-You can create your own keyword template.
+Option completion let you in easy way set keyword options like "dof" or "vad"
+in *BOUNDARY_PRESCRIBED_MOTION_ or "elform" in *SECTION_.
 
-Keyword template types:
-1. Predefined keyword
-   - keyword with predefined values
-     - gravity load for different system unit
-     - contact definition with non-default values
-   - are stored in the library subdirectories like any other keywords
-   - example: load_body_z_gravity_mkgsec.k
-2. Template
-   - group of keywords you are using often
-     - like master deck with *CONTROL_ and *DATABASE_ keywords
-   - are stored in "_" subdirectory in the library
-   - template file names must start with "_"
-   - to insert a template from the library use _<Ctrl-Tab>
-   - example: _template_master_mmkgms.k
+--------------------------------------------------------------------------------
+5.1.1 Set option
+
+Go to keyword option field and run completion with <Ctrl-Tab>:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |          <Ctrl-Tab>                         I
+    |         >|        1 x-translation |<        |
+    |          |        2 y-translation |         |
+    |          |        3 z-translation |         |
+    |          +------------------------+         |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |                   1<Ctrl-Tab>               I
+    |                    |        0 acceleration ||
+    |                    |        1 velocity     ||
+    |                   >|        2 displacement ||
+    |                    +-----------------------+|
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+*NOTE: Field completion use field headers to distinguish between different
+       options. With no headers field completion will fail.
+
+--------------------------------------------------------------------------------
+5.1.1 Extend option library
+
+List of all options and their keywords are save in file
+>
+	- /lsdyna/keywords/dynaOptLib
+
+Each line in the file is one value for specific option in specific keyword.
+All entries are separated with ";" sign.
+>
+	- keywordName ; optionName ; optionValue ; optionDescription
+
+Example of lines for "dof" option in *LOAD_NODE keyword
+>
+	load_node ; dof ; 1 ; x-force
+	load_node ; dof ; 2 ; y-force
+	load_node ; dof ; 3 ; z-force
+	load_node ; dof ; 4 ; follower force
+	load_node ; dof ; 5 ; x-moment
+	load_node ; dof ; 6 ; y-moment
+	load_node ; dof ; 7 ; z-moment
+	load_node ; dof ; 8 ; follower moment
+
+*NOTE: Option library is initialized once per session.
+
+--------------------------------------------------------------------------------
+5.3 Id completion                                            *lsdyna-completeId*
+
+With id completion you can choose between all ids in your keyword file.
+
+Depend on cursor position and ls-dyna header (sid, mid, ...) the plugin
+gives you:
+- section id list
+- material id list
+- curve id list
+- transformation id list
+- coordinates id list
+- vectors id list
+
+*NOTE: All other fields will generate list of all parts and sets!
+
+Example:
+
+For "lcid" field list of *DEFINE_CURVES id will be returned
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |                   1         2<Ctrl-Tab>     |
+    |                              |       10 Gravity_load |
+    |                             >|      100 Movement     |<
+    |                              |     1000 Hardening    |
+    |                              +-----------------------+
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+For "typeid" list of all parts and sets will be given (S - set, P - part)
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |<Ctrl-Tab>         1         2        10     |
+    | |       10 S Load    |<                     |
+    | |       20 S Fix     |                      |
+    | |        3 P Support |                      |
+    | |        4 P Plate   |                      |
+    | |       10 P Bracket |                      |
+    | +--------------------+                      |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+To short list use id prefix and next <Ctrl-Tab>, example below will give all
+ids starting with 1:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    | 1<Ctrl-Tab>       1         2        10     |
+    ||       10 S Load    |<                      |
+    ||       10 P Bracket |                       |
+    |+--------------------+                       |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+If you know the name you can use it for completion as well:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    | lo<Ctrl-Tab>       1         2        10    |
+    ||       10 S Load    |<                      |
+    |+--------------------+                       |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |                   1         2 grav<Ctrl-Tab>|
+    |                              |       10 Gravity_load |
+    |                              +-----------------------+
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+*NOTE: Be sure your name and cursor is inside Ls-dyna column you want
+       to update.
+
+Id list is refreshed every time <Ctrl-Tab> is trigged so all new added
+keywords are available as well. By default VIM scan all open buffers to build
+id list. If current buffer include *INCLUDE keyword include files will be open
+as hidden buffers and scan as well. Performance of id completion strongly
+depends on number of includes and their sizes.
+
+--------------------------------------------------------------------------------
+5.4 Parameter completion                              *lsdyna-completeParameter*
+
+Parameter completion let you choose from list of all parameters in your model.
+
+Parameter list includes:
+- parameter name
+- parameter type (R, I, C)
+- parameter value or expression
+
+Start typing name with "&" sign and complete with <Ctrl-Tab>:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$#    name       val                         |
+    |R   thkTop       2.7                         |
+    |R  thkDown       1.5                         |
+    |I   intPnt         5                         |
+    |*PARAMETER_EXPRESSION                        |
+    |$#    name val                               |
+    |R area10mm 3.14*10.0**2                      |
+    |R area15mm 3.14*15.0**2                      |
+    |$                                            |
+    |$------------------------------------------- |
+    |$                                            |
+    |*SECTION_SHELL_TITLE                         |
+    |$# title                                     |
+    |Top_shell                                    |
+    |$#   secid    elform      shrf       nip     |
+    |       100        16     0.833         2     |
+    |$#      t1        t2        t3        t4     |
+    | &th<Ctrl-Tab>                               |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$#    name       val                         |
+    |r   thkTop       2.7                         |
+    |rthkBottom       1.5                         |
+    |iintPoints         5                         |
+    |*PARAMETER_EXPRESSION                        |
+    |$#    name val                               |
+    |R area10mm 3.14*10.0**2                      |
+    |R area15mm 3.14*15.0**2                      |
+    |$                                            |
+    |$------------------------------------------- |
+    |$                                            |
+    |*SECTION_SHELL_TITLE                         |
+    |$# title                                     |
+    |Top_shell                                    |
+    |$#   secid    elform      shrf       nip     |
+    |       100        16     0.833         2     |
+    |$#      t1        t2        t3        t4     |
+    | &thk<Ctrl-Tab>                              |
+    | |thkTop    R 2.7      |                     |
+    | |thkDown   R 1.5      |                     |
+    | +---------------------+                     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+To get list of all parameters use only "&" <ctrl-Tab>:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$#    name       val                         |
+    |r   thkTop       2.7                         |
+    |rthkBottom       1.5                         |
+    |iintPoints         5                         |
+    |*PARAMETER_EXPRESSION                        |
+    |$#    name val                               |
+    |R area10mm 3.14*10.0**2                      |
+    |R area15mm 3.14*15.0**2                      |
+    |$                                            |
+    |$------------------------------------------- |
+    |$                                            |
+    |*SECTION_SHELL_TITLE                         |
+    |$# title                                     |
+    |Top_shell                                    |
+    |$#   secid    elform      shrf       nip     |
+    |       100        16     0.833         2     |
+    |$#      t1        t2        t3        t4     |
+    | &<Ctrl-Tab>                                 |
+    | |thkUp     R 2.7          |                 |
+    | |thkDown   R 1.5          |                 |
+    | |intPoints I 5            |                 |
+    | |area10mm  R 3.14*10.0**2 |                 |
+    | |area15mm  R 3.14*10.0**2 |                 |
+    | +-------------------------+                 |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Parameter list is refreshed every time <Ctrl-Tab> is trigged so all new added
+keywords are available as well. By default VIM scan all open buffers to build
+id list. If current buffer include *INCLUDE keyword includes files will be open
+as hidden buffers and scan as well. Performance of parameter completion strongly
+depends on number of includes and their sizes.
 
 ================================================================================
 6. Mappings                                                    *lsdyna-mappings*
 
-The plugin gives you a lot of useful mappings and functions to work with
-Ls-Dyna keyword file.
+The plugin defines mappings and functions to work with Ls-Dyna keyword file.
 
 --------------------------------------------------------------------------------
 6.1 Mappings list                                               *lsdyna-mapList*
@@ -342,7 +559,7 @@ Ls-Dyna keyword file.
 <ll>#    : separator line (type 3) above (is like <ll>3 with <Shift>)
 
 <ll> is <localleader> key in VIM. By default it is backslash "\".
-For details see VIM documentation ":help <localleade>".
+You can overwrite <localleader>, for details see :help <localleade>.
 
 --------------------------------------------------------------------------------
 6.2 Comment/uncomment                                           *lsdyna-comment*
@@ -350,7 +567,7 @@ For details see VIM documentation ":help <localleade>".
 The function is used to comment/uncomment line/lines in Ls-Dyna keyword file.
 Function is mapped with <ALT-c> or <Ctrl-c>.
 
-If selected line start with "$" it will be uncommented, if the line does not
+If selected line starts with "$" it will be uncommented, if the line does not
 start with "$" it will be commented. If you selected more than one line
 comment/uncomment will be performed according to first line from selection.
 
@@ -551,7 +768,7 @@ Use <ll><ll> with selected lines:
 Example: Parameters autoformating
 
 The function is able recognise parameter type (integer, real, character) and
-set correct prefix (I, R, C). If prefix is defined it will not overwrite.
+set correct prefix (I, R, C). If prefix is defined it will not be overwrite.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -574,7 +791,7 @@ Use <ll><ll> with selected lines:
     +---------------------------------------------+
     |lsdyna_model.key=============================|
     |$                                            |
-    |*PARAMETER                                   |
+    |*parameter                                   |
     |$#    name       val                         |
     |I     par1       100                         |
     |I     par2       -10                         |
@@ -602,7 +819,7 @@ Ls-Dyna filetype plugin text-objects:
 - <ap> : around keyword column
 
 You can use them with other VIM commands like <d>, <y>, <v>.
-Both text object work the same way! There is no distinguish like in <aw>/<iw>.
+Both text object work the same way. There is no distinguish like in <aw>/<iw>.
 
 --------------------------------------------------------------------------------
 6.4.1 Keyword objects                                     *lsdyna-objectKeyword*
@@ -773,15 +990,267 @@ Use <vac>/<vic> to select whole column
     |                                             |
     +---------------------------------------------+
 
+--------------------------------------------------------------------------------
+6.5 Tags                                                           *lsdyna-tags*
+
+The plugin lets you is part/section/material/... ids as tags.
+Tags file is created and updated every time id or parameter completion is used.
+To manually create tags file use command:
+>
+	:LsTags
+
+Examples:
+
+Set cursor on id and use <Ctrl>] to jump:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |      1001         1         2      2000     |
+    |$                                   ^        |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+If id is unique you will be moved to id position otherwise you must
+specify id you want to jump.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |      1001         1         2      2000     |
+    |$                                   ^        |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    | 1 2000 F C PART                             |
+    |            Support_plate                    |
+    | 2 2000 F C CURVE                            |
+    |            Load                             |
+    | 3 2000 F C MATERIAL                         |
+    |            Steel                            |
+    | 4 2000 F C VECTOR                           |
+    |            x-direction                      |
+    |                                             |
+    |Choose number: ?                             |
+    +---------------------------------------------+
+
+To jump to *DEFINE_CURVE id 2000 put 2 and confirm with <Enter>.
+
+You can use "tjump" command to go to any id in the file
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |      1001         1         2      1234     |
+    |$                                            |
+    |command-line=================================+
+    |:tjump 1234                                  |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+   >|      1234         0       1.0       1.0     |<
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 1.0                 1.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+With "ptjump" you can preview id in second window.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |      1001         1         2      1234     |
+    |$                                            |
+    |command-line=================================+
+    |:ptjump 1234                                 |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Load                                         |
+    |$#    lcid      sidr       sfa       sfo     |
+   >|      1234         0       1.0       1.0     |<
+    |$#                a1                  o1     |
+    |                 0.0                 0.0     |
+    |                 1.0                 1.0     |
+    |$                                            |
+    |command-line=================================+
+    |$                                            |
+    |*BOUNDARY_PRESCRIBED_MOTION_NODE             |
+    |$#  typeid       dof       vad      lcid     I
+    |      1001         1         2      1234     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Tags is very powerful tool in VIM, read ":help tags" to get know it well.
+
+--------------------------------------------------------------------------------
+6.6 File name completion                                    *lsdyna-includeName*
+
+With VIM build-in file completion <Ctrl-x><Ctrl-f> command you can in easy way
+add a new include file to your master deck.
+
+Use <Ctrl-x><Ctrl-f> to get list of files in include directory:
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |$                                            |
+    |*INCLUDE                                     |
+    |../OO_INC/<Ctrl-x><Ctrl-f>                   |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Select include file:
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |$                                            |
+    |*INCLUDE                                     |
+    |../OO_INC/                                   |
+    | | ../00_INC/include_A.inc  |                |
+    | | ../00_INC/include_B.inc  |                |
+    | | ../00_INC/include_C.inc  |<               |
+    | | ../00_INC/include_D.inc  |                |
+    | +--------------------------+                |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |$                                            |
+    |*INCLUDE                                     |
+    |../00_INC/include_C.inc                      |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+6.7 Include jumps                                           *lsdyna-includeJump*
+
+To jump from master deck into include file you can use <gf> or <gF> commands.
+
+Jump commands:
+- <gf> : open include file in current window
+- <gF> : open include file in new window (vertical split)
+- <gd> : open include directory in current window
+- <gD> : open include directory in new window (vertical split)
+
+Put cursor on the line with include path:
+
+    +---------------------------------------------+
+    |lsdyna_model.k===============================|
+    |$                                            |
+    |*INCLUDE                                     |
+    |../OO_INC/include_A.inc                      |
+    |*INCLUDE                                     |
+   >|../OO_INC/include_B.inc                      |<
+    |*INCLUDE                                     |
+    |../OO_INC/include_C.inc                      |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use <gf> to jump:
+
+    +---------------------------------------------+
+    |include_B.inc================================|
+    |$                                            |
+    |$ include B                                  |
+    |$                                            |
+    |*NODE                                        |
+    | 1000, 0.0, 0.0, 0.0                         |
+    | ...                                         |
+    |*ELEMENT_SHELL                               |
+    | 1000, 1001, 1002, 1003, 1004                |
+    | ...                                         |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+*NOTE: *INCLUDE_PATH is supported.
+
+    +---------------------------------------------+
+    |lsdyna_MASTER.key============================|
+    |$                                            |
+    |*INCLUDE_PATH                                |
+    |/FEM/LSDYNA/INCL/MAT                         |
+    |$                                            |
+    |*INCLUDE                                     |
+   >|matdbs_v01.inc                               |<
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
+Use <gf> normal command to open include file
+
+    +---------------------------------------------+
+    |matdbs_v01.inc===============================|
+    |$                                            |
+    |*MAT_ELASTIC_TITLE                           |
+    |$# title                                     |
+    |Steel                                        |
+    |$#     mid        ro         e        pr     |
+    |        10  7.85e-06     210.0       0.3     |
+    |$                                            |
+    |~                                            |
+    |~                                            |
+    |command-line=================================|
+    |                                             |
+    +---------------------------------------------+
+
 ================================================================================
 7. Commands                                                    *lsdyna-commands*
 
 The plugin gives you many useful commands to work with Ls-Dyna keyword file.
-
-Commands sections:
-- curve commands   : works with x & y data under *DEFINE_CURVE
-- node commands    : works with data lines under *NODE
-- element commands : works with data lines under *ELEMENT_
 
 --------------------------------------------------------------------------------
 7.1 Curve commands                                        *lsdyna-curveCommands*
@@ -1882,153 +2351,10 @@ Make visual selection line with element lines:
     |                                             |
     +---------------------------------------------+
 
-================================================================================
-8. Include files                                               *lsdyna-includes*
-
-VIM has a lot of options to work with many files. You can use them
-to work with Ls-Dyna include files if your model use them.
-
 --------------------------------------------------------------------------------
-8.1 File name completion                                    *lsdyna-includeName*
+7.4.2 LsInclCheckPath                                     *lsdyna-inclCheckPath*
 
-With VIM build-in file completion <Ctrl-x><Ctrl-f> command you can in easy way
-add a new include file to your master deck.
-
-Use <Ctrl-x><Ctrl-f> to get list of files in include directory:
-
-    +---------------------------------------------+
-    |lsdyna_model.k===============================|
-    |$                                            |
-    |*INCLUDE                                     |
-    |../OO_INC<Ctrl-x><Ctrl-f>                    |
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-Select include file:
-
-    +---------------------------------------------+
-    |lsdyna_model.k===============================|
-    |$                                            |
-    |*INCLUDE                                     |
-    |../OO_INC                                    |
-    | | ../00_INC/include_A.inc  |                |
-    | | ../00_INC/include_B.inc  |                |
-    | | ../00_INC/include_C.inc  |<               |
-    | | ../00_INC/include_D.inc  |                |
-    | +--------------------------+                |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-    +---------------------------------------------+
-    |lsdyna_model.k===============================|
-    |$                                            |
-    |*INCLUDE                                     |
-    |../00_INC/include_C.inc                      |
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
---------------------------------------------------------------------------------
-8.2 Include jumps                                           *lsdyna-includeJump*
-
-To jump from master deck into include file you can use <gf> or <gF> commands.
-
-Jump commands:
-- <gf> : open include file in current window
-- <gF> : open include file in new window (vertical split)
-
-Put cursor on the line with include path:
-
-    +---------------------------------------------+
-    |lsdyna_model.k===============================|
-    |$                                            |
-    |*INCLUDE                                     |
-    |../OO_INC/include_A.inc                      |
-    |*INCLUDE                                     |
-   >|../OO_INC/include_B.inc                      |<
-    |*INCLUDE                                     |
-    |../OO_INC/include_C.inc                      |
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-Use <gf> to jump:
-
-    +---------------------------------------------+
-    |include_B.inc================================|
-    |$                                            |
-    |$ include B                                  |
-    |$                                            |
-    |*NODE                                        |
-    | 1000, 0.0, 0.0, 0.0                         |
-    | ...                                         |
-    |*ELEMENT_SHELL                               |
-    | 1000, 1001, 1002, 1003, 1004                |
-    | ...                                         |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-<gf> and <gF> normal commands support *INCLUDE_PATH keyword as well.
-
-    +---------------------------------------------+
-    |lsdyna_MASTER.key============================|
-    |$                                            |
-    |*INCLUDE_PATH                                |
-    |/FEM/LSDYNA/INCL/MAT                         |
-    |$                                            |
-    |*INCLUDE                                     |
-   >|matdbs_v01.inc                               |<
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
-Use <gf> normal command to open include file
-
-    +---------------------------------------------+
-    |matdbs_v01.inc===============================|
-    |$                                            |
-    |*MAT_ELASTIC_TITLE                           |
-    |$# title                                     |
-    |Steel                                        |
-    |$#     mid        ro         e        pr     |
-    |        10  7.85e-06     210.0       0.3     |
-    |$                                            |
-    |~                                            |
-    |~                                            |
-    |command-line=================================|
-    |                                             |
-    +---------------------------------------------+
-
---------------------------------------------------------------------------------
-8.3 LsCheckPath                                               *lsdyna-checkPath*
-
-Command LsCheckPath can be used to test are all paths and include names valid.
+Command LsInclCheckPath tests if all paths and include names valid.
 The command support *INCLUDE_PATH keyword.
 
 Example of use:
@@ -2051,7 +2377,7 @@ Example of use:
     |                                             |
     +---------------------------------------------+
 >
-	:LsCheckPath
+	:LsInclCheckPath
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -2074,18 +2400,20 @@ Example of use:
     |Press ENTER or type command to continue      |
     +---------------------------------------------+
 
-================================================================================
-9. Credits                                                      *lsdyna-credits*
+--------------------------------------------------------------------------------
+7.4.3 LsIncl2Buff                                             *lsdyna-incl2Buff*
 
- keyword library       Bartosz Gradzik
- mappings              Bartosz Gradzik
- functions             Bartosz Gradzik
- commands              Bartosz Gradzik
- syntax highlighting   Bartosz Gradzik / Jakub Pajerski
- folding               Jakub Pajerski
+The command open all *INCLUDES as buffers in VIM.
+
+--------------------------------------------------------------------------------
+7.4.4 LsTags                                               *lsdyna-commandsTags*
+
+The command generates tags file.
+- linux:   ~/.vimrc/.dynatags
+- windows: ~/vimfiles/.dynatags
 
 ================================================================================
-10. License                                                     *lsdyna-license*
+8. License                                                     *lsdyna-license*
 
 Ls-Dyna filetype plugin for VIM
 Copyright (C) 2014 Bartosz Gradzik (bartosz.gradzik@hotmail.com)
@@ -2102,34 +2430,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-================================================================================
-11. Bugs                                                           *lsdyna-bugs*
-
-It's not a bug is a feature ;-)
-
-Found a bug? Please let me know at bartosz.gradzik@hotmail.com.
-
---------------------------------------------------------------------------------
-
-The last word from the author.
-
-Congratulations! This is end of reading, you made it. Or you hit <G>? ;-)
-
-Hope you will find the plugin useful in your daily work with VIM & Ls-Dyna.
-If you want you can sent me short mail with a good word about it.
-Then I would know someone is use it and I did not wast a lot of my time ;-)
-
-Something is missing and you feel it will be useful for you and other users?
-Please let me know, I will see what I can do.
-
-The library is the most powerful feature in the plugin.
-More keywords in the library the more powerful plugin is.
-You are using plugin, you like it, you have some spare time?
-Find 5 missing keywords and add them to github or sent it to me directly.
-
-Thanks,
-Bartosz
 
 ================================================================================
 vim:tw=80:ts=4:ft=help:norl:

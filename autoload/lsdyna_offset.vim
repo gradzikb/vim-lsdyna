@@ -47,7 +47,7 @@ function! lsdyna_offset#Offset(line1, line2, ...)
       let offset = a:1
     endif
 
-    call lsdyna_offset#Set(a:line1, a:line2, a:1)
+    call lsdyna_offset#Set(a:line1, a:line2, offset)
 
   "-----------------------------------------------------------------------------
   elseif keyword =~? '^\*ELEMENT_MASS\s*$'
