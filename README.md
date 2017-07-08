@@ -33,7 +33,7 @@ Many great features to update your nodes/elements/curves directly in VIM.
 
 ## Example
 
-The plugin in action you can see [here](https://www.youtube.com/watch?v=5a62UACiBA0&feature=youtu.be).
+The plugin in action you can see [here](https://www.youtube.com/watch?v=MY9qV8jrkDk&spfreload=10).
 
 ## Documentation
 
