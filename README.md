@@ -9,7 +9,7 @@ The plugin was created to make work with Ls-Dyna keyword file as fast and as eas
 - Syntax highlighting
 - Nodes/elements table folding
 - Omni-completion (keywords, options, ids, parameters)
-- Many useful commands, function and mappings
+- Many useful commands, functions and mappings
 
 ### Syntax highlighting
 Easy navigation with keyword file.
