@@ -37,7 +37,7 @@ The plugin in action you can see [here](https://www.youtube.com/watch?v=5a62UACi
 
 ## Documentation
 
-Please read [documentation](https://github.com/gradzikb/vim-lsdyna/blob/master/doc/lsdyna.txt) to know all plugin features.
+Please read [documentation](https://github.com/gradzikb/vim-lsdyna/blob/master/doc/lsdyna.txt) to get know all plugin features.
 
 `:help lsdyna`
 
