@@ -3,47 +3,33 @@
 
 ## Introduction
 
-What is Ls-Dyna filetype plugin?
-
-It's just bunch of scripts to speed up work with Ls-Dyna keyword file and VIM text editor.
+The plugin was created to make work with Ls-Dyna keyword file as fast and as easy as possible.
 
 ## Main features
 - Syntax highlighting
-- Folding
-- Keyword library
-- Useful mappings, functions and commands
+- Nodes/elements table folding
+- Omni-completion (keywords, options, ids, parameters)
+- Many useful commands, function and mappings
 
 ### Syntax highlighting
-With color syntax it's easier to navigate through a keyword file.
+Easy navigation with keyword file.
 
 ![syntax](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/syntax.gif)
 
-### Folding
-Node & element table folding, no more never ending scrolling!
+### Nodes/elements table folding
+No more never ending scrolling.
 
 ![folding](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
 
-### Keyword library
-With keyword library you can very quick add a new Ls-Dyna keyword into your model.
+### Omni-completion
+Insert keywords/option/ids/parameters like a pro.
 
 ![libraryb](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/omni-completion.gif)
 
-
-### Commands
-The plugin has many build-in commands to work with data directly for:
-- curves
-- nodes
-- elements
+### Commands/functions/mappings
+Many great features to update your nodes/elements/curves directly in VIM.
 
 ![commands](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/commands.gif)
-
-
-### Commands, functions & mappings
-The plugin has couple of great functions to make your work even faster:
-- mappings
-- comment/uncomment
-- data line autoformating
-- keyword text objects
 
 ## Example
 
@@ -51,9 +37,7 @@ The plugin in action you can see [here](https://www.youtube.com/watch?v=5a62UACi
 
 ## Documentation
 
-The plugin has decent [documentation](https://github.com/gradzikb/vim-lsdyna/blob/master/doc/lsdyna.txt) with detail explanation of all functions and examples.
-
-Please read the documentation before you start using the plugin.
+Please read [documentation](https://github.com/gradzikb/vim-lsdyna/blob/master/doc/lsdyna.txt) to know all plugin features.
 
 `:help lsdyna`
 
