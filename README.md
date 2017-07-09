@@ -22,12 +22,12 @@ No more never ending scrolling.
 ![folding](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
 
 ### Omni-completion
-Insert keywords/options/ids/parameters like a pro.
+Inserting keywords/options/ids/parameters never was easier.
 
-![libraryb](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/omni-completion.gif)
+![omni-completion](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/omni-completion.gif)
 
 ### Commands/functions/mappings
-Many great features to update your nodes/elements/curves directly in VIM.
+Many great features to update your model directly in VIM.
 
 ![commands](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/commands.gif)
 
