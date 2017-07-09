@@ -3,7 +3,7 @@
 
 ## Introduction
 
-The plugin was created to make work with Ls-Dyna keyword file as fast and as easy as possible.
+The plugin make your work with Ls-Dyna keyword file as fast and as easy as possible.
 
 ## Main features
 - Syntax highlighting
@@ -22,7 +22,7 @@ No more never ending scrolling.
 ![folding](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
 
 ### Omni-completion
-Inserting keywords/options/ids/parameters never was easier.
+Inserting of keywords/options/ids/parameters never was easier.
 
 ![omni-completion](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/omni-completion.gif)
 
