@@ -5,7 +5,7 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  15th of April 2017
+" Last Change:  10th of July 2017
 "
 "-------------------------------------------------------------------------------
 "
@@ -94,8 +94,7 @@ function! lsdyna_complete#LsdynaComplete(findstart, base)
 
       " get keyword and field name
       let keyword = tolower(getline(search('^\*\a', 'bn'))[1:])
-      let fpos = ((float2nr((virtcol(".")-1)/10))*10)
-      let option  = tolower(substitute(strpart(getline(line(".")-1), fpos, 10), "[#$:]\\?\\s*", "", "g"))
+      let option = lsdyna_complete#getOption()
 
       " set option list
       let items = lsdyna_complete#checkOptLib(keyword, option)
@@ -114,6 +113,30 @@ function! lsdyna_complete#LsdynaComplete(findstart, base)
     endif
 
   endif
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function lsdyna_complete#getOption()
+
+  "-----------------------------------------------------------------------------
+  " Function to find keyword option in libe above.
+  "
+  " Arguments:
+  " - None
+  " Return:
+  " - keyLib (string) : keyword option
+  "-----------------------------------------------------------------------------
+
+  " find comment line
+  let lnum = search('^\$', 'bn')
+  " set cursor position
+  let fpos = ((float2nr((virtcol(".")-1)/10))*10)
+  " get keyword option
+  let option = tolower(substitute(strpart(getline(lnum), fpos, 10), "[#$:]\\?\\s*", "", "g"))
+
+  return option
 
 endfunction
 
