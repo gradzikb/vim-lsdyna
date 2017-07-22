@@ -324,7 +324,7 @@ command! -buffer -range -nargs=+ LsOffsetId
 "-------------------------------------------------------------------------------
 
 command! -buffer -nargs=0 LsInclCheckPath
- \ :call lsdyna_include#checkPath(1)
+ \ :call lsdyna_include#checkIncl()
 
 command! -buffer -nargs=0 LsIncl2Buff
  \ :call lsdyna_include#incl2buff()
