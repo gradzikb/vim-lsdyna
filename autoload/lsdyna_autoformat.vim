@@ -56,7 +56,8 @@ function! lsdyna_autoformat#Autoformat() range
   elseif keyword =~? '^\*ELEMENT_PLOTEL\s*$' ||
        \ keyword =~? '^\*ELEMENT_BEAM\s*$' ||
        \ keyword =~? '^\*ELEMENT_SHELL\s*$' ||
-       \ keyword =~? '^\*ELEMENT_SOLID\s*$'
+       \ keyword =~? '^\*ELEMENT_SOLID\s*$' ||
+       \ keyword =~? '^\*AIRBAG_SHELL_REFERENCE_GEOMETRY\s*$'
 
     call lsdyna_autoformat#element(a:firstline, a:lastline)
 
