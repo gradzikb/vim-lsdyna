@@ -5,11 +5,13 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  21th of October 2016
-" Version:      1.1.1
+" Last Change:  27th of July 2017
+" Version:      1.1.2
 "
 " History of change:
 "
+" v1.1.2
+"   - empty fields at the beginning of the line supported
 " v1.1.1
 "   - define_curve function fixed
 " v1.1.0
@@ -370,7 +372,7 @@ function! lsdyna_autoformat#keyword(line1, line2)
     " ignore keyword and comment line
     if lineStr =~? '^[*$]' | continue | endif
     " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
+    let line = split(lineStr, '\s*,\s*\|\s\+', 1)
 
     " set 10 length string for each item
     call map(line, 'printf("%10s", v:val)')
