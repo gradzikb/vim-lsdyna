@@ -371,8 +371,12 @@ function! lsdyna_autoformat#keyword(line1, line2)
     let lineStr = getline(i)
     " ignore keyword and comment line
     if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+', 1)
+    " split the line, decide to keep empty item at the beginning
+    if lineStr =~? '^\s*,'
+      let line = split(lineStr, '\s*,\s*\|\s\+', 1)
+    else
+      let line = split(lineStr, '\s*,\s*\|\s\+', 0)
+    endif
 
     " set 10 length string for each item
     call map(line, 'printf("%10s", v:val)')
