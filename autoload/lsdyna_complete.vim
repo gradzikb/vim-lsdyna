@@ -345,7 +345,7 @@ function!  lsdyna_complete#keyword2tag(bnum, lnum)
     let tags = lsdyna_complete#coordinate2tag(a:lnum)
   elseif kw =~? '^\*PARAMETER\s*$' || kw =~? '^\*PARAMETER_LOCAL\s*$'
     let tags = lsdyna_complete#parameter2tag(a:lnum)
-  elseif kw =~? '^\*PARAMETER_EXPRESSION\s*$'
+  elseif kw =~? '^\*PARAMETER_EXPRESSION'
     let tags = lsdyna_complete#parameterExpr2tag(a:lnum)
   endif
 
