@@ -4,11 +4,13 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  18th of February 2017
-" Version:      1.4.0
+" Last Change:  4th of January 2018
+" Version:      1.5.0
 "
 " History of change:
 "
+" v1.5.0
+"   - file clean up
 " v1.4.0
 "   - omni completion added
 "   - tags for dyna added
@@ -90,6 +92,7 @@ set cpo&vim
 "    VARIABLES
 "-------------------------------------------------------------------------------
 
+"set $VIMHOME variable base on OS
 if has('win32') || has ('win64')
   let $VIMHOME = $HOME."/vimfiles"
 else
@@ -102,6 +105,7 @@ endif
 
 "load colors
 colorscheme lsdyna
+setlocal syntax=lsdyna
 
 "-------------------------------------------------------------------------------
 "    MISC SETTINGS
@@ -124,7 +128,13 @@ setlocal indentexpr=
 " always change current directory
 setlocal autochdir
 " set tags file
-set tags=$VIMHOME/.dynatags
+set tags=$VIMHOME/.dtags
+" set using popup menu for completion
+if v:version == '800'
+  setlocal completeopt=menu,menuone,noinsert
+else
+  setlocal completeopt=menu,menuone
+endif
 
 "-------------------------------------------------------------------------------
 "    FOLDING
@@ -136,56 +146,6 @@ setlocal foldmethod=expr
 setlocal foldminlines=4
 
 "-------------------------------------------------------------------------------
-"    USEFUL MAPPINGS
-"-------------------------------------------------------------------------------
-
-" comment/uncomment line
-noremap <silent><buffer> <M-c> :call lsdyna_misc#CommentLine()<CR>j
-" change 4 -> $ but only at the beginning of the line
-inoreabbrev 4 4<C-R>=lsdyna_misc#CommentSign()<CR>
-
-" mapping for separation lines
-nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
-nnoremap <silent><buffer> <LocalLeader>C O$<ESC>0
-nnoremap <silent><buffer> <LocalLeader>1 o$<ESC>79a-<ESC>0
-nnoremap <silent><buffer> <LocalLeader>! O$<ESC>79a-<ESC>0
-nnoremap <silent><buffer> <LocalLeader>2 o
- \$-------10--------20--------30--------40
- \--------50--------60--------70--------80<ESC>0
-nnoremap <silent><buffer> <LocalLeader>@ O
- \$-------10--------20--------30--------40
- \--------50--------60--------70--------80<ESC>0
-nnoremap <silent><buffer> <LocalLeader>3 o
- \$--------\|---------\|---------\|---------\|
- \---------\|---------\|---------\|---------\|<ESC>0
-nnoremap <silent><buffer> <LocalLeader># O
- \$--------\|---------\|---------\|---------\|
- \---------\|---------\|---------\|---------\|<ESC>0
-nnoremap <silent><buffer> <LocalLeader>0 o$<ESC>79a-<ESC>yypO$<ESC>A    
-nnoremap <silent><buffer> <LocalLeader>) O$<ESC>79a-<ESC>yypO$<ESC>A    
-
-" jump to previous keyword
-nnoremap <silent><buffer> [[ ?^\*\a<CR>:nohlsearch<CR>zz
-" jump to next keyword
-nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
-
-" remove all comment lines from selection
-vnoremap <silent><buffer> <M-r> :g/^\$/d<CR>:nohlsearch<CR>
-"
-inoreabbrev bof $-------------------------------------BOF---------------------------------------
-inoreabbrev eof $-------------------------------------EOF---------------------------------------
-inoreabbrev nh $#   nid               x               y               z      tc      rc
-inoreabbrev eh $#   eid     pid      n1      n2      n3      n4      n5      n6      n7      n8
-
-" tags mappings
-nnoremap <C-]> g<C-]>
-nnoremap <c-leftmouse> g<c-]>
-
-" check includes before write
-cnoremap w<CR> <C-u>call lsdyna_include#quit("w")<CR>
-cnoremap wq<CR> <C-u>call lsdyna_include#quit("wq")<CR>
-
-"-------------------------------------------------------------------------------
 "    AUTOGROUP
 "-------------------------------------------------------------------------------
 
@@ -194,114 +154,106 @@ augroup lsdyna
 
   " store file as unix
   autocmd BufWrite * set ff=unix
-  " check includes for :q
-  "autocmd QuitPre * if lsdyna_include#checkPath(0) != 0 | call getchar() | endif
-  "autocmd QuitPre * lsdyna_include#quit()
+
 augroup END
 
 "-------------------------------------------------------------------------------
-"    TEXT OBJECTS
+"    MAPPINGS
 "-------------------------------------------------------------------------------
 
-" around keyword (ak) and insert keyword (ik) works the same
+" change 4 -> '$' sign at the line beginning
+inoreabbrev 4 4<C-R>=lsdyna_misc#CommentSign()<CR>
+" comment/uncomment line
+noremap <silent><buffer> <M-c> :call lsdyna_misc#CommentLine()<CR>j
+" put empty comment line below
+nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
+" put empty comment line above
+nnoremap <silent><buffer> <LocalLeader>C O$<ESC>0
+" put separator line above
+nnoremap <silent><buffer> <LocalLeader>1 o$-------------------------------------------------------------------------------<ESC>0
+nnoremap <silent><buffer> <LocalLeader>2 o$-------10--------20--------30--------40--------50--------60--------70--------80<ESC>0
+" put separator line below
+nnoremap <silent><buffer> <LocalLeader>! O$-------------------------------------------------------------------------------<ESC>0
+nnoremap <silent><buffer> <LocalLeader>@ O$-------10--------20--------30--------40--------50--------60--------70--------80<ESC>0
+" put title separator line below
+nnoremap <silent><buffer> <LocalLeader>0 o$<ESC>79a-<ESC>yypO$<ESC>A    
+" put title separator line above
+nnoremap <silent><buffer> <LocalLeader>) O$<ESC>79a-<ESC>yypO$<ESC>A    
+" jump to next keyword
+nnoremap <silent><buffer> [[ ?^\*\a<CR>:nohlsearch<CR>zz
+" jump to previous keyword
+nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
+" remove all comment lines from selection
+vnoremap <silent><buffer> <M-r> :g/^\$/d<CR>:nohlsearch<CR>
+" tags mappings (do not jump to the first but always show full list)
+nnoremap <C-]> g<C-]>
+nnoremap <c-leftmouse> g<c-]>
+" check includes before write
+cnoremap w<CR> <C-u>call lsdyna_include#quit("w")<CR>
+cnoremap wq<CR> <C-u>call lsdyna_include#quit("wq")<CR>
+" autoformat function
+noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call lsdyna_autoformat#Autoformat()<CR>
+" open include file in current window
+noremap <buffer><script><silent> gf :call lsdyna_include#expandPath()<CR>gf
+" open include file in separate window
+noremap <buffer><script><silent> gF :call lsdyna_include#expandPath()<CR><C-w>f<C-w>H
+" open include directory in current window
+noremap <buffer><script><silent> gd :execute "edit ".fnamemodify(getline("."), ":p:h")<CR>
+" open include directory in separate window
+noremap <buffer><script><silent> gD :execute "vertical split ".fnamemodify(getline("."), ":p:h")<CR><C-w>L
+" text object around keyword (ak) and insert keyword (ik) works the same
 vnoremap <buffer><script><silent> ik :call lsdyna_misc#KeywordTextObject()<CR>
 onoremap <buffer><script><silent> ik :call lsdyna_misc#KeywordTextObject()<CR>
 vnoremap <buffer><script><silent> ak :call lsdyna_misc#KeywordTextObject()<CR>
 onoremap <buffer><script><silent> ak :call lsdyna_misc#KeywordTextObject()<CR>
-
-" around column (ac) and insert column (ic) works the same
+" text object around column (ac) and insert column (ic) works the same
 vnoremap <buffer><script><silent> ac :call lsdyna_misc#ColumnTextObject()<CR>
 onoremap <buffer><script><silent> ac :call lsdyna_misc#ColumnTextObject()<CR>
 vnoremap <buffer><script><silent> ic :call lsdyna_misc#ColumnTextObject()<CR>
 onoremap <buffer><script><silent> ic :call lsdyna_misc#ColumnTextObject()<CR>
+" begining and end lines
+inoreabbrev bof $-------------------------------------BOF---------------------------------------
+inoreabbrev eof $-------------------------------------EOF---------------------------------------
 
 "-------------------------------------------------------------------------------
-"    KEYWORDS LIBRARY
+"    COMMANDS
 "-------------------------------------------------------------------------------
 
-" set tags method
-" g:lsdynaSearchMode = 0 : search is turn off
-" g:lsdynaSearchMode = 1 : search only in current buffer
-" g:lsdynaSearchMode = 2 : search in all open buffers
-" g:lsdynaSearchMode = 3 : like 2 but add *INCLUDE as new buffers
-if !exists("g:lsdynaSearchMode")
-  let g:lsdynaSearchMode = 3
-endif
+command! -buffer -nargs=* LsTags
+ \ :call lsdyna_tags#cmdlstags(<f-args>)
 
-" set omni completion functions
-setlocal omnifunc=lsdyna_complete#LsdynaComplete
-" set using popup menu for completion
-if v:version == '800'
-  setlocal completeopt=menu,menuone,noinsert
-else
-  setlocal completeopt=menu,menuone
-endif
-
-" map Ctrl-Tab for Ls-Dyna completion
-inoremap <C-Tab> <C-X><C-O>
-nnoremap <C-Tab> :call lsdyna_complete#extendLine()<CR>R<C-X><C-O>
-
-if !exists("g:lsdynaTagsPath")   | let g:lsdynaTagsPath = $VIMHOME."/.dynatags" | endif
-if !exists("g:lsdynaKeyLibPath") | let g:lsdynaKeyLibPath = expand('<sfile>:p:h:h') . '/keywords/' | endif
-if !exists("g:lsdynaOptLibPath") | let g:lsdynaOptLibPath = expand('<sfile>:p:h:h') . '/keywords/dynaOptLib' | endif
-
-" initialize lsdyna keyword & option library
-if !exists("g:lsdynaKeyLib") | let g:lsdynaKeyLib=lsdyna_complete#InitKeyLib(g:lsdynaKeyLibPath) | endif
-if !exists("g:lsdynaOptLib") | let g:lsdynaOptLib=lsdyna_complete#InitOptLib(g:lsdynaOptLibPath) | endif
-
-" initialize completion type
-if !exists("b:lsdynaCompleteType") | let b:lsdynaCompleteType = 'none' | endif
-
-" mapping for <CR>/<C-Y>/<kEnter>
-inoremap <buffer><silent><expr> <CR>     lsdyna_complete#LsDynaMapEnter()
-inoremap <buffer><silent><expr> <kEnter> lsdyna_complete#LsDynaMapEnter()
-inoremap <buffer><silent><expr> <C-Y>    lsdyna_complete#lsdynamapCtrly()
-
-"-------------------------------------------------------------------------------
-"    LINE FORMATTING
-"-------------------------------------------------------------------------------
-
-noremap <buffer><script><silent> <LocalLeader><LocalLeader>
- \ :call lsdyna_autoformat#Autoformat()<CR>
-
-"-------------------------------------------------------------------------------
-"    CURVE COMMANDS
-"-------------------------------------------------------------------------------
-
-command! -buffer -range -nargs=* LsCurveShift
- \ :call lsdyna_curves#Shift(<line1>,<line2>,<f-args>)
+command! -buffer -range -nargs=* LsCurveOffset
+ \ :call lsdyna_curve#Offset(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsCurveScale
- \ :call lsdyna_curves#Scale(<line1>,<line2>,<f-args>)
+ \ :call lsdyna_curve#Scale(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=0 LsCurveMirror
+ \ :call lsdyna_curve#Mirror(<line1>,<line2>)
+
+command! -buffer -range -nargs=* LsCurveCut
+ \ :call lsdyna_curve#Cut(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsCurveResample
- \ :call lsdyna_curves#Resample(<line1>,<line2>,<f-args>)
+ \ :call lsdyna_curve#Resample(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsCurveAddPoint
- \ :call lsdyna_curves#AddPoint(<line1>,<line2>,<f-args>)
-
-command! -buffer -range LsCurveSwapXY
- \ :call lsdyna_curves#SwapXY(<line1>,<line2>)
-
-command! -buffer -range LsCurveRevers
- \ :call lsdyna_curves#Reverse(<line1>,<line2>)
-
-"-------------------------------------------------------------------------------
-"    NODE COMMANDS
-"-------------------------------------------------------------------------------
+command! -buffer -range -nargs=1 LsCurveAddPoint
+ \ :call lsdyna_curve#Addpoint(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsNodeScale
  \ :call lsdyna_node#Scale(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsNodeShift
- \ :call lsdyna_node#Shift(<line1>,<line2>,<f-args>)
+command! -buffer -range -nargs=* LsNodeTranslate
+ \ :call lsdyna_node#Transl(<line1>,<line2>,<f-args>)
 
-command! -buffer -range -nargs=* LsNodeReflect
- \ :call lsdyna_node#Reflect(<line1>,<line2>,<f-args>)
+command! -buffer -range -nargs=* LsNodeRotate
+ \ :call lsdyna_node#Rotate(<line1>,<line2>,<f-args>)
 
-"-------------------------------------------------------------------------------
-"    ELEMENT COMMANDS
-"-------------------------------------------------------------------------------
+command! -buffer -range -nargs=* LsNodePos6p
+ \ :call lsdyna_node#Pos6p(<line1>,<line2>,<f-args>)
+
+command! -buffer -range -nargs=* LsNodeMirror
+ \ :call lsdyna_node#Mirror(<line1>,<line2>,<f-args>)
 
 command! -buffer -range -nargs=* LsElemFindPid
  \ :call lsdyna_element#FindPid(<line1>,<line2>,<f-args>)
@@ -312,16 +264,8 @@ command! -buffer -range -nargs=* LsElemChangePid
 command! -buffer -range -nargs=0 LsElemReverseNormals
  \ :call lsdyna_element#ReverseNormals(<line1>,<line2>)
 
-"-------------------------------------------------------------------------------
-"    OFFSET COMMAND
-"-------------------------------------------------------------------------------
-
 command! -buffer -range -nargs=+ LsOffsetId
  \ :call lsdyna_offset#Offset(<line1>,<line2>,<f-args>)
-
-"-------------------------------------------------------------------------------
-"    INCLUDE COMMANDS
-"-------------------------------------------------------------------------------
 
 command! -buffer -nargs=0 LsInclCheckPath
  \ :call lsdyna_include#checkIncl()
@@ -329,20 +273,59 @@ command! -buffer -nargs=0 LsInclCheckPath
 command! -buffer -nargs=0 LsIncl2Buff
  \ :call lsdyna_include#incl2buff()
 
-command! -buffer -nargs=0 LsTags
- \ :call lsdyna_complete#tags(g:lsdynaTagsPath, 3)
+" abbreviations for commonly used commands
+cnoreabbrev lcs LsCurveScale
+cnoreabbrev lco LsCurveOffset
+cnoreabbrev lcr LsCurveResample
+cnoreabbrev lca LsCurveAddPoint
+cnoreabbrev lcm LsCurveMirror
+cnoreabbrev lcc LsCurveCut
 
-noremap <buffer><script><silent> gf
- \ :call lsdyna_include#expandPath()<CR>gf
+cnoreabbrev lns LsNodeScale
+cnoreabbrev lnt LsNodeTranslate
+cnoreabbrev lnr LsNodeRotate
+cnoreabbrev lnp LsNodePos6p
+cnoreabbrev lnm LsNodeMirror
 
-noremap <buffer><script><silent> gF
- \ :call lsdyna_include#expandPath()<CR><C-w>f<C-w>H
+cnoreabbrev lec LsElemChangePid
+cnoreabbrev lef LsElemFindPid
+cnoreabbrev ler LsElemReverseNormals
 
-noremap <buffer><script><silent> gd
- \ :execute "edit ".fnamemodify(getline("."), ":p:h")<CR>
+"-------------------------------------------------------------------------------
+"    COMPLETION
+"-------------------------------------------------------------------------------
 
-noremap <buffer><script><silent> gD
- \ :execute "vertical split ".fnamemodify(getline("."), ":p:h")<CR><C-w>L
+" set search method
+" 't' : use tag file only
+" 'b' : use current buffer only
+" 'B' : use all open buffers
+" 'i' : like 'B' but add *INCLUDE files as new buffers
+if !exists("g:lsdynaSearchMode") | let g:lsdynaSearchMode = 'i' | endif
+
+" set global paths
+if !exists("g:lsdynaPathTags")     | let g:lsdynaPathTags     = $VIMHOME."/.dtags"                                       | endif
+if !exists("g:lsdynaPathKeywords") | let g:lsdynaPathKeywords = expand('<sfile>:p:h:h') . '/keywords/'                   | endif
+if !exists("g:lsdynaPathKvars")    | let g:lsdynaPathKvars    = expand('<sfile>:p:h:h') . '/keywords/dynaKvars.dat'      | endif
+if !exists("g:lsdynaPathHeaders")  | let g:lsdynaPathHeaders  = expand('<sfile>:p:h:h') . '/keywords/dynaTagHeaders.dat' | endif
+
+" set variables
+if !exists("g:lsdynaLibKeywords")  | let g:lsdynaLibKeywords  = lsdyna_complete#libKeywords(g:lsdynaPathKeywords) | endif
+if !exists("g:lsdynaLibHeaders")   | let g:lsdynaLibHeaders   = lsdyna_complete#libHeaders(g:lsdynaPathHeaders)   | endif
+if !exists("g:dtags")              | let g:dtags              = lsdyna_tags#dynatags()                            | endif
+if !exists("g:kvars")              | let g:kvars              = lsdyna_kvars#kvars(g:lsdynaPathKvars)             | endif
+if !exists("b:lsdynaCompleteType") | let b:lsdynaCompleteType = 'none'                                            | endif
+
+" set omni completion functions
+setlocal omnifunc=lsdyna_complete#LsdynaComplete
+
+" completion mappings
+inoremap <C-Tab> <C-X><C-O>
+nnoremap <C-Tab> :call lsdyna_complete#extendLine()<CR>R<C-X><C-O>
+inoremap <buffer><silent><expr> <CR>     lsdyna_complete#LsDynaMapEnter()
+inoremap <buffer><silent><expr> <kEnter> lsdyna_complete#LsDynaMapEnter()
+inoremap <buffer><silent><expr> <C-Y>    lsdyna_complete#lsdynamapCtrly()
+
+"-------------------------------------------------------------------------------
 
 " restore vim functions
 let &cpo = s:cpo_save

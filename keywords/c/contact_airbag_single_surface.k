@@ -1,7 +1,7 @@
 *CONTACT_AIRBAG_SINGLE_SURFACE_ID
 $#     cid title
          ? ?title?
-$#    ssid      msid    sstype    mstype    sboxid    mboxid       spr       mpr
+$#    ssid      msid     sstyp     mstyp    sboxid    mboxid       spr       mpr
          ?                   2
 $#      fs        fd        dc        vc       vdc     pench        bt        dt
          ?         ?                          20.0
@@ -13,6 +13,6 @@ $#  penmax    thkopt    shlthk     snlog      isym     i2d3d    sldthk    sldstf
 
 $#    igap    ignore    dprfac    dtstif                        flangl   cid_rcf
                    2
-$#   q2tri    dtpchk     sfnbr    fnlscl    dnlscl      tcso    tiedid   sheledg
+$#   q2tri    dtpchk     sfnbr    fnlscl    dnlscl      tcso    tiedid    shledg
          1
 $

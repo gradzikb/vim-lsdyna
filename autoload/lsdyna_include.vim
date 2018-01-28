@@ -128,8 +128,6 @@ function! lsdyna_include#incl2buff()
     execute "badd " . file
   endfor
 
-  echo len(files) . " new buffer(s) added."
-
 endfunction
 
 "-------------------------------------------------------------------------------
@@ -184,6 +182,9 @@ function! lsdyna_include#checkIncl()
 
   " loop over includes
   for include in includes
+
+    " remove white signs from include path
+    let include = substitute(include, '\s', '', 'g')
 
     " if include does not exist check *INCLUDE_PATH
     if !filereadable(include)

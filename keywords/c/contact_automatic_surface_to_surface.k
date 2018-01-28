@@ -13,6 +13,6 @@ $#  penmax    thkopt    shlthk     snlog      isym     i2d3d    sldthk    sldstf
 
 $#    igap    ignore    dprfac    dtstif                        flangl   cid_rcf
 
-$#   q2tri    dtpchk     sfnbr    fnlscl    dnlscl      tcso    tiedid   sheledg
+$#   q2tri    dtpchk     sfnbr    fnlscl    dnlscl      tcso    tiedid    shledg
 
 $
