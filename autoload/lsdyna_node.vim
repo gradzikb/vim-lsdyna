@@ -5,10 +5,12 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  12th January 2018
-" Version:      2.0.0
+" Last Change:  4th April 2018
+" Version:      2.0.1
 "
 " History of change:
+" v2.0.1
+"   - 6 point positioning fixed
 " v2.0.0
 "   - all functions wrote from scratch
 " v1.1.0
@@ -198,17 +200,17 @@ function! lsdyna_node#Pos6p(line1, line2, p1x, p1y, p1z,
 
   " update P3 coordinates
   let P3 = [nodes.nodes[-3].x, nodes.nodes[-3].y, nodes.nodes[-3].z]
-  " set rotation angle (angle between vectors P4-P3 and P4-P6)
-  let a = lsdyna_node#vec2angle(lsdyna_node#vector(P4, P3), lsdyna_node#vector(P4, P6), 'd')
+  " set rotation angle (angle between vectors P5-P3 and P5-P6)
+  let a = lsdyna_node#vec2angle(lsdyna_node#vector(P5, P3), lsdyna_node#vector(P5, P6), 'd')
 
   " don't do rotation for 0.0 angle
   if a != 0.0
     " rotation about angle respect to axis passing through point
-    " angle : between vector P4-P3 and vector P4-P6
-    " axis  : vector P4-P5
+    " angle : between vector P5-P3 and vector P5-P6
+    " axis  : vector P5-P4
     " point : point P4
     call nodes.transl(-P4[0], -P4[1], -P4[2])
-    call nodes.rotate(a, lsdyna_node#vector(P4, P5))
+    call nodes.rotate(a, lsdyna_node#vector(P5, P4))
     call nodes.transl(P4[0], P4[1], P4[2])
   endif
 
