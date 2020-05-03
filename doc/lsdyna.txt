@@ -93,20 +93,20 @@ Recommended is to use VIM packages for installation. See ":help packages".
 
 Single user installation:
 -------------------------
-1. Copy plugin files to your home directory:
+1. Copy plugin files/directories to your home directory:
 >
-	$USERPROFILE%\vimfiles\pack\lsdyna\
-	$HOME/.vim/pack/lsdyna/
+	$USERPROFILE%\vimfiles\pack\cae\start\vim-lsdyna
+	$HOME/.vim/pack/cae/start/vim-lsdyna
 <
 For example whole plugin structure might looks like this:
 
-    C:\Users\bartosz\vimfiles\lsdyna\start\lsdyna\autoload\
-    C:\Users\bartosz\vimfiles\lsdyna\start\lsdyna\colors\
-    C:\Users\bartosz\vimfiles\lsdyna\start\lsdyna\doc\
-    C:\Users\bartosz\vimfiles\lsdyna\start\lsdyna\ftdetect\
-    C:\Users\bartosz\vimfiles\lsdyna\start\lsdyna\ftplugin\
-    C:\Users\bartosz\vimfiles\lsdyna\start\lsdyna\keywords\
-    C:\Users\bartosz\vimfiles\lsdyna\start\lsdyna\syntax\
+    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\autoload\
+    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\colors\
+    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\doc\
+    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\ftdetect\
+    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\ftplugin\
+    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\keywords\
+    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\syntax\
 
 Multi user installation:
 ------------------------
