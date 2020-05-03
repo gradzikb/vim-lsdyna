@@ -8,8 +8,10 @@ The plugin make your work with Ls-Dyna keyword file as fast and as easy as possi
 ## Main features
 - Syntax highlighting
 - Nodes/elements table folding
-- Omni-completion (keywords, options, ids, parameters)
-- Many useful commands, functions and mappings
+- Omni-completion for keywords/options/ids/parameters
+- Keyword manager
+- Numerous commands to operate on model data
+- Useful mappings and functions
 
 ### Syntax highlighting
 Easy navigation with keyword file.
@@ -58,4 +60,4 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 The GNU General Public License
 
-Copyright &copy; 2014 Bartosz Gradzik
+Copyright &copy; 2020 Bartosz Gradzik
