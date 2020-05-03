@@ -8,8 +8,10 @@ The plugin make your work with Ls-Dyna keyword file as fast and as easy as possi
 ## Main features
 - Syntax highlighting
 - Nodes/elements table folding
-- Omni-completion (keywords, options, ids, parameters)
-- Many useful commands, functions and mappings
+- Omni-completion for keywords/options/ids/parameters
+- Keyword manager
+- Numerous commands to operate on model data
+- Useful mappings and functions
 
 ### Syntax highlighting
 Easy navigation with keyword file.
@@ -43,10 +45,14 @@ Please read [documentation](https://github.com/gradzikb/vim-lsdyna/blob/master/d
 
 ## Installation
 
+For (g)VIM 8.0 or higher you can use native package manager
+`:help packages`
+
+For lower (g)VIM version you must use third-party package manager:
 [Pathogen](https://github.com/tpope/vim-pathogen)
 
 ```
-cd ~/.vim/bundle
+cd ~/.vim/pack/cae_plugins/start/vim-lsdyna
 git clone https://github.com/gradzikb/vim-lsdyna
 ```
 
@@ -54,4 +60,4 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 The GNU General Public License
 
-Copyright &copy; 2014 Bartosz Gradzik
+Copyright &copy; 2020 Bartosz Gradzik
