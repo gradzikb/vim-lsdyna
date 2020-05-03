@@ -298,6 +298,8 @@ function! lsdyna_autoformat#parameter(line1, line2)
     let lineStr = getline(i)
     " ignore keyword and comment line
     if lineStr =~? '^[*$]' | continue | endif
+    " remove '&' sign
+    let lineStr = substitute(lineStr, '&', '', 'g')
     " split the line
     let line = split(lineStr, '\s*,\s*\|\s\+')
 
@@ -340,6 +342,8 @@ function! lsdyna_autoformat#parameter_expr(line1, line2)
     let lineStr = getline(i)
     " ignore keyword and comment line
     if lineStr =~? '^[*$]' | continue | endif
+    " remove '&' sign
+    let lineStr = substitute(lineStr, '&', '', 'g')
     " split the line
     let line = split(lineStr, '\s*,\s*\|\s\+')
 

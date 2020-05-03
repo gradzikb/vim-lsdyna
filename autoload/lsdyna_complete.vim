@@ -13,6 +13,12 @@
 "   - initial version
 "
 "-------------------------------------------------------------------------------
+"
+function! s:Start_dyna_col()
+    return (float2nr((virtcol(".")-1)/10))*10
+endfunction
+
+"-------------------------------------------------------------------------------
 
 function! lsdyna_complete#LsdynaComplete(findstart, base)
 
@@ -34,84 +40,91 @@ function! lsdyna_complete#LsdynaComplete(findstart, base)
 
     "---------------------------------------------------------------------------
     " keyword completion
-    "
+    " return 1ts or 2nd column in line depend on '*'
+
     if line =~? '^\*\?\h\+$'
       let b:lsdynaCompleteType = 'keyword'
-      if line[0] == "*"
-        return 1
-      else
-        return 0
-      endif
+      return line[0] == '*' ? 1 : 0
     endif
 
     "---------------------------------------------------------------------------
     " parameter completion
+    " return one sign after '&' sign in current ls-dyna column
 
-    " lsdyna column start index
-    let cpos = ((float2nr((virtcol(".")-1)/10))*10)
-    " & index from begining of lsdyna column
-    let apos = stridx(strpart(line, cpos, col(".")-cpos), '&')
+    " find '&' position between start of dyna column and current cursor position
+    let apos = stridx(line[:col('.')], '&', <SID>Start_dyna_col())
     if apos > -1
       let b:lsdynaCompleteType = 'parameter'
-      return cpos+apos+1
+      return apos+1
     endif
 
     "---------------------------------------------------------------------------
     " field completion
-    "
-    let fpos = ((float2nr((virtcol(".")-1)/10))*10)
+    " return start position of current ls-dyna column
+
     let b:lsdynaCompleteType = 'field'
-    return fpos
+    return <SID>Start_dyna_col()
 
   "-----------------------------------------------------------------------------
   " 2nd function call --> build completion list
   else
 
-    " remove whit signs from completion string
-    let base = substitute(a:base,'\s','','g')
+    let base = trim(a:base)
 
     "---------------------------------------------------------------------------
     " keyword completion
+
     if b:lsdynaCompleteType == 'keyword'
 
       let keywords = []
       for keyword in g:lsdynaLibKeywords
-        if keyword =~? '^' . a:base | call add(keywords, keyword) | endif
+        if keyword =~? '^' . base
+          call add(keywords, keyword)
+        endif
       endfor
       return keywords
 
     "---------------------------------------------------------------------------
     "parameter completion
+
     elseif b:lsdynaCompleteType == 'parameter'
 
-      " build completion list for parameters only
-      call g:dtags.set('parameter', g:lsdynaSearchMode)
-      " loop over tags list to build completion list
-      let parameters = []
-      for tag in g:dtags.get('parameter')
-        if tag.id =~? '^'.base
-          call add(parameters, {'word' : tag.id,
-                              \ 'menu' : tag.title[2:],
-                              \ 'kind' : tag.title[0]})
+      " build all parameters list
+      let save_cursor = getpos(".")
+      let save_cursor[0] = bufnr('%')
+      call lsdyna_vimgrep#Vimgrep('parameter', '%', 'i')
+      let params = []
+      for item in getqflist()
+        call extend(params, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Parameter())
+      endfor
+      execute 'noautocmd buffer ' . save_cursor[0]
+      call setpos('.', save_cursor)
+
+      " build completion list
+      let complete = []
+      for param in params
+        if param.pname =~? '^'.base
+          call add(complete, param.Omni())
         endif
       endfor
-      return parameters
+      return complete
 
     "---------------------------------------------------------------------------
     " field completion (kvar or id)
+
     elseif b:lsdynaCompleteType == 'field'
 
-      " get keyword and field name
       let items = []
+
+      " get keyword and field name
       let keyword = tolower(getline(search('^\*\a', 'bn'))[1:])
-      let header = tolower(lsdyna_complete#getOption())
+      let header = <SID>GetHeader()
 
       "-------------------------------------------------------------------------
       " keyword variable (kvar) completion
 
       " get kvars and if not empty return completion list
-      let kvars = g:kvars.get(keyword, header)
-      echom string(kvars)
+      let kvars = g:lsdynaKvars.get(keyword, header)
       if !empty(kvars)
         for kvar in kvars
           call add(items, {'word' : kvar.value,
@@ -125,19 +138,22 @@ function! lsdyna_complete#LsdynaComplete(findstart, base)
 
       " check header and tell me what keywords I am looking for?
       let keywords = get(g:lsdynaLibHeaders, header, "set part")
-      " count number of keyword typs I am looking for
-      " used later for kind --> if only one type on the list do not add kind to completion list
-      let nrKeys = len(split(keywords))
-      " build list of tags
-      call g:dtags.set(keywords, g:lsdynaSearchMode)
-      " loop over tags list to build completion list
-      for tag in g:dtags.get(keywords)
-        if tag.id =~? '^'.base || tag.title =~? base
-          " add new item to completion list
-          call add(items, {'word' : printf("%10s", tag.id),
-                         \ 'menu' : tag.title,
-                         \ 'kind' : nrKeys > 1 ? tag.kind[0] : '',
-                         \ 'dup'  : 1})
+
+      " build all keywords list
+      let save_cursor = getpos(".")
+      let save_cursor[0] = bufnr('%')
+      let kwords = []
+      call lsdyna_vimgrep#Vimgrep(keywords, '%', 'i')
+      for item in getqflist()
+        call extend(kwords, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Kword())
+      endfor
+      execute 'noautocmd buffer ' . save_cursor[0]
+      call setpos('.', save_cursor)
+
+      " build completion list
+      for kword in kwords
+        if kword.id =~? '^'.base || kword.title =~? base
+          call add(items, kword.Omni())
         endif
       endfor
       return items
@@ -150,7 +166,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function lsdyna_complete#getOption()
+function s:GetHeader()
 
   "-----------------------------------------------------------------------------
   " Function to find keyword option in line above.
@@ -208,39 +224,18 @@ function! lsdyna_complete#InputKeyword()
   " - None
   "-----------------------------------------------------------------------------
 
-  " save unnamed register
-  let tmpUnnamedReg = @@
+  " get keyword name from current line
+  " if necessary get rid of asterisk sign
+  let kline = tolower(getline("."))
+  let keyword = kline[0] == "*" ? kline[1:] : kline[0:]
 
-  " remove empty line if exists
-  if len(getline('.')) == 0
-    normal! ddk
-  endif
-
-  " get keyword from current line
-  if getline('.')[0] == "*"
-    let keyword = tolower(getline('.')[1:])
-  else
-    let keyword = tolower(getline('.')[0:])
-  endif
-
-  " extract sub directory name from keyword name
-  let KeyLibSubDir = keyword[0] . "/"
-
-  " set keyword file path
-  let file = g:lsdynaPathKeywords . KeyLibSubDir . keyword . ".k"
-
-  " check if the file exist and put it
-  if filereadable(file)
-   execute "read " . file
-   normal! kdd
-   " jump to first dataline under the keyword
-   call search("^[^$]\\|^$", "W")
-  else
-    normal! <C-Y>
-  endif
-
-  " restore unnamed register
-  let @@ = tmpUnnamedReg
+  " step 1: completion put line with a keyword name, I do not need it any more since
+  "         keyword definition I am going to read already include this line
+  " step 2: read keyword definition from external file
+  " step 3: jump to first dataline under the keyword
+  delete _
+  execute "read " . g:lsdynaPathKeywords . keyword[0] . "/" . keyword . ".k"
+  call search("^[^$]\\|^$", "W")
 
 endfunction
 
@@ -267,46 +262,34 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-
 function! lsdyna_complete#LsDynaMapEnter()
 
-  " do not mapp if menu not visible
+  "-----------------------------------------------------------------------------
+  " Function change behaviour of <CR> to perform completion.
+  " It depends on variable set by "lsdyna_complete#LsdynaComplete" function.
+  "
+  " Arguments:
+  " - None
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  " do not map if menu not visible
   if !pumvisible() | return "\<CR>" | endif
 
   " choose mapping depend on completion type
   if b:lsdynaCompleteType == 'keyword'
-    let mapStr = "\<CR>\<ESC>:call lsdyna_complete#InputKeyword()\<CR>"
+    " insert entry from menu, leave insert mode, insert keyword
+    let mapStr = "\<C-Y>\<ESC>:call lsdyna_complete#InputKeyword()\<CR>"
   elseif b:lsdynaCompleteType == 'parameter'
-    let mapStr = "\<CR>\<ESC>"
+    " insert entry from menu, leave insert mode
+    let mapStr = "\<C-Y>\<ESC>"
   elseif b:lsdynaCompleteType == 'field'
-    let mapStr = "\<CR>\<ESC>"
+    " insert entry from menu, leave insert mode
+    let mapStr = "\<C-Y>\<ESC>"
   else
+    " act normal
     let mapStr = "\<CR>"
-  endif
-
-  " reset completion type
-  let b:lsdynaCompleteType = 'none'
-
-  return mapStr
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! lsdyna_complete#lsdynamapCtrly()
-
-  " do not mapp if menu not visible
-  if !pumvisible() | return "\<C-Y>" | endif
-
-  " choose mapping depend on completion type
-  if b:lsdynaCompleteType == 'keyword'
-    let mapStr = "\<ESC>:call lsdyna_complete#InputKeyword()\<CR>"
-  elseif b:lsdynaCompleteType == 'parameter'
-    let mapStr = "\<ESC>"
-  elseif b:lsdynaCompleteType == 'field'
-    let mapStr = "\<ESC>"
-  else
-    let mapStr = "\<C-Y>"
   endif
 
   " reset completion type

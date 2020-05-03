@@ -4,11 +4,14 @@
 "
 " Language:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  21th of December 2018
-" Version:      1.2.0
+" Last Change:  1st February 2018
+" Version:      1.2.1
 "
 "-------------------------------------------------------------------------------
 "
+" v1.2.1
+"   - lsdyna_curve#resample(step) function fixed
+"     (could happend to skip last point)
 " v1.2.0
 "   - new internal representation of curve
 " v1.1.0
@@ -456,21 +459,25 @@ function! lsdyna_curve#resample(step) dict
   " Class curve function to resample function.
   "
   " Arguments:
-  " - step (float) : sampling point
+  " - step (float) : sampling step
   " Return:
   " - none
   "-----------------------------------------------------------------------------
 
-  " local variables
-  let curve = []
-  let start = 0
+  " add first point
+  let curve = [self.curve[0]]
 
-  " interpolation loop (small value added to not skip last point)
-  let x = self.curve[0].x
-  while x <= self.curve[-1].x
+  " variables used in while loop
+  let start = 1
+  let len = len(self.curve)-1
+  let x = self.curve[0].x + a:step
+  let last = self.curve[-1].x
+
+  " interpolation loop
+  while x < last
 
     " find two neighbour points for x value
-    for i in range(start, len(self.curve)-1)
+    for i in range(start, len)
       if (self.curve[i].x >= x)
         " interpolate new value
         let point = lsdyna_curve#linint(x, self.curve[i], self.curve[i-1])
@@ -487,6 +494,9 @@ function! lsdyna_curve#resample(step) dict
     let x += a:step
 
   endwhile
+
+  " add last point
+  call add(curve, self.curve[-1])
 
   " save new curve
   let self.curve = curve
@@ -512,6 +522,49 @@ function! lsdyna_curve#linint(x, point1, point2)
   \     + a:point2.y*((a:x-a:point1.x)/(a:point2.x-a:point1.x))
 
   return {'x':a:x, 'y':y}
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_curve#curve2xydata(...)
+
+  "-----------------------------------------------------------------------------
+  " Find and write all *DEFINE_CURVE in file.
+  "
+  " Arguments:
+  " - a:1 : bang status (bang=0 : write only curve under the cursor)
+  "                     (bang=1 : write all curves in file)
+  " - a:2 : (optional) file where to save all curves
+  "         by default file_name + 'xy' extension
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  " if user set dump file use it ...
+  if a:0 == 2
+    let file = a:2
+  " ... use current file, just add xy extension
+  else
+    let file = expand('%')
+  endif
+
+  " write all curves (with bang)
+  if a:1
+    execute 'noautocmd silent! vimgrep/\c^*DEFINE_CURVE\s*$\|^*DEFINE_CURVE_TITLE\s*$/j %'
+    for item in getqflist()
+      let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')
+      let curve = kword._Define_curve()[0]
+      "call curve.Points()
+      call curve.WriteXYData(file.'.crv')
+    endfor
+  " write only current keyword (w/o bang)
+  else
+    let kword = lsdyna_parser#Keyword(line('.'), bufnr('%'), 'nc')
+    let curve = kword._Define_curve()[0]
+    "call curve.Points()
+    call curve.WriteXYData(file.'_ID'.curve.id.'.crv')
+  endif
 
 endfunction
 "-------------------------------------EOF---------------------------------------

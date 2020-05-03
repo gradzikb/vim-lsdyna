@@ -518,3 +518,9 @@ boundary_spc : dofry : 0 : free
 boundary_spc : dofry : 1 : lock
 boundary_spc : dofrz : 0 : free
 boundary_spc : dofrz : 1 : lock
+mat_general_nonlinear_6dof_discrete_beam : iflag : 0 : displacement
+mat_general_nonlinear_6dof_discrete_beam : iflag : 1 : strain
+mat_general_nonlinear_6dof_discrete_beam : iunld : 0 : elastic
+mat_general_nonlinear_6dof_discrete_beam : iunld : 1 : plastic (load, unload)
+mat_general_nonlinear_6dof_discrete_beam : iunld : 2 : plastic (load, KT(KR), unload)
+mat_general_nonlinear_6dof_discrete_beam : iunld : 3 : quadratic unloading

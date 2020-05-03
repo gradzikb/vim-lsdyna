@@ -5,12 +5,10 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  4th April 2018
-" Version:      2.0.1
+" Last Change:  12th January 2018
+" Version:      2.0.0
 "
 " History of change:
-" v2.0.1
-"   - 6 point positioning fixed
 " v2.0.0
 "   - all functions wrote from scratch
 " v1.1.0
@@ -23,7 +21,8 @@
 "-------------------------------------------------------------------------------
 
 " Pi number
-let s:Pi = 3.1415926535
+"let s:Pi = 3.1415926535
+let s:Pi = 4.0*atan(1.0)
 
 "-------------------------------------------------------------------------------
 
@@ -159,6 +158,9 @@ function! lsdyna_node#Pos6p(line1, line2, p1x, p1y, p1z,
   let P5 = [str2float(a:p5x), str2float(a:p5y), str2float(a:p5z)]
   let P6 = [str2float(a:p6x), str2float(a:p6y), str2float(a:p6z)]
 
+  " mid point between P4 & P5, used in 3rd transformation
+  let P45 = [(P4[0]+P5[0])/2.0, (P4[1]+P5[1])/2.0, (P4[2]+P5[2])/2.0]
+
   " object class nodes
   let nodes = lsdyna_node#nodes()
 
@@ -179,8 +181,11 @@ function! lsdyna_node#Pos6p(line1, line2, p1x, p1y, p1z,
   "-----------------------------------------------------------------------------
   " 2nd transformation
 
-  " update P2 coordinates
+  " update starting points to new position
+  let P1 = [nodes.nodes[-1].x, nodes.nodes[-1].y, nodes.nodes[-1].z]
   let P2 = [nodes.nodes[-2].x, nodes.nodes[-2].y, nodes.nodes[-2].z]
+  let P3 = [nodes.nodes[-3].x, nodes.nodes[-3].y, nodes.nodes[-3].z]
+
   " set rotation angle (angle between vectors P4-P2 and P4-P5)
   let a = lsdyna_node#vec2angle(lsdyna_node#vector(P4, P2), lsdyna_node#vector(P4, P5), 'd')
 
@@ -198,20 +203,23 @@ function! lsdyna_node#Pos6p(line1, line2, p1x, p1y, p1z,
   "-----------------------------------------------------------------------------
   " 3rd transformation
 
-  " update P3 coordinates
+  " update starting points to new position
+  let P1 = [nodes.nodes[-1].x, nodes.nodes[-1].y, nodes.nodes[-1].z]
+  let P2 = [nodes.nodes[-2].x, nodes.nodes[-2].y, nodes.nodes[-2].z]
   let P3 = [nodes.nodes[-3].x, nodes.nodes[-3].y, nodes.nodes[-3].z]
-  " set rotation angle (angle between vectors P5-P3 and P5-P6)
-  let a = lsdyna_node#vec2angle(lsdyna_node#vector(P5, P3), lsdyna_node#vector(P5, P6), 'd')
+
+  " set rotation angle (angle between P1-P2-P3 plane and P4-P5-P6 plane)
+  let a = lsdyna_node#vec2angle(lsdyna_node#vector(P1, P2, P3), lsdyna_node#vector(P4, P5, P6), 'd')
 
   " don't do rotation for 0.0 angle
   if a != 0.0
-    " rotation about angle respect to axis passing through point
-    " angle : between vector P5-P3 and vector P5-P6
-    " axis  : vector P5-P4
-    " point : point P4
-    call nodes.transl(-P4[0], -P4[1], -P4[2])
-    call nodes.rotate(a, lsdyna_node#vector(P5, P4))
-    call nodes.transl(P4[0], P4[1], P4[2])
+   " rotation about angle respect to axis passing through point
+   " angle : angle between P1-P2-P3 plane and P4-P5-P6 plane
+   " axis  : vector P4-P5
+   " point : point P4
+   call nodes.transl(-P4[0], -P4[1], -P4[2])
+   call nodes.rotate(a, lsdyna_node#vector(P4, P5))
+   call nodes.transl(P4[0], P4[1], P4[2])
   endif
 
   "-----------------------------------------------------------------------------
@@ -552,6 +560,68 @@ function! lsdyna_node#mirror(plane, base) dict
     endif
 
   endfor
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_node#ReplaceNodes(line1, line2, range, ...)
+
+  if a:0 == 1
+    let file = a:1
+    let offset = 0
+  elseif a:0 == 2
+    let file = a:2
+    let offset = a:1
+  endif
+
+  "-----------------------------------------------------------------------------
+  " collect all nodes from source file
+
+  let source_nodes = {}
+  setlocal shortmess+=A
+  execute 'noautocmd silent! vimgrep/\c^*NODE\s*+\?\s*$/j ' . file
+  for item in getqflist()
+    let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')
+    let node = kword._Node()[0]
+    call extend(source_nodes, node.Nodes())
+  endfor
+  setlocal shortmess-=A
+
+  echo 'Import '.len(source_nodes).' nodes from source file.'
+
+  "-----------------------------------------------------------------------------
+  " process *NODE in range lines or in whole target file
+
+  echo 'Processing target nodes ...'
+
+  let ncount = 0
+  if a:range
+    " process range lines
+    for lnum in range(a:line1, a:line2)
+      let id = str2nr(getline(lnum)[0:7])
+      if has_key(source_nodes, id-offset)
+        let x = source_nodes[id][0] 
+        let y = source_nodes[id][1] 
+        let z = source_nodes[id][2] 
+        call setline(lnum, printf("%8s%16.6f%16.6f%16.6f", id+offset, x, y, z))
+        let ncount += 1
+      endif
+    endfor
+  else
+    " process whole file
+    execute 'noautocmd silent! vimgrep/\c^*NODE\s*$/j %'
+    for item in getqflist()
+      let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')
+      let node = kword._Node()[0]
+      let ncount += node.Replace(source_nodes, offset)
+      call node.Delete()
+      call node.Write(kword.first)
+    endfor
+    execute 'bdelete' bufnr('$')
+  endif
+
+  echo 'Replaced '.ncount.' nodes.'
 
 endfunction
 "-------------------------------------EOF---------------------------------------

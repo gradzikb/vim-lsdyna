@@ -3,6 +3,6 @@ $# title
 ?title?
 $#     mid        ro         e      lcid        f0    tmaxf0     tramp     iread
          ?         ?
-$#  output    tstart
+$#  output    tstart    fraclo     mxeps     mxfrc
 
 $

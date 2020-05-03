@@ -2,7 +2,7 @@
 ?path?
 $#  idnoff    ideoff    idpoff    idmoff    idsoff    idfoff    iddoff
 
-$#  idroff
+$#  idroff              prefix    suffix
 
 $#  fctmas    fcttim    fctlen    fcttem   incout1
 

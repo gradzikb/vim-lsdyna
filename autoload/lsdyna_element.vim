@@ -289,9 +289,11 @@ function! lsdyna_element#ReverseNormals(line1, line2)
     " revers tria element
     if str2nr(n3) == str2nr(n4)
       let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n1, n3, n2, n2)
+      "let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n3, n1, n2, n2)
     " revers quad element
     else
       let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n1, n4, n3, n2)
+      "let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n4, n1, n2, n3)
     endif
 
     " dump line with new element definition

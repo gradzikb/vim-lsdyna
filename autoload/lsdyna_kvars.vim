@@ -29,15 +29,17 @@ function! lsdyna_kvars#kvars(path)
   " - let kvars = lsdyna_kvars#kvars('/home/user/dynaKvars.dat')
   "-----------------------------------------------------------------------------
 
-  " main tags dict
+  " class
   let class = {}
+
+  " class members
   let class.kvars = {}
 
   " class methods
   let class.get  = function("lsdyna_kvars#get")
   let class.read = function("lsdyna_kvars#read")
 
-  " initialize class if path defined
+  " constructor
   if !empty(a:path) | call class.read(a:path) | endif
 
   return class
@@ -54,7 +56,7 @@ function! lsdyna_kvars#read(path) dict
   " Arguments:
   " - path (string) : path to directory with keyword variables library
   " Return:
-  " - mone
+  " - none
   "-----------------------------------------------------------------------------
 
   " loop over lines
@@ -79,7 +81,7 @@ function! lsdyna_kvars#read(path) dict
     endif
 
     " add variable
-    call add(self.kvars[keyword][variable], {'value':printf("%10s", line[2]), 'description':line[3]})
+    call add(self.kvars[keyword][variable], {'value':printf("%10s", line[2]), 'description': trim(line[3])})
 
   endfor
 
