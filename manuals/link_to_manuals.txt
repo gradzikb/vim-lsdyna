@@ -1,0 +1,10 @@
+Ls-dyna manual files are just too big to be part of the plugin package.
+To use manual feature (F1 key, "LsManual") you must download following pdf files:
+
+http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_I_R9.0.pdf
+http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_II_R9.0.pdf
+http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_III_R9.0.pdf
+
+and save them into plugin "manuals" directory.
+
+

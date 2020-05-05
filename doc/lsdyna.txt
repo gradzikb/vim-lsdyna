@@ -30,6 +30,7 @@ CONTENTS
            7.1.1 LsOffsetId....................|lsdyna-offsetId|
            7.1.2 LsManager.....................|lsdyna-lsManager|
            7.1.3 LsTags........................|lsdyna-lsTags|
+           7.1.4 LsManual......................|lsdyna-lsManual|
        7.2 Node commands.......................|lsdyna-nodeCommands|
            7.2.1 LsNodeScale...................|lsdyna-nodeScale|
            7.2.2 LsNodeRotate..................|lsdyna-nodeRotate|
@@ -1008,6 +1009,45 @@ Abbreviation:
 Normal mappings:
   <F11>   : LsTags
   <S-F11> : LsTags!
+
+--------------------------------------------------------------------------------
+7.1.4 LsManual                                                  *lsdyna-lsManual*
+
+Description:
+  Open Ls-Dyna pdf manual at page with specific keyword.
+
+  NOTE
+  Requriments:
+  - Windows operating system
+  - Adobe Acrobat Reader
+  - Ls-Dyna R9.0 pdf manual files
+
+  Configuration:
+  - set in 'vimrc' file variable 'g:lsdynaPathAcrobat' to path with Adobe
+    Acrobat Reader, by default it is set to:
+    let g:lsdynaPathAcrobat='"C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"'
+  - download following manual files and put them into 'manuals' directory 
+    http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_I_R9.0.pdf
+    http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_II_R9.0.pdf
+    http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_III_R9.0.pdf
+
+Syntax:
+  :LsManual keyword
+
+Arguments:
+  keyword : keyword name
+
+Abbreviation:
+  :lh<Space>
+  NOTE 'lm' is used by LsManager so 'lh' stand for lsdyna help.
+
+Normal mappings:
+  <F1> : opens manual for keyword under the cursor
+
+Example:
+  :LsManual part
+  :LsManual *section_shell
+  :LsManual MAT_FABRIC
 
 --------------------------------------------------------------------------------
 7.2 Node commands                                           *lsdyna-nodeCommands*
@@ -2315,7 +2355,7 @@ be process before *DEFINE_).
 ================================================================================
 8. Mappings                                                    *lsdyna-mappings*
 
-This chapter collect list o mappings not relataed to any function. 
+This chapter collect list of mappings not relataed to any function. 
 <ll> means locla leader, which is a special key in VIM.  By default it is "\".
 You might want to use diffrrent load leader, See ":help maplocalleader".
 
@@ -2324,6 +2364,7 @@ You might want to use diffrrent load leader, See ":help maplocalleader".
 
   Key            | Action
  ----------------+-------------------------------------------------------------
+  <F1>           | open manual for keyword under the cursor |lsdyna-lsManual|
   ]]             | jump to next keyword
   [[             | jump to previous keyword
   4<Space>       | put "$" at the beginning of the line (works only if "4" is in 1st col)
