@@ -30,22 +30,22 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_misc#CommentSign()
-
-  " ----------------------------------------------------------------------------
-  " Function to swap '4' into '$' at the begining of line.
-  " ----------------------------------------------------------------------------
-
-  if col('.') == 2 && getline('.')[0] == '4'
-    let tmpUnnamedReg = @@
-    normal! hx
-    let @@ = tmpUnnamedReg
-    return '$'
-  else
-    return ''
-  endif
-
-endfunction
+"function! lsdyna_misc#CommentSign()
+"
+"  " ----------------------------------------------------------------------------
+"  " Function to swap '4' into '$' at the begining of line.
+"  " ----------------------------------------------------------------------------
+"
+"  if col('.') == 2 && getline('.')[0] == '4'
+"    let tmpUnnamedReg = @@
+"    normal! hx
+"    let @@ = tmpUnnamedReg
+"    return '$'
+"  else
+"    return ''
+"  endif
+"
+"endfunction
 
 "-------------------------------------------------------------------------------
 

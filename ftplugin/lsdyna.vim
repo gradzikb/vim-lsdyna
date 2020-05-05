@@ -153,6 +153,7 @@ setlocal foldmethod=expr
 augroup lsdyna
   autocmd!
   autocmd BufWrite * set fileformat=unix
+  "autocmd BufWritePre * call lsdyna_include#Check()
 augroup END
 
 augroup lsdyna-lsManager
@@ -172,7 +173,7 @@ augroup END
 "-------------------------------------------------------------------------------
 
 " change 4 -> '$' sign at the line beginning
-inoreabbrev 4 4<C-R>=lsdyna_misc#CommentSign()<CR>
+inoreabbrev 4 <C-R>=(col('.')==1 ? '$' : 4)<CR>
 " comment/uncomment line
 noremap <silent><buffer> <M-c> :call lsdyna_misc#CommentLine()<CR>j
 " put empty comment line below
@@ -197,8 +198,10 @@ nnoremap <silent><buffer> ]] /^\*\a<CR>:nohlsearch<CR>zz
 nnoremap <C-]> g<C-]>
 nnoremap <c-leftmouse> g<c-]>
 " check includes before write
-cnoremap w<CR> <C-u>call lsdyna_include#Quit("w")<CR>
-cnoremap wq<CR> <C-u>call lsdyna_include#Quit("wq")<CR>
+command! -nargs=0 -bang W call lsdyna_include#Quit(<bang>0, "w")
+command! -nargs=0 -bang WQ call lsdyna_include#Quit(<bang>0, "wq")
+cnoreabbrev <expr> w  (getcmdtype()==':' && getcmdline()== 'w') ?  'W' :  'w'
+cnoreabbrev <expr> wq (getcmdtype()==':' && getcmdline()=='wq') ? 'WQ' : 'wq'
 " autoformat function
 noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call lsdyna_autoformat#Autoformat()<CR>
 " begining and end lines
@@ -267,6 +270,8 @@ noremap <buffer><silent><expr> <S-F12>/ ':LsManager! '.input('LsManager ').'<CR>
 " tags
 noremap <buffer><silent> <F11> :LsTags<CR>
 noremap <buffer><silent> <S-F11> :LsTags!<CR>
+" ls-dyna manuall
+noremap <buffer><silent> <F1> :call lsdyna_manual#Manual(line('.'))<CR>
 
 "-------------------------------------------------------------------------------
 "    COMMANDS
@@ -335,6 +340,9 @@ command! -buffer -range -nargs=* -complete=file LsEncryptFile
 command! -buffer -nargs=+ -bang LsManager
  \ :call lsdyna_manager#Manager(<bang>0, <f-args>)
 
+command! -buffer -nargs=1 LsManual
+ \ :call lsdyna_manual#Manual(<f-args>)
+
 " abbreviations for commonly used commands
 cnoreabbrev lcs LsCurveScale
 cnoreabbrev lco LsCurveOffset
@@ -344,22 +352,20 @@ cnoreabbrev lcm LsCurveMirror
 cnoreabbrev lcc LsCurveCut
 cnoreabbrev lcw LsCurveWrite
 cnoreabbrev lcw! LsCurveWrite!
-
 cnoreabbrev lns LsNodeScale
 cnoreabbrev lnt LsNodeTranslate
 "cnoreabbrev lnr LsNodeRotate
 cnoreabbrev lnr LsNodeReplace
 cnoreabbrev lnp LsNodePos6p
 cnoreabbrev lnm LsNodeMirror
-
 cnoreabbrev lec LsElemChangePid
 cnoreabbrev lef LsElemFindPid
 cnoreabbrev ler LsElemReverseNormals
-
 cnoreabbrev lm LsManager
 cnoreabbrev lm! LsManager!
 cnoreabbrev lt LsTags
 cnoreabbrev lt! LsTags!
+cnoreabbrev lh LsManual
 
 "-------------------------------------------------------------------------------
 "    GLOBAL PLUGIN SETTINGS

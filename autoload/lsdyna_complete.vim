@@ -231,11 +231,11 @@ function! lsdyna_complete#InputKeyword()
 
   " step 1: completion put line with a keyword name, I do not need it any more since
   "         keyword definition I am going to read already include this line
-  " step 2: read keyword definition from external file
+  " step 2: read keyword definition from external file, start one line up
   " step 3: jump to first dataline under the keyword
-  delete _
-  execute "read " . g:lsdynaPathKeywords . keyword[0] . "/" . keyword . ".k"
-  call search("^[^$]\\|^$", "W")
+  execute "delete _"
+  execute ".-1read " . g:lsdynaPathKeywords . keyword[0] . "/" . keyword . ".k"
+  "call search("^[^$]\\|^$", "W")
 
 endfunction
 

@@ -317,6 +317,7 @@ function! lsdyna_include#Check()
   " open manager
   if !empty(qflist)
     call lsdyna_manager#Open(qflist)
+    "set readonly
   endif
 
   return len(qflist)
@@ -325,7 +326,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_include#Quit(cmd)
+function! lsdyna_include#Quit(bang, cmd)
 
   "-----------------------------------------------------------------------------
   " Fundtion to check includes at write/quit.
@@ -336,16 +337,21 @@ function! lsdyna_include#Quit(cmd)
   " - None
   "-----------------------------------------------------------------------------
 
-  " check includes
-  let incl_status = lsdyna_include#Check()
+  if a:bang
+    execute a:cmd.'!'
+  else
+    if lsdyna_include#Check() == 0
+      execute a:cmd
+    endif
+  endif
 
   " if include missing --> confirm write
-  if incl_status == 0
-    if a:cmd == "w"
-      execute 'w'
-    elseif a:cmd == "wq"
-      execute 'wq'
-    endif
+  "if incl_status == 0
+  "  if a:cmd == "w"
+  "    execute 'w'
+  "  elseif a:cmd == "wq"
+  "    execute 'wq'
+  "  endif
   "else
   "  "let choice = confirm("Include files missings!\nDo you want to write/quit anyway?", "&Yes\n&No", 2, "Warrning")
   "  let choice = input('Includes missing. Write (y/n)? :')
@@ -357,7 +363,7 @@ function! lsdyna_include#Quit(cmd)
   "      quit
   "    endif
   "  endif
-  endif
+  "endif
 
 endfunction
 
