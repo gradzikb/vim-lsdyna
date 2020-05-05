@@ -44,8 +44,8 @@ function! parser#contact#Contact() dict
   let datalines  = self.Datalines()
 
   " child class memebrs
-  let self.id    = self.name =~? '_ID' ? str2nr(datalines[1][:9]) : 0
-  let self.title = self.name =~? '_ID' ? trim(datalines[1][10:])  : ''
+  let self.id    = self.name =~? '_ID\|_TITLE' ? str2nr(datalines[1][:9]) : 0
+  let self.title = self.name =~? '_ID\|_TITLE' ? trim(datalines[1][10:])  : ''
   let self.Qf    = function('<SID>Qf')
   let self.Tag   = function('<SID>Tag')
 
