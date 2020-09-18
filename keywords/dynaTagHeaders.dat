@@ -1,4 +1,6 @@
 pid     : part
+pids    : part
+pidm    : part
 secid   : section
 mid     : mat
 lcid    : define_curve

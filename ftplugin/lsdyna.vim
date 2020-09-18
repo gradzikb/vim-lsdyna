@@ -132,11 +132,6 @@ setlocal tags=$VIMHOME/.dtags
 setlocal listchars=tab:>-,trail:-
 setlocal list
 setlocal completeopt=menuone,noinsert
-"if v:version == '800'
-"  setlocal completeopt=menu,menuone,noinsert
-"else
-"  setlocal completeopt=menu,menuone
-"endif
 
 "-------------------------------------------------------------------------------
 "    FOLDING
@@ -164,8 +159,7 @@ augroup lsdyna-lsManager
   autocmd FileType qf autocmd CursorMoved <buffer> call lsdyna_manager#SetPosition()
   " clear 'search' highlight for quikfix window and restore it back after close
   autocmd FileType qf setlocal cursorline
-  autocmd FileType qf hi search none
-  autocmd FileType qf autocmd BufDelete <buffer> hi search term=reverse ctermfg=0 ctermbg=12 guifg=Black guibg=Red
+  autocmd FileType qf highlight QuickFixLine guifg=NONE guibg=NONE
 augroup END
 
 "-------------------------------------------------------------------------------
@@ -383,19 +377,19 @@ if !exists("g:lsdynaPathAcrobat")  | let g:lsdynaPathAcrobat  = '"C:\Program Fil
 if !exists("g:lsdynaLibKeywords")  | let g:lsdynaLibKeywords  = lsdyna_complete#libKeywords(g:lsdynaPathKeywords) | endif
 if !exists("g:lsdynaLibHeaders")   | let g:lsdynaLibHeaders   = lsdyna_complete#libHeaders(g:lsdynaPathHeaders)   | endif
 if !exists("g:lsdynaKvars")        | let g:lsdynaKvars        = lsdyna_kvars#kvars(g:lsdynaPathKvars)             | endif
-if !exists("b:lsdynaCompleteType") | let b:lsdynaCompleteType = 'none'                                            | endif
+if !exists("g:complete_type")      | let g:complete_type      = 'none'                                            | endif
 
 "-------------------------------------------------------------------------------
 "    COMPLETION
 "-------------------------------------------------------------------------------
 
 " set omni completion functions
-setlocal omnifunc=lsdyna_complete#LsdynaComplete
+setlocal omnifunc=lsdyna_complete#Omnifunc
 " completion mappings
-inoremap <C-Tab> <C-X><C-O>
-nnoremap <C-Tab> :call lsdyna_complete#extendLine()<CR>R<C-X><C-O>
-inoremap <buffer><silent><expr> <CR>     lsdyna_complete#LsDynaMapEnter()
-inoremap <buffer><silent><expr> <kEnter> lsdyna_complete#LsDynaMapEnter()
+inoremap <C-Tab> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre()<CR>a<C-x><C-o>
+nnoremap <C-Tab> :<C-u>call lsdyna_complete#OmnifunctPre()<CR>:<C-u>call lsdyna_complete#extendLine()<CR>R<C-x><C-o>
+inoremap <buffer><silent><expr> <CR>     lsdyna_complete#MapEnter()
+inoremap <buffer><silent><expr> <kEnter> lsdyna_complete#MapEnter()
 
 "-------------------------------------------------------------------------------
 "    ENCRYPTION

@@ -31,22 +31,20 @@ function! lsdyna_vimgrep#Vimgrep(kword, file, mode)
   let kwords = split(a:kword, '\s\+')
   "call map(kwords, 'toupper(v:val[0]=="*"?v:val:"*".v:val)')
   for i in range(len(kwords))
-    let kwords[i] = kwords[i][0]=='*' ? kwords[i] : '*'.kwords[i]
+    let kwords[i] = kwords[i][0]=='*' ? kwords[i][1:] : kwords[i]
     let kwords[i] = toupper(kwords[i])
   endfor
-  let search_pattern = join(kwords, '\|')
+  let search_pattern = '^*\('.join(kwords, '\|').'\)'
 
   " set paths where to search
   if empty(a:mode)
     let paths = a:file
   elseif a:mode == 'i'
     let incls = <SID>SearchIncludes(a:file)
-    "echo incls[0].Qf()
-    "call input('key')
     " if I am looking for *INCLDE I do not need make second vimgrep pass.
     " SearchIncludes function already return list of include object so I can
     " manually set qf list here plus it has correct order of includes
-    if search_pattern ==? '*INCLUDE'
+    if search_pattern =~? 'INCLUDE'
       call setqflist(map(incls, '{"lnum":v:val.first, "bufnr":v:val.bufnr}'))
       return
     endif
@@ -54,7 +52,7 @@ function! lsdyna_vimgrep#Vimgrep(kword, file, mode)
   endif
 
   " fire vimgrep
-  execute 'noautocmd silent! vimgrep /\c^'.search_pattern.'/j '.paths
+  execute 'noautocmd silent! vimgrep /\c'.search_pattern.'/j '.paths
 
   return
 

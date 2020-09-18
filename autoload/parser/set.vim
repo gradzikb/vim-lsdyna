@@ -90,6 +90,7 @@ function! s:Omni() dict
   let item.word = printf("%10s", self.id)
   let item.menu = self.title
   let item.dup  = 1
+  let item.kind = "S"
   return item
 
 endfunction

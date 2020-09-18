@@ -5,22 +5,103 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  10th of July 2017
+" Last Change:  14th of July 2020
 "
 "-------------------------------------------------------------------------------
 "
+" v1.1.0
+"   - update for VIM 8.2
 " v1.0.0
 "   - initial version
 "
 "-------------------------------------------------------------------------------
 "
-function! s:Start_dyna_col()
-    return (float2nr((virtcol(".")-1)/10))*10
+"-------------------------------------------------------------------------------
+
+function! lsdyna_complete#OmnifunctPre()
+
+  "-----------------------------------------------------------------------------
+  " Function trigger before omnifunc. It defines type of completion
+  " (keyword/parameter/field/...) and return list of candidates for
+  " completion.
+  "
+  " Since Vim 8.2 I must not use ':vimgerp' in omnifunct. Vimgrep is used to
+  " scan files for completion candidates. This is why first I use 'OmnifunctPre'
+  " and next I call 'Omnifunc' to make completion.
+  "
+  " Arguments:
+  " - None
+  " Return:
+  " - g:complete_type (string) : 'keyword'
+  "                              'parameter'
+  "                              'field_opt'
+  "                              'field_id'
+  " - g:complete_items (list)  : list with all candidates for completion
+  "                              this list is tested against 'base' in 'omnifunct'
+  "                              item type depends on type completion
+  "-----------------------------------------------------------------------------
+
+  let g:complete_type = 'none'
+  let g:complete_items = []
+
+  "-----------------------------------------------------------------------------
+  " keyword completion
+  if getline(".") =~? '^\*\?\h\+$'
+    let g:complete_type = 'keyword'
+    let g:complete_items = g:lsdynaLibKeywords
+    return
+  endif
+
+  "-----------------------------------------------------------------------------
+  " parameter completion
+  " find '&' position between start of dyna column and current cursor position
+  let apos = stridx(getline(".")[:col('.')], '&', <SID>Start_dyna_col())
+  if apos > -1
+
+    let g:complete_type = 'parameter'
+    normal! mP
+    call lsdyna_vimgrep#Vimgrep('parameter', '%', 'i')
+    let g:complete_items = []
+    for item in getqflist()
+      call extend(g:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Parameter())
+    endfor
+    normal! `P
+    return
+
+  endif
+
+  "-----------------------------------------------------------------------------
+  " field option completion
+
+  let keyword = tolower(getline(search('^\*\a', 'bn'))[1:])
+  let header = <SID>GetHeader()
+  let kvars = g:lsdynaKvars.get(keyword, header)
+  if !empty(kvars)
+    let g:complete_type = 'field_opt'
+    let g:complete_items = kvars
+    return
+  endif
+
+  "-------------------------------------------------------------------------
+  " field id completion
+
+  let g:complete_type = 'field_id'
+  let g:complete_items = []
+  normal! mP
+  call lsdyna_vimgrep#Vimgrep(get(g:lsdynaLibHeaders, header, "set part"), '%', 'i')
+  for item in getqflist()
+    "echo item
+    "call input("stop")
+    call extend(g:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Kword())
+  endfor
+  normal! `P
+  return
+
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_complete#LsdynaComplete(findstart, base)
+function! lsdyna_complete#Omnifunc(findstart, base)
 
   "-----------------------------------------------------------------------------
   " Omni completion function used with Ls-Dyna completion.
@@ -32,159 +113,69 @@ function! lsdyna_complete#LsdynaComplete(findstart, base)
   "-----------------------------------------------------------------------------
 
   "-----------------------------------------------------------------------------
-  " first function call --> find completion type and start position
+  " first function call --> set beginning of string
+  " text between this position and cursor position when completion was used
+  " will be tested against completion list in next function call
   if a:findstart
 
-    " get current line
     let line = getline(".")
 
-    "---------------------------------------------------------------------------
-    " keyword completion
-    " return 1ts or 2nd column in line depend on '*'
-
-    if line =~? '^\*\?\h\+$'
-      let b:lsdynaCompleteType = 'keyword'
+    " for keyword completion --> from line beginning but w/o asterisk sign 
+    " for parameter completion --> from ampersand sign '&'
+    " for field completion --> from beginning of ls-dyna column
+    if g:complete_type == 'keyword'
       return line[0] == '*' ? 1 : 0
-    endif
-
-    "---------------------------------------------------------------------------
-    " parameter completion
-    " return one sign after '&' sign in current ls-dyna column
-
-    " find '&' position between start of dyna column and current cursor position
-    let apos = stridx(line[:col('.')], '&', <SID>Start_dyna_col())
-    if apos > -1
-      let b:lsdynaCompleteType = 'parameter'
+    elseif g:complete_type == 'parameter'
+      let apos = stridx(line[:col('.')], '&', <SID>Start_dyna_col())
       return apos+1
+    elseif g:complete_type == 'field_opt' || g:complete_type == 'field_id'
+      return <SID>Start_dyna_col()
     endif
-
-    "---------------------------------------------------------------------------
-    " field completion
-    " return start position of current ls-dyna column
-
-    let b:lsdynaCompleteType = 'field'
-    return <SID>Start_dyna_col()
 
   "-----------------------------------------------------------------------------
   " 2nd function call --> build completion list
   else
 
     let base = trim(a:base)
+    let complete = []
 
     "---------------------------------------------------------------------------
     " keyword completion
-
-    if b:lsdynaCompleteType == 'keyword'
-
-      let keywords = []
-      for keyword in g:lsdynaLibKeywords
-        if keyword =~? '^' . base
-          call add(keywords, keyword)
+    if g:complete_type == 'keyword'
+      for item in g:complete_items
+        if item =~? '^' . base
+          call add(complete, item)
         endif
       endfor
-      return keywords
-
     "---------------------------------------------------------------------------
     "parameter completion
-
-    elseif b:lsdynaCompleteType == 'parameter'
-
-      " build all parameters list
-      let save_cursor = getpos(".")
-      let save_cursor[0] = bufnr('%')
-      call lsdyna_vimgrep#Vimgrep('parameter', '%', 'i')
-      let params = []
-      for item in getqflist()
-        call extend(params, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Parameter())
-      endfor
-      execute 'noautocmd buffer ' . save_cursor[0]
-      call setpos('.', save_cursor)
-
-      " build completion list
-      let complete = []
-      for param in params
-        if param.pname =~? '^'.base
-          call add(complete, param.Omni())
+    elseif g:complete_type == 'parameter'
+      for item in g:complete_items
+        if item.pname =~? '^'.base
+          call add(complete, item.Omni())
         endif
       endfor
-      return complete
-
     "---------------------------------------------------------------------------
-    " field completion (kvar or id)
-
-    elseif b:lsdynaCompleteType == 'field'
-
-      let items = []
-
-      " get keyword and field name
-      let keyword = tolower(getline(search('^\*\a', 'bn'))[1:])
-      let header = <SID>GetHeader()
-
-      "-------------------------------------------------------------------------
-      " keyword variable (kvar) completion
-
-      " get kvars and if not empty return completion list
-      let kvars = g:lsdynaKvars.get(keyword, header)
-      if !empty(kvars)
-        for kvar in kvars
-          call add(items, {'word' : kvar.value,
-                         \ 'menu' : kvar.description})
-        endfor
-        return items
-      endif
-
-      "-------------------------------------------------------------------------
-      " id completion
-
-      " check header and tell me what keywords I am looking for?
-      let keywords = get(g:lsdynaLibHeaders, header, "set part")
-
-      " build all keywords list
-      let save_cursor = getpos(".")
-      let save_cursor[0] = bufnr('%')
-      let kwords = []
-      call lsdyna_vimgrep#Vimgrep(keywords, '%', 'i')
-      for item in getqflist()
-        call extend(kwords, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Kword())
+    " field option completion
+    elseif g:complete_type == 'field_opt'
+      for item in g:complete_items
+        call add(complete, {'word' : item.value,
+                          \ 'menu' : item.description})
       endfor
-      execute 'noautocmd buffer ' . save_cursor[0]
-      call setpos('.', save_cursor)
-
-      " build completion list
-      for kword in kwords
-        if kword.id =~? '^'.base || kword.title =~? base
-          call add(items, kword.Omni())
+    "---------------------------------------------------------------------------
+    " field id completion
+    elseif g:complete_type == 'field_id'
+      for item in g:complete_items
+        if item.id =~? '^'.base || item.title =~? base
+          call add(complete, item.Omni())
         endif
       endfor
-      return items
 
     endif
 
+    return complete
+
   endif
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function s:GetHeader()
-
-  "-----------------------------------------------------------------------------
-  " Function to find keyword option in line above.
-  "
-  " Arguments:
-  " - None
-  " Return:
-  " - keyLib (string) : keyword option
-  "-----------------------------------------------------------------------------
-
-  " find comment line
-  let lnum = search('^\$', 'bn')
-  " set cursor position
-  let fpos = ((float2nr((virtcol(".")-1)/10))*10)
-  " get keyword option
-  let option = tolower(substitute(strpart(getline(lnum), fpos, 10), "[#$:]\\?\\s*", "", "g"))
-
-  return option
 
 endfunction
 
@@ -194,6 +185,7 @@ function! lsdyna_complete#libKeywords(path)
 
   "-----------------------------------------------------------------------------
   " Function to initialize Ls-Dyna keyword library.
+  " It create list of all *.k files in 'a:path'.
   "
   " Arguments:
   " - path (string) : path to directory with keyword files
@@ -262,11 +254,11 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_complete#LsDynaMapEnter()
+function! lsdyna_complete#MapEnter()
 
   "-----------------------------------------------------------------------------
   " Function change behaviour of <CR> to perform completion.
-  " It depends on variable set by "lsdyna_complete#LsdynaComplete" function.
+  " It depends on variable set by "lsdyna_complete#OmnifunctPre" function.
   "
   " Arguments:
   " - None
@@ -278,13 +270,13 @@ function! lsdyna_complete#LsDynaMapEnter()
   if !pumvisible() | return "\<CR>" | endif
 
   " choose mapping depend on completion type
-  if b:lsdynaCompleteType == 'keyword'
+  if g:complete_type == 'keyword'
     " insert entry from menu, leave insert mode, insert keyword
     let mapStr = "\<C-Y>\<ESC>:call lsdyna_complete#InputKeyword()\<CR>"
-  elseif b:lsdynaCompleteType == 'parameter'
+  elseif g:complete_type == 'parameter'
     " insert entry from menu, leave insert mode
     let mapStr = "\<C-Y>\<ESC>"
-  elseif b:lsdynaCompleteType == 'field'
+  elseif g:complete_type == 'field_opt' || g:complete_type == 'field_id'
     " insert entry from menu, leave insert mode
     let mapStr = "\<C-Y>\<ESC>"
   else
@@ -293,7 +285,7 @@ function! lsdyna_complete#LsDynaMapEnter()
   endif
 
   " reset completion type
-  let b:lsdynaCompleteType = 'none'
+  let g:complete_type = 'none'
 
   return mapStr
 
@@ -325,5 +317,52 @@ function! lsdyna_complete#libHeaders(path)
   return headers
 
 endfunction
+
+"-------------------------------------------------------------------------------
+
+function s:GetHeader()
+
+  "-----------------------------------------------------------------------------
+  " Function to find keyword option in line above.
+  "
+  " Arguments:
+  " - None
+  " Return:
+  " - keyLib (string) : keyword option
+  "-----------------------------------------------------------------------------
+
+  " find comment line
+  let lnum = search('^\$', 'bn')
+  " set cursor position
+  "let fpos = ((float2nr((virtcol(".")-1)/10))*10)
+  let fpos = <SID>Start_dyna_col()
+  " get keyword option
+  let option = tolower(substitute(strpart(getline(lnum), fpos, 10), "[#$:]\\?\\s*", "", "g"))
+
+  return option
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! s:Start_dyna_col()
+
+  "-----------------------------------------------------------------------------
+  " Small function to return beginning of ls-dyna column for current cursor
+  " position. It assumes all columns are 10 signs length.
+  " Cursor position count from 1, ls-dyna columns position count from 0
+  "
+  " cursor position --> ls-dyna column 1st position
+  "            1-10 --> 0
+  "           11-20 --> 10
+  "             ... --> ...
+  "           61-70 --> 60
+  "           71-80 --> 70
+  "-----------------------------------------------------------------------------
+  "
+  return (float2nr((virtcol(".")-1)/10))*10
+
+endfunction
+
 
 "-------------------------------------EOF---------------------------------------
