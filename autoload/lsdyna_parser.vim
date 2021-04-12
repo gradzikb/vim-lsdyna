@@ -34,58 +34,83 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   " Return:
   "   - dict : keyword class object
   " Members:
-  "   - self.first : kword 1st line number in file
-  "   - self.last  : kword last line number
   "   - self.bufnr : buffer number with kword
   "   - self.file  : file name with kword
+  "   - self.first : kword 1st line number in file
+  "   - self.last  : kword last line number
+  "   - self.lines : list with all kword lines, includes comments lines
   "   - self.name  : full kword name (*PART, *SECTION, ...)
   "   - self.type  : kword type, substring of kword name after 1st '_' (INERTIA)
-  "   - self.lines : list with all kword lines, includes comments lines
   " Methods:
-  "   - self.Datalines()               : return all kword data lines
+  "   - self.Comment()                 : comment kword body
+  "   - self.Datalines()               : Return all datalines (remove comment lines from kword body)
+  "   - self.Delete()                  : delete kword body from file
+  "   - self.Encrypt()                 : encrypt kword body
+  "   - self.Write()                   : write kword body into file
+  " 
+  "   - self._Autodetect()             : detect kword type and return child class
   "   - self._Kword()                  : return child class for any kword
-  "   - self._Part()                   : return child class for *PART
-  "   - self._Section()                : return child class for *SECTION
-  "   - self._Material()               : return child class for *MATERIAL
-  "   - self._Define_curve()           : return child class for *DEFINE_CURVE
+  "
+  "   - self._Contact()                : return child class for *CONTACT
+  "   - self._Database_cross_section() : return child class for *DATABASE_CROSS_SECTION
   "   - self._Define_coord()           : return child class for *DEFINE_COORDINATE
+  "   - self._Define_curve()           : return child class for *DEFINE_CURVE
   "   - self._Define_trans()           : return child class for *DEFINE_TRANSFORMATION
   "   - self._Define_vector()          : return child class for *DEFINE_VECTOR
-  "   - self._Set()                    : return child class for *SET
-  "   - self._Contact()                : return child class for *CONTACT
-  "   - self._Parameter()              : return child class for *PARAMETER
   "   - self._Include()                : return child class for *INCLUDE
+  "   - self._Include_path()           : return child class for *INCLUDE_PATH
+  "   - self._Material()               : return child class for *MATERIAL
   "   - self._Node()                   : return child class for *NODE
-  "   - self._Database_cross_section() : return child class for *DATABASE_CROSS_SECTION
+  "   - self._Parameter()              : return child class for *PARAMETER
+  "   - self._Part()                   : return child class for *PART
+  "   - self._Section()                : return child class for *SECTION
+  "   - self._Set()                    : return child class for *SET
   "
   "-----------------------------------------------------------------------------
 
   " load buffer if you are in diffrent
 
-  if a:flags =~? 'c'
-    let save_cursor = getpos(".")
-    let save_cursor[0] = bufnr('%')
-  endif
+  "if a:flags =~? 'c'
+  "  let save_cursor = getpos(".")
+  "  let save_cursor[0] = bufnr('%')
+  "endif
 
-  if a:bufnr != bufnr('%')
-    let cmd = a:flags =~? 'n' ? 'noautocmd buffer ' : 'buffer '
-    execute cmd a:bufnr
-  endif
+  "if a:bufnr != bufnr('%')
+  "  let cmd = a:flags =~? 'n' ? 'noautocmd buffer ' : 'buffer '
+  "  execute cmd a:bufnr
+  "endif
 
   let re_kword = '^*'         " regular expression to find keyword name
   let re_dline = '^[^$]\|^$'  " regular expression to find data line
+
+  " save current cursor position so I can restore it later
+  " getpos() set bufnr only for mark, so I overwrite it manually.
+  let save_cursor = getpos(".")
+  let save_cursor[0] = bufnr('%')
+
+  " set cursor on a:lnum in a:bufnr
+  if a:bufnr != bufnr('%')
+    execute 'noautocmd buffer' a:bufnr
+  endif
+  call cursor(a:lnum, 0)
 
   " search first and last kword line
   " 1. look backward keyword name
   " 2. look forward next keyword name or end of the file
   " 3. look backward data line
-  call cursor(a:lnum, 0)
-  let lnum_start = a:flags =~? 'f' ? a:lnum : search(re_kword,'bWc')
+  "let lnum_start = a:flags =~? 'f' ? a:lnum : search(re_kword,'bWc')
+  let lnum_start = search(re_kword,'bWc')
   let next_kw = search(re_kword.'\|BEGIN PGP MESSAGE', 'W')
-  if next_kw == 0 | call cursor(line('$'), 0) | endif
-  let lnum_end = next_kw == 0 ? search(re_dline,'bWc') : search(re_dline,'bW')
+  if next_kw == 0
+    "normal! G "normal command does not works good fie foldings
+    call cursor(line('$'), 0)
+  else
+    "normal! k
+    call cursor(line('.')-1, 0)
+  endif
+  let lnum_end = search(re_dline,'bWc')
 
-  " class keyword
+  " class
   let kword = {}
 
   " class members
@@ -97,13 +122,17 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   let kword.type  = stridx(kword.name, '_') >= 0 ? kword.name[stridx(kword.name, '_')+1:] : ''
   let kword.lines = getline(lnum_start, lnum_end)
 
-  " class methods
-  let kword.Write                   = function('<SID>Write')
-  let kword.Delete                  = function('<SID>Delete')
-  let kword.Datalines               = function('<SID>Datalines')
-  let kword.Encrypt                 = function('<SID>Encrypt')
-  let kword._Kword                  = function('<SID>Kword')
-  let kword._General                = function('parser#general#General')
+  " class methods to operate on kword lines
+  let kword.Comment                 = function('s:Comment')    " comment kword body
+  let kword.Datalines               = function('s:Datalines')  " Return all datalines (remove comment lines from kword body)
+  let kword.Delete                  = function('s:Delete')     " delete kword body from file
+  let kword.Encrypt                 = function('s:Encrypt')    " encrypt kword body
+  let kword.Write                   = function('s:Write')      " write kword body into file
+  let kword.Addheader               = function('s:AddHeader')
+
+  " class methods to create specific kword objects
+  let kword._Autodetect             = function('s:Autodetect')       " autodetect kword base on name 
+  let kword._Kword                  = function('parser#kword#Kword') " genreal representation of keyword used for not supported keywords
   let kword._Node                   = function('parser#node#Node')
   let kword._Part                   = function('parser#part#Part')
   let kword._Section                = function('parser#section#Section')
@@ -119,10 +148,14 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   let kword._Include_path           = function('parser#include_path#Include_path')
   let kword._Database_cross_section = function('parser#database_cross_section#Database_cross_section')
 
-  if a:flags =~? 'c'
-    execute 'noautocmd buffer ' . save_cursor[0]
-    call setpos('.', save_cursor)
-  endif
+  "if a:flags =~? 'c'
+  "  execute 'noautocmd buffer ' . save_cursor[0]
+  "  call setpos('.', save_cursor)
+  "endif
+
+  " restor orginal cursor position
+  execute 'noautocmd buffer ' . save_cursor[0]
+  call setpos('.', save_cursor)
 
   return kword
 
@@ -130,7 +163,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! s:Kword() dict
+function! s:Autodetect() dict
   if self.name =~? '^*PART'
     return self._Part()
   elseif self.name =~? '^*SECTION'
@@ -160,14 +193,15 @@ function! s:Kword() dict
   elseif self.name =~? '^*DATABASE_CROSS_SECTION'
     return self._Database_cross_section()
   else
-    return self._General()
+    return self._Kword()
   endif
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! s:Write(lnum) dict
-  call append(a:lnum-1, self.lines)
+function! s:Write(...) dict
+  let lnum = a:0 == 0 ? self.first : a:1
+  call append(lnum-1, self.lines)
 endfunction
 
 "-------------------------------------------------------------------------------
@@ -184,31 +218,42 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! s:Encrypt(lvl) dict
-
+function! s:Encrypt(lvl, vendor_date='') dict
   let datalines = self.Datalines()
   let lines_open = a:lvl == 0 ? [] : datalines[: a:lvl-1]
-  let lines_encrypt = lsdyna_encryption#Encrypt(datalines[a:lvl :])
-  let self.lines = extend(lines_open, lines_encrypt)
-
+  let lines_for_encrypt = datalines[a:lvl :]
+  if !empty(a:vendor_date)
+    let vBlock = ['*VENDOR', 'DATE      ' .. a:vendor_date]
+    let lines_for_encrypt = vBlock + lines_for_encrypt + ['*VENDOR_END']
+  endif
+  let lines_after_encrypt = lsdyna_encryption#Encrypt(lines_for_encrypt)
+  "if !empty(a:vendor_date)
+  "  let vBlock = ['$*VENDOR', '$DATE      ' .. a:vendor_date]
+  "  let lines_after_encrypt = vBlock + lines_after_encrypt + ['$*VENDOR_END']
+  "endif
+  let self.lines = extend(lines_open, lines_after_encrypt)
   return self.lines
-
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! s:Offset(val, flag) dict
-
-  for line in self.lines[1:]
-    if line[0] != '$'
-      let line = trim(line)
-      let lline = []
-      for i in range(0, len(line), 10))
-        call add(lline, line[i:i+9])
-      endfor
-      echo lline
-    endif
-  endfor
-
+function! s:Comment() dict
+  call map(self.lines, '"$".v:val')
 endfunction
+
+"-------------------------------------------------------------------------------
+
+function s:AddHeader() dict
+  " head is too first sign short so I can add line index in loop
+  let header = '------10--------20--------30--------40--------50--------60--------70--------80'
+  let newLines = []
+  let i = 1
+  for line in self.Datalines()
+    call add(newLines, line)
+    call add(newLines, '$' .. i .. header)
+    let i += 1
+  endfor
+  let self.lines = newLines[:-2] " for loop make one header line to much
+endfunction
+
 "-------------------------------------EOF---------------------------------------

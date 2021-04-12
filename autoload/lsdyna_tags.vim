@@ -20,32 +20,37 @@ function! lsdyna_tags#Lstags(bang, ...)
   " Function used with LsTags command.
   "-----------------------------------------------------------------------------
 
+  "TODO: I need this variable for evaluation of parameters value but I do not
+  "need this option to do it for tags only fo lsmanager, update parameter
+  "construction to not always make parameter evaluation 
+  let g:lsdyna_manager_parameters = {}
+
   let kword = a:0 ? a:1 : '*'
 
   if a:bang
-    call lsdyna_vimgrep#Vimgrep(kword, '%', 'i')
-    " it speed up opening includes for search
+    let qfid = lsdyna_vimgrep#Vimgrep(kword, '%', 'i')
   else
-    call lsdyna_vimgrep#Vimgrep(kword, '%', '')
+    let qfid = lsdyna_vimgrep#Vimgrep(kword, '%', '')
   endif
 
   " parsing keywords change cursor position and I want to stay in place
   " save cursor position
-  let save_cursor = getpos(".")
-  let save_cursor[0] = bufnr('%')
+  "let save_cursor = getpos(".")
+  "let save_cursor[0] = bufnr('%')
 
   let dtags = []
-  for item in getqflist()
-    let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Kword()
+  "for item in getqflist()
+  for item in getqflist({'id':qfid, 'items':0}).items
+    let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, '')._Autodetect()
     call extend(dtags, map(kword, 'v:val.Tag()'))
   endfor
 
-  call writefile(dtags, g:lsdynaPathTags)
+  call writefile(dtags, &tags)
   echo 'Write '.len(dtags).' dtags.'
 
   " retore cursor position
-  execute 'noautocmd buffer ' . save_cursor[0]
-  call setpos('.', save_cursor)
+  "execute 'noautocmd buffer ' . save_cursor[0]
+  "call setpos('.', save_cursor)
 
 endfunction
 

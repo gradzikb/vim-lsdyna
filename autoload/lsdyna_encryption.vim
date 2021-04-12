@@ -48,7 +48,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_encryption#EncryptLines(line1, line2)
+function! lsdyna_encryption#EncryptLines(line1, line2, ...)
 
   "-----------------------------------------------------------------------------
   " Function to encrypt selected lines.
@@ -60,10 +60,25 @@ function! lsdyna_encryption#EncryptLines(line1, line2)
   " - None
   "-----------------------------------------------------------------------------
 
+  if a:0 == 2
+    if a:1 == '--date'
+      let vendor_date = a:2
+    endif
+  endif
+
   " encrypt selected lines, delete them and write encryption block
-  let lines_encrypt = lsdyna_encryption#Encrypt(getline(a:line1, a:line2))
+  let lines_for_encrypt = getline(a:line1, a:line2)
+  if exists('vendor_date')
+    let vBlock = ['*VENDOR', 'DATE      ' .. vendor_date]
+    let lines_for_encrypt = vBlock + lines_for_encrypt + ['*VENDOR_END']
+  endif
+  let lines_after_encrypt = lsdyna_encryption#Encrypt(lines_for_encrypt)
+  "if exists('vendor_date')
+  "  let vBlock = ['$*VENDOR', '$DATE      ' .. vendor_date]
+  "  let lines_after_encrypt = vBlock + lines_after_encrypt + ['$*VENDOR_END']
+  "endif
   silent execute a:line1.','.a:line2.'delete'
-  call append(a:line1-1, lines_encrypt)
+  call append(a:line1-1, lines_after_encrypt)
 
 endfunction
 
@@ -131,7 +146,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_encryption#EncryptKeyword(lnum, mode, string)
+function! lsdyna_encryption#EncryptKeyword(lnum, mode, string, vendor_date)
 
   "-----------------------------------------------------------------------------
   " Function to encrypt keyword.
@@ -168,7 +183,7 @@ function! lsdyna_encryption#EncryptKeyword(lnum, mode, string)
   endif
 
   " encrypt keyword and write it back to the file
-  call kword.Encrypt(encrypt_lvl)
+  call kword.Encrypt(encrypt_lvl, a:vendor_date)
   call kword.Delete()
   call kword.Write(kword.first)
 
@@ -187,17 +202,27 @@ function! lsdyna_encryption#EncryptFile(...)
   " - None
   "-----------------------------------------------------------------------------
 
-  " process command arguments
+  " check do I have any arguments
   if a:0 == 0
-    echo "LsEncryptFile error! Required command argument missed."
+    echo "LsEncryptFile command error! Required command argument missed."
     return
-  elseif a:0 == 2 && a:1 == '--file'
-     " read encryption rules from external file
-      let kw_to_encrypt = lsdyna_encryption#read_rules(a:2, "file")
-  else
-     " read encryption rules from command argument
-     let kw_to_encrypt = lsdyna_encryption#read_rules(join(a:000), "cmd_arg")
   endif
+
+  " process arguments
+  let vendor_date = ''
+  let i = 0
+  while i < a:0
+    if a:000[i] ==# '--date'
+      let vendor_date = a:000[i+1]
+      let i += 2
+    elseif a:000[i] ==# '--file'
+      let kw_to_encrypt = lsdyna_encryption#read_rules(a:000[i+1], "file")
+      let i += 2
+    else
+      let kw_to_encrypt = lsdyna_encryption#read_rules(join(a:000[i:]), "cmd_arg")
+      break
+    endif
+  endwhile
 
   " avoid more message stop when list of encrypted keywords is long
   let more_old = &more
@@ -219,7 +244,7 @@ function! lsdyna_encryption#EncryptFile(...)
         echo "Encryption" kwName "on line" kwName_lnum
         let encryption_mode = kw_to_encrypt[key]['encryption_mode']
         let exclude_string = kw_to_encrypt[key]['exclude_string']
-        call lsdyna_encryption#EncryptKeyword(kwName_lnum, encryption_mode, exclude_string)
+        call lsdyna_encryption#EncryptKeyword(kwName_lnum, encryption_mode, exclude_string, vendor_date)
         break
       endif
     endfor

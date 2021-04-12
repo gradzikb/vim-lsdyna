@@ -99,7 +99,8 @@ function! s:Qf() dict
     let qf = {}
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.first
-    let qf.text  = 'kword'.'|'.self.name
+    let qf.type  = 'U'
+    let qf.text  = self.name
 
   return qf
 

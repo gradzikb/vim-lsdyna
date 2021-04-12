@@ -16,23 +16,6 @@
 "
 "-------------------------------------------------------------------------------
 
-function! s:Slash(path, sign)
-
-  "-----------------------------------------------------------------------------
-  " Function to set path separators
-  "-----------------------------------------------------------------------------
-
-  if a:sign == 'u'
-    let path = substitute(a:path,'\','/','g')
-  elseif a:sign == 'w'
-    let path = substitute(a:path,'/','\','g')
-  endif
-  return path
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
 function! lsdyna_include#Open(lnum, flag)
 
   "-----------------------------------------------------------------------------
@@ -46,11 +29,11 @@ function! lsdyna_include#Open(lnum, flag)
   "                     'T' - open file in tab in background
   "                     'd' - open directory in current window
   "                     'D' - open directory in split window
+  "                     'e' - explore directory with OS file manager
   " Return:
   " - none
   "-----------------------------------------------------------------------------
 
-  " paresr *INCLUDE at line a:lnum
   let incl = lsdyna_parser#Keyword(a:lnum, bufnr('%'), 'nc')._Include()[0]
 
   if incl.read
@@ -68,11 +51,13 @@ function! lsdyna_include#Open(lnum, flag)
     elseif a:flag ==# 'D'
       execute 'vertical split' fnamemodify(incl.path, ':p:h')
     elseif a:flag ==# 'e'
-      let dir_path = <SID>Slash(fnamemodify(incl.path,':p:h'), 'w')
-      execute 'silent ! explorer' dir_path
+      if has('win32') || has('win64')
+        let dir_path =  substitute(fnamemodify(incl.path,':p:h','/','\','g'))
+        execute 'silent ! explorer' dir_path
+      endif
     endif
   else
-    echo 'Path not found!'
+    echo 'Path ' .. incl.path .. ' not found!'
   endif
 
 endfunction
@@ -90,12 +75,9 @@ function! lsdyna_include#GetIncludePaths()
   " - paths (list) : list of paths
   "-----------------------------------------------------------------------------
 
-  " find all *INCLUDE_PATH keywords in current buffer
-  call lsdyna_vimgrep#Vimgrep('include_path', '%', '')
-
-  " loop over all *INCLUDE_PATH and collect paths under the keyword
   let paths = []
-  for item in getqflist()
+  let qfid = lsdyna_vimgrep#Vimgrep('include_path', '%', '')
+  for item in getqflist({'id':qfid, 'items':''}).items
     let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')._Include_path()
     call extend(paths, map(incls, 'v:val.path'))
   endfor
@@ -125,8 +107,7 @@ function! lsdyna_include#Resolve(path)
   endif
 
   " include path respect to current include file
-  let cwd = <SID>Slash(expand('%:p:h'), 'u')
-  let path = cwd.'\'.a:path
+  let path = expand('%:p:h').'/'.a:path
   if filereadable(path) || isdirectory(a:path)
     return {'read':1, 'path':path}
   endif
@@ -134,7 +115,7 @@ function! lsdyna_include#Resolve(path)
   " look in include_paths
   let incl_paths = lsdyna_include#GetIncludePaths()
   for incl_path in incl_paths
-    let path = incl_path.'\'.a:path
+    let path = incl_path.'/'.a:path
     if filereadable(path) || isdirectory(a:path)
       return {'read':1, 'path':path}
     endif
@@ -149,118 +130,58 @@ endfunction
 function! lsdyna_include#Touch(command)
 
   "-----------------------------------------------------------------------------
-  " ?
+  " Function to manage include files.
   "
   " Arguments:
-  " - None
+  " - command (string) : defined type of operation
   " Return:
-  " - includes (list) : list with includes paths
+  " - none
   "-----------------------------------------------------------------------------
 
-  "-----------------------------------------------------------------------------
-  if a:command ==# 't'
-
-    " toggle between *INCLUDE and *INCLUDE_TRANSFORM keyword
-
-    let lnum_path  = line('.')
-    let lnum_kword =search('^*','bWn')
-    if getline(lnum_kword) =~? '_TRANSFORM'
-      call setline(lnum_kword, '*INCLUDE')
-      let kw = lsdyna_misc#getKeyword(line('.'), '')
-      execute lnum_path+1 . ',' . kw.last . 'delete'
-      call cursor(lnum_path, 0)
-    else
-      call setline(lnum_kword, '*INCLUDE_TRANSFORM')
-      let lines = []
-      call add(lines,"$#  idnoff    ideoff    idpoff    idmoff    idsoff    idfoff    iddoff")
-      call add(lines,'')
-      call add(lines,'$#  idroff')
-      call add(lines,'')
-      call add(lines,'$#  fctmas    fcttim    fctlen    fcttem   incout')
-      call add(lines,'')
-      call add(lines,'$#  tranid')
-      call add(lines,'')
-      call append(lnum_path, lines)
-      call cursor(lnum_path, 0)
-    endif
-
-  "-----------------------------------------------------------------------------
-  elseif a:command ==# 'd'
-
-    " delete selected include keyword
-
-    let kword = lsdyna_misc#getKeyword(line('.'), 'fl')
-    execute kword.first.','.kword.last.'delete'
-
-  "-----------------------------------------------------------------------------
-  elseif a:command ==# 'D'
+  if a:command ==# 'D'
 
     " delete selected include file
 
-    " to do anything a file must exist
-    let file = lsdyna_include#Resolve(getline("."))
-    if file.read
-      if input('Delete file '.file.path.' (y/n)? ') == 'y'
-        call delete(file.path)
-        call lsdyna_include#touchInclude('d')
+    let incl = lsdyna_parser#Keyword(line('.'), '%', '')._Include()[0]
+    if incl.read
+      if input('Delete file ' .. incl.path .. ' (y/n)? ') == 'y'
+        call delete(incl.path)
+        call incl.Delete()
       endif
     else
-      echo 'File ' . file.path . ' does not exist.'
+      echo 'File ' . incl.path . ' does not exist.'
     endif
-
-  "-----------------------------------------------------------------------------
-  elseif a:command ==# 'c'
-
-    " copy selected include keyword
-
-    let kword = lsdyna_misc#getKeyword(line('.'), 'fl')
-    execute kword.first.','.kword.last.'copy '.kword.last
-    let kword = lsdyna_misc#getKeyword(line('.'), 'fl')
-    call cursor(kword.first, 0)
-    call search('^[^$]\|^$', 'W')
 
   "-----------------------------------------------------------------------------
   elseif a:command ==# 'C' || a:command ==# 'R'
 
-    " 'C' : copy include file
-    " 'R' : rename/move include file
+    " copy/rename include file
 
-    let incl_paths = lsdyna_include#GetIncludePaths()
-    "let incl_paths = []
-    let file_old = getline(".")
+    let incl = lsdyna_parser#Keyword(line('.'), '%', '')._Include()[0]
 
-    " defien path separator as usd in, if missing use as linux
-    let sep = match(file_old, '/') == -1 ? '\' : '/'
-
-    " to do anything first we need to check the file exists
-    let file = lsdyna_include#Resolve(file_old)
-    if !file.read
-      echo 'File ' . file.path . ' does not exist.'
+    " do nothing if the file does not exists
+    if !incl.read
+      echo 'File ' .. incl.path .. ' does not exist!'
       return
     endif
 
-    " strip current include file path
-    let fop = fnamemodify(file_old, ':h')   " file old path
-    let foe = fnamemodify(file_old, ':e')   " file old extension
-    let fon = fnamemodify(file_old, ':t:r') " file old name
+    let fop = fnamemodify(incl.path, ':h')   " file old path
+    let fon = fnamemodify(incl.path, ':t:r') " file old name
+    let foe = fnamemodify(incl.path, ':e')   " file old extension
 
-    " if include have only file name with no path, keep it
-    " fnamemodify function will return path as '.' so I reset here old path
-    " and separator
-    if file_old !~ '[\/]'
-      let fop = ''
-      let sep = ''
+    " get file new name
+    let fnn = input('New include name (*.' .. foe .. '): ', fon, 'file')
+    if empty(fnn) | return | endif
+
+    " keep old extension unless new one is defined
+    if fnn =~?'\.\a\+$'
+      let pathnew = fop .. '/' .. fnn
+    else
+      let pathnew = fop .. '/' .. fnn .. '.' .. foe
     endif
 
-    " get a new include name from a user
-    let fname_new = input('New include name (*.'.foe.'): ', fon, 'file')
-    if empty(fname_new) | return | endif
-
-    " old extension is carryover unless a user set a new extension
-    let file_new = fname_new =~? '\.\a\{1,3}$' ? fop.sep.fname_new : fop.sep.fname_new.'.'.foe
-
     " if a file with new name exists ask a user what to do
-    let file = lsdyna_include#Resolve(file_new)
+    let file = lsdyna_include#Resolve(pathnew)
     if file.read
       if input('File exists! Overwrite (y/n)? ') !=# 'y'
         return
@@ -269,18 +190,18 @@ function! lsdyna_include#Touch(command)
 
     " finally do main job
     if a:command == 'R'
-
-      call rename(file_old, file_new)
-
+      call rename(incl.path, pathnew)
     elseif a:command == 'C'
-
-      call writefile(readfile(file_old, 'b'), file_new, 'b')
-
+      call writefile(readfile(incl.path, 'b'), pathnew, 'b')
     endif
 
-    " update path to new file
-    call setline(".", substitute(file_new, '\', '/', 'g'))
-    "call setline(".", file_new)
+    " update keyword with new path
+    let pathhead = fnamemodify(incl.pathraw, ':h')
+    let pathhead = pathhead == '.' && incl.pathraw[0] != '.' ? '' : pathhead .. '/' 
+    let new_path =  pathhead .. fnamemodify(pathnew, ':t')
+    call incl.SetPath(new_path, '')
+    call incl.Delete()
+    call incl.Write()
 
   endif
 
@@ -303,10 +224,10 @@ function! lsdyna_include#Check()
   "-----------------------------------------------------------------------------
 
   " collect all broken includes
-  call lsdyna_vimgrep#Vimgrep('include', '%', '')
+  let qfid = lsdyna_vimgrep#Vimgrep('include', '%', '')
   let qflist = []
-  for item in getqflist()
-    let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')._Include()
+  for item in getqflist({'id':qfid, 'items':''}).items
+    let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')._Autodetect()
     for incl in incls
       if !incl.read
         call add(qflist, incl.Qf())
@@ -316,8 +237,9 @@ function! lsdyna_include#Check()
 
   " open manager
   if !empty(qflist)
-    call lsdyna_manager#Open(qflist)
-    "set readonly
+    call setqflist([], ' ', {'items' : qflist,
+    \                        'title' : 'Check include'})
+    call lsdyna_manager#QfOpen(getqflist({'id':0}).id)
   endif
 
   return len(qflist)
@@ -344,26 +266,6 @@ function! lsdyna_include#Quit(bang, cmd)
       execute a:cmd
     endif
   endif
-
-  " if include missing --> confirm write
-  "if incl_status == 0
-  "  if a:cmd == "w"
-  "    execute 'w'
-  "  elseif a:cmd == "wq"
-  "    execute 'wq'
-  "  endif
-  "else
-  "  "let choice = confirm("Include files missings!\nDo you want to write/quit anyway?", "&Yes\n&No", 2, "Warrning")
-  "  let choice = input('Includes missing. Write (y/n)? :')
-  "  if choice ==? 'y'
-  "    if a:cmd == "w"
-  "      write
-  "    elseif a:cmd == "wq"
-  "      write
-  "      quit
-  "    endif
-  "  endif
-  "endif
 
 endfunction
 

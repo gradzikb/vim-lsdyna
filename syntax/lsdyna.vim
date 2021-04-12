@@ -29,7 +29,7 @@ let b:current_syntax = "lsdyna"
 "-------------------------------------------------------------------------------
 
 syntax match lsdynaComment '^\$.*$'
-syntax match lsdynaTitle '^\(\h\|?\|\.\).*$' contained
+syntax match lsdynaTitle '^\([.\/]\|\w\).*$' contained
 syntax match lsdynaKeywordName '^\*\a.*$' contains=lsdynaKeywordOption
 syntax match lsdynaKeywordOption '_.*$' contained
 

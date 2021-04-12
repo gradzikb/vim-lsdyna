@@ -71,7 +71,8 @@ function! s:Qf() dict
     let qf = {}
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.first
-    let qf.text  = 'id_title_type'.'|'.self.name.'|'.self.type.'|'.self.id.'|'.self.title
+    let qf.type  = 'K'
+    let qf.text  = self.id.'|'.self.title.'|'.self.type
 
   return qf
 
@@ -91,6 +92,7 @@ function! s:Omni() dict
   let item.menu = self.title
   let item.dup  = 1
   let item.kind = "S"
+  let item.info = join(self.lines[:10], "\n")
   return item
 
 endfunction

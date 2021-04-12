@@ -51,6 +51,9 @@ function! lsdyna_manual#Manual(arg1)
       let cmd = '!start /B '. g:lsdynaPathAcrobat.' /A page='.page.' '.file
       silent execute cmd
     endif
+  elseif has("unix")
+     let cmd = ':! '. g:lsdynaPathAcrobat.' '.file.' -P '.page
+     silent execute cmd
   else
     echo "No manual found for ".kword
   endif

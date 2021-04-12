@@ -48,38 +48,45 @@ function! parser#part#Part() dict
   "-----------------------------------------------------------------------------
   if self.type ==? ''
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
+          "call add(lines, line)
           let part       = copy(self)
           let part.title = trim(line)
         elseif dlcount == 2
+          "call add(lines, line)
           let part.id    = str2nr(line[:9])
           let part.lnum  = part.first + lcount
+          let part.lines = lines
           let part.Qf    = function('<SID>Qf')
           let part.Tag   = function('<SID>Tag')
           let part.Omni  = function('<SID>Omni')
           call add(parts, part)
           let dlcount = 0
+          let lines = [self.name] " set to only keyword name for another *Part instance
         endif
-
+      "else
+      "  call add(lines, line)
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'CONTACT'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let part       = copy(self)
@@ -88,25 +95,27 @@ function! parser#part#Part() dict
           let part.id   = str2nr(line[:9])
           let part.lnum = part.first + lcount
         elseif dlcount == 3
+          let part.lines = lines
           let part.Qf    = function('<SID>Qf')
           let part.Tag   = function('<SID>Tag')
           let part.Omni  = function('<SID>Omni')
           call add(parts, part)
           let dlcount = 0
+          let lines = [self.name] " set to only keyword name for another *Part instance
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'INERTIA'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let part       = copy(self)
@@ -115,33 +124,36 @@ function! parser#part#Part() dict
           let part.id   = str2nr(line[:9])
           let part.lnum = part.first + lcount
         elseif dlcount == 5
+          let part.lines = lines
           let part.Qf    = function('<SID>Qf')
           let part.Tag   = function('<SID>Tag')
           let part.Omni  = function('<SID>Omni')
           call add(parts, part)
           let dlcount = 0
+          let lines = [self.name] " set to only keyword name for another *Part instance
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'SENSOR'
 
+    let lines = [self.name]
     let lcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let part       = copy(self)
         let part.title = ''
         let part.id    = str2nr(line[:9])
         let part.lnum  = part.first + lcount
+        let part.lines = lines
         let part.Qf    = function('<SID>Qf')
         let part.Tag   = function('<SID>Tag')
         let part.Omni  = function('<SID>Omni')
         call add(parts, part)
-
+        let lines = [self.name] " set to only keyword name for another *Part instance
       endif
     endfor
   endif
@@ -166,7 +178,8 @@ function! s:Qf() dict
   let qf = {}
   let qf.bufnr = self.bufnr
   let qf.lnum  = self.lnum
-  let qf.text  = 'id_title_type'.'|'.self.name.'|'.self.type.'|'.self.id.'|'.self.title
+  let qf.type  = 'K'
+  let qf.text  = self.id.'|'.self.title.'|'.self.type
 
   return qf
 
@@ -185,6 +198,7 @@ function! s:Omni() dict
   let item.word = printf("%10s", self.id)
   let item.menu = self.title
   let item.dup  = 1
+  let item.info = join(self.lines, "\n")
 
   return item
 

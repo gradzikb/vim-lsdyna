@@ -3,6 +3,7 @@ lsdyna-commands	lsdyna.txt	/*lsdyna-commands*
 lsdyna-comment	lsdyna.txt	/*lsdyna-comment*
 lsdyna-completeId	lsdyna.txt	/*lsdyna-completeId*
 lsdyna-completeKeyword	lsdyna.txt	/*lsdyna-completeKeyword*
+lsdyna-completeOmni	lsdyna.txt	/*lsdyna-completeOmni*
 lsdyna-completeOption	lsdyna.txt	/*lsdyna-completeOption*
 lsdyna-completeParameter	lsdyna.txt	/*lsdyna-completeParameter*
 lsdyna-curveAddPoint	lsdyna.txt	/*lsdyna-curveAddPoint*
@@ -27,10 +28,14 @@ lsdyna-includeOpen	lsdyna.txt	/*lsdyna-includeOpen*
 lsdyna-includes	lsdyna.txt	/*lsdyna-includes*
 lsdyna-installation	lsdyna.txt	/*lsdyna-installation*
 lsdyna-introduction	lsdyna.txt	/*lsdyna-introduction*
+lsdyna-kwordCommands	lsdyna.txt	/*lsdyna-kwordCommands*
+lsdyna-kwordComment	lsdyna.txt	/*lsdyna-kwordComment*
+lsdyna-kwordDelete	lsdyna.txt	/*lsdyna-kwordDelete*
 lsdyna-kwordManager	lsdyna.txt	/*lsdyna-kwordManager*
 lsdyna-license	lsdyna.txt	/*lsdyna-license*
 lsdyna-lsManager	lsdyna.txt	/*lsdyna-lsManager*
 lsdyna-lsManual	lsdyna.txt	/*lsdyna-lsManual*
+lsdyna-lsMarkers	lsdyna.txt	/*lsdyna-lsMarkers*
 lsdyna-lsTags	lsdyna.txt	/*lsdyna-lsTags*
 lsdyna-mapList	lsdyna.txt	/*lsdyna-mapList*
 lsdyna-mappings	lsdyna.txt	/*lsdyna-mappings*
@@ -43,7 +48,6 @@ lsdyna-nodeRotate	lsdyna.txt	/*lsdyna-nodeRotate*
 lsdyna-nodeScale	lsdyna.txt	/*lsdyna-nodeScale*
 lsdyna-nodeTranslate	lsdyna.txt	/*lsdyna-nodeTranslate*
 lsdyna-offsetId	lsdyna.txt	/*lsdyna-offsetId*
-lsdyna-omniComplete	lsdyna.txt	/*lsdyna-omniComplete*
 lsdyna-syntax	lsdyna.txt	/*lsdyna-syntax*
 lsdyna-tags	lsdyna.txt	/*lsdyna-tags*
 lsdyna-textObject	lsdyna.txt	/*lsdyna-textObject*

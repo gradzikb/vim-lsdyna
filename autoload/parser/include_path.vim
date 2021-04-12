@@ -80,28 +80,45 @@ function! parser#include_path#Include_path() dict
   let path = ''
   let incls = []
 
-  " collect all path under the keyword
+  " collect path under the keyword
   " join path, ' +' at the end
+  let count_path_lines = 0
   for line in self.Datalines()[1:]
+    let count_path_lines += 1
     if line =~? ' +\s*$'
       let path = path . s:Trim(line)[0:-3]
     else
       let path = path . s:Trim(line)
-      " include object
-      let incl = copy(self)
-      let incl.path_ = path
-      let incl.path  = self.name ==? '*INCLUDE_PATH_RELATIVE' ? expand('%:p:h').'/'.path : path
-      let incl.path  = <SID>Slash(incl.path, 'u')
-      let incl.lnum  = incl.first
-      let incl.read  = isdirectory(path)
-      let incl.Qf    = function('<SID>Qf')
-      let incl.Tag   = function('<SID>Tag')
-      " get rid of members which are not inherit
-      call filter(incl, 'v:key[0] != "_"')
-      call add(incls, incl)
-      let path = ''
     endif
   endfor
+
+  " find path line number
+  let lnum = 0
+  for line in self.lines[1:]
+    let lnum += 1
+    if line[0] != '$'
+      break
+    endif
+  endfor
+
+  " get rid of members which are not inherit
+  call filter(self, 'v:key[0] != "_"')
+
+  " include object
+  let incl = copy(self)
+  "let incl.path  = self.name ==? '*INCLUDE_PATH_RELATIVE' ? expand('%:p:h').'/'.path : path
+  let incl.path  = path
+  "let incl.path  = <SID>Slash(incl.path, 'u')
+  let incl.pathraw  = path
+  let incl.lnum  = incl.first + lnum
+  let incl.pathlnum1 = lnum " 1st line number with path
+  let incl.pathlnum2 = lnum + count_path_lines - 1 " last line number with path
+  "let incl.read  = isdirectory(path)
+  let incl.read  = <SID>IsDirectory(path)
+  let incl.Qf    = function('<SID>Qf')
+  let incl.Tag   = function('<SID>Tag')
+  let incl.SetPath = function('parser#include#SetPath')
+  call add(incls, incl)
 
   return incls
 
@@ -127,8 +144,9 @@ function! s:Qf() dict
     let qf = {}
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.lnum
+    let qf.type  = 'I'
     let qf.col   = 1
-    let qf.text  = 'include'.'|'.self.name.'|'.self.type.'|'.self.path_.'|'.self.read.'|'.self.file
+    let qf.text  = fnamemodify(self.path,':h:t').'|'.self.read.'|'.self.type.'|'.self.file
 
   return qf
 
@@ -145,6 +163,31 @@ function! s:Tag() dict
 
   let tag = fnamemodify(self.path,':p:t')."\t".self.file."\t".self.lnum.";\"\tkind:INCLUDE\ttitle:"
   return tag
+
+endfunction
+
+function! s:IsDirectory(path)
+
+  "-----------------------------------------------------------------------------
+  " Method:
+  "   ?
+  " Returns:
+  "   ?
+  "-----------------------------------------------------------------------------
+
+  if has('win32') || has('win64')
+    " when I am on Windows I ignore linux absolute path
+    if a:path[0] == '/'
+      return -1
+    endif
+  else
+    " when I am on Linux I ignore Windows absolute path
+    if a:path[0] == '\' || a:path[0:1] =~? '\a:'
+      return -1
+    endif
+  endif
+
+  return isdirectory(a:path)
 
 endfunction
 

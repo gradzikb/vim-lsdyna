@@ -48,6 +48,7 @@ function! parser#contact#Contact() dict
   let self.title = self.name =~? '_ID\|_TITLE' ? trim(datalines[1][10:])  : ''
   let self.Qf    = function('<SID>Qf')
   let self.Tag   = function('<SID>Tag')
+  let self.AddComments = function('s:AddComments')
 
   return [self]
 
@@ -69,11 +70,14 @@ function! s:Qf() dict
     let qf = {}
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.first
-    let qf.text  = 'id_title_type'.'|'.self.name.'|'.self.type.'|'.self.id.'|'.self.title
+    let qf.type  = 'K'
+    let qf.text  = self.id.'|'.self.title.'|'.self.type
 
   return qf
 
 endfunction
+
+"-------------------------------------------------------------------------------
 
 function! s:Tag() dict
 
@@ -88,6 +92,26 @@ function! s:Tag() dict
 
   return tag
 
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function s:AddComments() dict abort
+
+  let commentlines = []
+  if self.name =~? '_ID$'
+    call add(commentlines, '$#     cid title')
+  endif
+  call add(commentlines, '$#    ssid      msid     sstyp     mstyp    sboxid    mboxid       spr       mpr')
+  call add(commentlines, '$#      fs        fd        dc        vc       vdc    penchk        bt        dt')
+  call add(commentlines, '$#     sfs       sfm       sst       mst      sfst      sfmt       fsf       vsf')
+  call add(commentlines, '$#    soft    sofscl    lcidab    maxpar     sbopt     depth     bsort    frcfrq')
+  call add(commentlines, '$#  penmax    thkopt    shlthk     snlog      isym     i2d3d    sldthk    sldstf')
+  call add(commentlines, '$#    igap    ignore    dprfac    dtstif                        flangl   cid_rcf')
+  call add(commentlines, '$#   q2tri    dtpchk     sfnbr    fnlscl    dnlscl      tcso    tiedid    shledg')
+
+  let self.lines = [self.name] + lsdyna_misc#ZipList(commentlines, self.Datalines()[1:])
+ 
 endfunction
 
 "-------------------------------------EOF---------------------------------------

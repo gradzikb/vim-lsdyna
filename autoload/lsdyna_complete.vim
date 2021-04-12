@@ -16,83 +16,80 @@
 "
 "-------------------------------------------------------------------------------
 "
-"-------------------------------------------------------------------------------
 
-function! lsdyna_complete#OmnifunctPre()
+function! lsdyna_complete#OmnifunctPre(flag)
 
   "-----------------------------------------------------------------------------
-  " Function trigger before omnifunc. It defines type of completion
+  " Function trigger before "omnifunc". It defines type of completion
   " (keyword/parameter/field/...) and return list of candidates for
   " completion.
   "
-  " Since Vim 8.2 I must not use ':vimgerp' in omnifunct. Vimgrep is used to
-  " scan files for completion candidates. This is why first I use 'OmnifunctPre'
-  " and next I call 'Omnifunc' to make completion.
+  " I am doing it before "omnifunc" because I am not able make a jump to
+  " other buffer to parse keywords when I am in "omnifunc" function.
   "
   " Arguments:
   " - None
   " Return:
-  " - g:complete_type (string) : 'keyword'
-  "                              'parameter'
-  "                              'field_opt'
-  "                              'field_id'
-  " - g:complete_items (list)  : list with all candidates for completion
+  " - s:lsdynaOmniCompletionType (string) : 'keyword'
+  "                                         'parameter'
+  "                                         'field_opt'
+  "                                         'field_id'
+  " - s:complete_items (list)  : list with all candidates for completion
   "                              this list is tested against 'base' in 'omnifunct'
   "                              item type depends on type completion
   "-----------------------------------------------------------------------------
 
-  let g:complete_type = 'none'
-  let g:complete_items = []
+  echo 'Building completion list ... '
+
+  let s:lsdynaOmniCompletionType = 'none'
+  let s:complete_items = []
 
   "-----------------------------------------------------------------------------
   " keyword completion
   if getline(".") =~? '^\*\?\h\+$'
-    let g:complete_type = 'keyword'
-    let g:complete_items = g:lsdynaLibKeywords
+    let s:lsdynaOmniCompletionType = 'keyword'
+    let s:complete_items = b:lsdynaLibKeywords
     return
   endif
 
   "-----------------------------------------------------------------------------
   " parameter completion
-  " find '&' position between start of dyna column and current cursor position
   let apos = stridx(getline(".")[:col('.')], '&', <SID>Start_dyna_col())
   if apos > -1
-
-    let g:complete_type = 'parameter'
+    let s:lsdynaOmniCompletionType = 'parameter'
     normal! mP
-    call lsdyna_vimgrep#Vimgrep('parameter', '%', 'i')
-    let g:complete_items = []
-    for item in getqflist()
-      call extend(g:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Parameter())
+    let qfid = lsdyna_vimgrep#Vimgrep('parameter', '%', a:flag)
+    for item in getqflist({'id':qfid, 'items':''}).items
+      call extend(s:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Parameter())
     endfor
     normal! `P
     return
-
   endif
 
   "-----------------------------------------------------------------------------
   " field option completion
-
   let keyword = tolower(getline(search('^\*\a', 'bn'))[1:])
   let header = <SID>GetHeader()
-  let kvars = g:lsdynaKvars.get(keyword, header)
-  if !empty(kvars)
-    let g:complete_type = 'field_opt'
-    let g:complete_items = kvars
+  let options = []
+  for kword in keys(g:lsdynaLibKvars)
+    if keyword =~? '^' .. kword
+      let options = get(g:lsdynaLibKvars[kword], header, '')
+      break
+    endif
+  endfor
+  if !empty(options)
+    let s:lsdynaOmniCompletionType = 'field_opt'
+    let s:complete_items = options
     return
   endif
 
   "-------------------------------------------------------------------------
   " field id completion
-
-  let g:complete_type = 'field_id'
-  let g:complete_items = []
+  let s:lsdynaOmniCompletionType = 'field_id'
   normal! mP
-  call lsdyna_vimgrep#Vimgrep(get(g:lsdynaLibHeaders, header, "set part"), '%', 'i')
-  for item in getqflist()
-    "echo item
-    "call input("stop")
-    call extend(g:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Kword())
+  let qfid = lsdyna_vimgrep#Vimgrep(get(g:lsdynaLibHeaders, header, "set part"), '%', a:flag)
+  for item in getqflist({'id':qfid, 'items':''}).items
+    call extend(s:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Autodetect())
   endfor
   normal! `P
   return
@@ -116,6 +113,7 @@ function! lsdyna_complete#Omnifunc(findstart, base)
   " first function call --> set beginning of string
   " text between this position and cursor position when completion was used
   " will be tested against completion list in next function call
+
   if a:findstart
 
     let line = getline(".")
@@ -123,12 +121,13 @@ function! lsdyna_complete#Omnifunc(findstart, base)
     " for keyword completion --> from line beginning but w/o asterisk sign 
     " for parameter completion --> from ampersand sign '&'
     " for field completion --> from beginning of ls-dyna column
-    if g:complete_type == 'keyword'
+    if s:lsdynaOmniCompletionType == 'keyword'
       return line[0] == '*' ? 1 : 0
-    elseif g:complete_type == 'parameter'
+    elseif s:lsdynaOmniCompletionType == 'parameter'
       let apos = stridx(line[:col('.')], '&', <SID>Start_dyna_col())
       return apos+1
-    elseif g:complete_type == 'field_opt' || g:complete_type == 'field_id'
+    elseif s:lsdynaOmniCompletionType == 'field_opt' || s:lsdynaOmniCompletionType == 'field_id'
+    "else
       return <SID>Start_dyna_col()
     endif
 
@@ -141,31 +140,35 @@ function! lsdyna_complete#Omnifunc(findstart, base)
 
     "---------------------------------------------------------------------------
     " keyword completion
-    if g:complete_type == 'keyword'
-      for item in g:complete_items
-        if item =~? '^' . base
-          call add(complete, item)
+    if s:lsdynaOmniCompletionType == 'keyword'
+      for item in s:complete_items
+        if item.name =~? '^' . base
+        call add(complete, {'word'      : item.name,
+                          \ 'dup'       : 1,
+                          \ 'user_data' : item.path
+                          \})
         endif
       endfor
     "---------------------------------------------------------------------------
     "parameter completion
-    elseif g:complete_type == 'parameter'
-      for item in g:complete_items
+    elseif s:lsdynaOmniCompletionType == 'parameter'
+      for item in s:complete_items
         if item.pname =~? '^'.base
           call add(complete, item.Omni())
         endif
       endfor
     "---------------------------------------------------------------------------
     " field option completion
-    elseif g:complete_type == 'field_opt'
-      for item in g:complete_items
-        call add(complete, {'word' : item.value,
-                          \ 'menu' : item.description})
+    elseif s:lsdynaOmniCompletionType == 'field_opt'
+      for item in s:complete_items
+        let option = split(item,';')
+        call add(complete, {'word' : printf('%10s', option[0]),
+                          \ 'menu' : option[1]})
       endfor
     "---------------------------------------------------------------------------
     " field id completion
-    elseif g:complete_type == 'field_id'
-      for item in g:complete_items
+    elseif s:lsdynaOmniCompletionType == 'field_id'
+      for item in s:complete_items
         if item.id =~? '^'.base || item.title =~? base
           call add(complete, item.Omni())
         endif
@@ -173,6 +176,7 @@ function! lsdyna_complete#Omnifunc(findstart, base)
 
     endif
 
+    echo
     return complete
 
   endif
@@ -181,57 +185,37 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_complete#libKeywords(path)
+function! lsdyna_complete#libKeywords(paths)
 
   "-----------------------------------------------------------------------------
-  " Function to initialize Ls-Dyna keyword library.
-  " It create list of all *.k files in 'a:path'.
+  " Function to initialize Ls-Dyna keyword snippets library.
+  " It create list of all *.k files in 'a:paths'.
   "
   " Arguments:
-  " - path (string) : path to directory with keyword files
+  " - paths (string) : list of paths separated by ','
   " Return:
-  " - keyLib (dict) : keywords list
+  " - library (list) : keywords list for completion
+  "                    {
+  "                      'path' : absolute path for snippet
+  "                      'name' : keyword name
+  "                    }
   "-----------------------------------------------------------------------------
 
-  " get list of files in the library
-  let keyLib = split(globpath(a:path, '**/*.k'))
-  " keep only file names without extension
-  call map(keyLib, 'fnamemodify(v:val, ":t:r")')
-
-  return keyLib
+  let library = []
+  for path in split(a:paths, ',')
+    let files = split(globpath(path, '**/*.k'))
+    for file in files
+      let snippet = {}
+      let snippet.path = file
+      let snippet.name = fnamemodify(snippet.path, ':t:r')
+      call add(library, snippet)
+    endfor
+  endfor
+  return library
 
 endfunction
 
-"-------------------------------------------------------------------------------
-
-function! lsdyna_complete#InputKeyword()
-
-  "-----------------------------------------------------------------------------
-  " Function to take keyword name from current line and insert keyword
-  " definition from the library.
-  "
-  " Arguments:
-  " - None
-  " Return:
-  " - None
-  "-----------------------------------------------------------------------------
-
-  " get keyword name from current line
-  " if necessary get rid of asterisk sign
-  let kline = tolower(getline("."))
-  let keyword = kline[0] == "*" ? kline[1:] : kline[0:]
-
-  " step 1: completion put line with a keyword name, I do not need it any more since
-  "         keyword definition I am going to read already include this line
-  " step 2: read keyword definition from external file, start one line up
-  " step 3: jump to first dataline under the keyword
-  execute "delete _"
-  execute ".-1read " . g:lsdynaPathKeywords . keyword[0] . "/" . keyword . ".k"
-  "call search("^[^$]\\|^$", "W")
-
-endfunction
-
-"-------------------------------------------------------------------------------
+"-----------------------------------------------------------------------------
 
 function! lsdyna_complete#extendLine()
 
@@ -246,50 +230,100 @@ function! lsdyna_complete#extendLine()
   "-----------------------------------------------------------------------------
 
   " return colum number
-  if virtcol(".") > col(".")
-    call setline(".", getline(".").repeat(" ", virtcol(".")-col(".")+1))
+  let vcol = min([virtcol('.'), 79]) " limited to 79 to wvoid situation I am at last position in line
+  let  col = col('.')
+  if vcol > col
+    call setline(".", getline(".") .. repeat(" ", vcol-col))
+    normal! $
   endif
 
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_complete#MapEnter()
+function! lsdyna_complete#CompleteDone()
 
   "-----------------------------------------------------------------------------
-  " Function change behaviour of <CR> to perform completion.
-  " It depends on variable set by "lsdyna_complete#OmnifunctPre" function.
+  " Function trigger by autocmd "CompleteDonePre" event after completion is done.
+  " If I complete keyword and completion is not empty I read keyword
+  " definition from external file. It depends on gloabl variable set by
+  " "lsdyna_complete#OmnifunctPre" function.
   "
   " Arguments:
   " - None
   " Return:
   " - None
+  " Dependencies:
+  " - var "s:lsdynaOmniCompletionType" set by "lsdyna_complete#OmnifunctPre()"
   "-----------------------------------------------------------------------------
 
-  " do not map if menu not visible
-  if !pumvisible() | return "\<CR>" | endif
+  let complete_mode = complete_info().mode
+ 
+  if complete_mode == 'omni'
 
-  " choose mapping depend on completion type
-  if g:complete_type == 'keyword'
-    " insert entry from menu, leave insert mode, insert keyword
-    let mapStr = "\<C-Y>\<ESC>:call lsdyna_complete#InputKeyword()\<CR>"
-  elseif g:complete_type == 'parameter'
-    " insert entry from menu, leave insert mode
-    let mapStr = "\<C-Y>\<ESC>"
-  elseif g:complete_type == 'field_opt' || g:complete_type == 'field_id'
-    " insert entry from menu, leave insert mode
-    let mapStr = "\<C-Y>\<ESC>"
-  else
-    " act normal
-    let mapStr = "\<CR>"
+    if s:lsdynaOmniCompletionType == 'keyword' && !empty(v:completed_item)
+      silent execute 'delete _'
+      silent execute '.-1read ' .. v:completed_item.user_data
+      call search('^[^$*]','W')
+      stopinsert
+    else
+      stopinsert
+    endif
+
+  elseif complete_mode == 'function'
+
+    let incl = lsdyna_parser#Keyword('.', '%', '')._Autodetect()[0]
+    call incl.SetPath(incl.pathraw,'')
+    let pathlnum2 = incl.pathlnum2 " new position of last line of path, I need it to set cursor at the end 
+    call incl.Delete()
+    call incl.Write()
+    " restor cursor position at the end of path
+    let lnum = incl.first + pathlnum2
+    call cursor(lnum, len(getline(lnum))+1)
+    normal! zo
+
   endif
 
-  " reset completion type
-  let g:complete_type = 'none'
-
-  return mapStr
-
 endfunction
+
+"-------------------------------------------------------------------------------
+
+"function! lsdyna_complete#MapEnter()
+"
+"  "-----------------------------------------------------------------------------
+"  " Function change behaviour of <CR> to perform completion.
+"  " It depends on variable set by "lsdyna_complete#OmnifunctPre" function.
+"  "
+"  " Arguments:
+"  " - None
+"  " Return:
+"  " - None
+"  "-----------------------------------------------------------------------------
+"
+"  " do not map if menu not visible
+"  if !pumvisible() | return "\<CR>" | endif
+"
+"  " choose mapping depend on completion type
+"  if s:lsdynaOmniCompletionType == 'keyword'
+"    " insert entry from menu, leave insert mode, insert keyword
+"    let mapStr = "\<C-Y>\<ESC>:call lsdyna_complete#InputKeyword()\<CR>"
+"  elseif s:lsdynaOmniCompletionType == 'parameter'
+"    " insert entry from menu, leave insert mode
+"    let mapStr = "\<C-Y>\<ESC>"
+"  elseif s:lsdynaOmniCompletionType == 'field_opt' || s:lsdynaOmniCompletionType == 'field_id'
+"    " insert entry from menu, leave insert mode
+"    let mapStr = "\<C-Y>\<ESC>"
+"  else
+"    " act normal
+"    let mapStr = "\<CR>"
+"  endif
+"
+"  " reset completion type
+"  let s:lsdynaOmniCompletionType = 'none'
+"
+"  return mapStr
+"
+"endfunction
 
 "-------------------------------------------------------------------------------
 
@@ -361,6 +395,108 @@ function! s:Start_dyna_col()
   "-----------------------------------------------------------------------------
   "
   return (float2nr((virtcol(".")-1)/10))*10
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_complete#CompletefuncPre()
+
+  "-----------------------------------------------------------------------------
+  " Function trigger before "completefunc". Collect all neccessary data for
+  " file completion made in "completefunc" function.
+  " in *INCLUDE_PATHS. 
+  "
+  " Arguments:
+  " - None
+  " Return:
+  " - b:match (list)  : list of files/dirs names for completefunc
+  " - b:base (string) : name for completefunc
+  "-----------------------------------------------------------------------------
+
+  " parse *INCLUDE_ keyword to get include path
+  let incl = lsdyna_parser#Keyword('.', '%', '')._Autodetect()[0]
+  let path = fnamemodify(incl.pathraw, ':h')
+  let b:base = fnamemodify(incl.pathraw, ':t')
+
+  " absolute path --> never use *INCLUDE_PATH
+  if path[0] == '/' || path[0] == '\' || path[0:1] =~? '\a:'
+    let include_paths = [path]
+  " relative path --> look in current working directory and all *INCLUDE_PATH paths
+  " at the end full path is *INCLUDE_PATH path + *INCLUDE path
+  else
+    let include_paths = [getcwd()] + lsdyna_include#GetIncludePaths()
+    if !empty(path)
+      call map(include_paths, {idx, val -> val .. '/' .. path})
+    endif
+  endif
+
+  " find all files/directories and store it w/o paths
+  " add separator for directories only, it easy to see what is on the list and
+  " also I do not have to add path separator manually to follow the path
+  let b:match = globpath(include_paths->join(','), '*', 1, 1)
+  call map(b:match, {_,val -> isdirectory(val) ? fnamemodify(val, ':t') .. '/' : fnamemodify(val, ':t')})
+
+  return
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_complete#Completefunc(findstart, base)
+
+  "-----------------------------------------------------------------------------
+  " User completion function used for filename completion with *INCLUDE_PATH.
+  "
+  " Arguments:
+  " - see :help complete-functions
+  " - "b:match" : variable set by lsdyna_complete#CompletefuncPre function
+  " - "b:base"  : variable set by lsdyna_complete#CompletefuncPre function
+  " Return:
+  " - see :help complete-functions
+  "-----------------------------------------------------------------------------
+
+  if a:findstart
+
+    " in 1st call I define start position for completion, text between start
+    " position and current position will be used for completion and set as
+    " a:base variable in 2nd call of the function. Using this approach I am
+    " limited only for text in one line and it is a problem for multi line
+    " paths under *INCLUDE_PATH. In example below completion text might be
+    " only 'cto' and I want to use 'directo'
+    " *INCLUDE
+    " /path/dire +
+    " cto<c-x><c-f>
+    " To over came it in "CompletefuncPre" function I set my own "b:base" with
+    " text for completion.
+ 
+    " starting position for completion is 1st separator in path or column 0
+    let line = getline('.')
+    let start = col('.') - 1
+    while start > 0 && line[start - 1] !~ '[\/]'
+      let start -= 1
+    endwhile
+    return start
+
+  else
+
+    " base_skip is part of text which will be removed from match in case part of
+    " the file name is in previous line
+    let lineUp = getline(line('.')-1)  
+    let base_skip = lineUp =~? ' +$' ? fnamemodify(lineUp[0:-3], ':t') : ''
+
+    " test names against completion text
+    let complete = []
+    for file in b:match
+      if file =~? '^' .. b:base " !!! test against b:base not a:base
+        call add(complete, {'word' : substitute(file,base_skip,'',''),
+                          \ 'abbr' : file
+                          \})
+      endif
+    endfor  
+    return complete
+
+  endif
 
 endfunction
 

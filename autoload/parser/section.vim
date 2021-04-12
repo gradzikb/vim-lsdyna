@@ -48,32 +48,35 @@ function! parser#section#Section() dict
   "-----------------------------------------------------------------------------
   if self.type ==? 'SOLID'
 
+      let lines = [self.name]
       let lcount = 0
       for line in self.lines[1:]
         let lcount += 1
+        call add(lines, line)
         if line[0] != '$'
-
           let sect       = copy(self)
           let sect.title = ''
           let sect.id    = str2nr(line[:9])
           let sect.lnum  = sect.first + lcount
+          let sect.lines = lines
           let sect.Qf    = function('<SID>Qf')
           let sect.Tag   = function('<SID>Tag')
           let sect.Omni  = function('<SID>Omni')
           call add(sects, sect)
-
+          let lines = [self.name]
         endif
       endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'SOLID_TITLE'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -81,25 +84,27 @@ function! parser#section#Section() dict
         elseif dlcount == 2
           let sect.id   = str2nr(line[:9])
           let sect.lnum = sect.first + lcount
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'SHELL'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -109,25 +114,27 @@ function! parser#section#Section() dict
           let icomp = str2nr(line[60:70])
           let dlcount_end = icomp ? 3 : 2
         elseif dlcount == dlcount_end
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'SHELL_TITLE'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -138,25 +145,27 @@ function! parser#section#Section() dict
           let icomp = str2nr(line[60:70])
           let dlcount_end = icomp ? 4 : 3
         elseif dlcount == dlcount_end
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'BEAM'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -164,25 +173,27 @@ function! parser#section#Section() dict
           let sect.id    = str2nr(line[:9])
           let sect.lnum  = sect.first + lcount
         elseif dlcount == 2
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'BEAM_TITLE'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -191,25 +202,27 @@ function! parser#section#Section() dict
           let sect.id   = str2nr(line[:9])
           let sect.lnum = sect.first + lcount
         elseif dlcount == 3
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'DISCRETE'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -217,25 +230,27 @@ function! parser#section#Section() dict
           let sect.id    = str2nr(line[:9])
           let sect.lnum  = sect.first + lcount
         elseif dlcount == 2
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'DISCRETE_TITLE'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -244,45 +259,49 @@ function! parser#section#Section() dict
           let sect.id   = str2nr(line[:9])
           let sect.lnum = sect.first + lcount
         elseif dlcount == 3
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'SEATBELT'
 
+    let lines = [self.name]
     let lcount = 0
     for line in self.lines[1:]
       let lcount += 1
+        call add(lines, line)
       if line[0] != '$'
-
         let sect       = copy(self)
         let sect.title = ''
         let sect.id    = str2nr(line[:9])
         let sect.lnum  = sect.first + lcount
+        let sect.lines = lines
         let sect.Qf    = function('<SID>Qf')
         let sect.Tag   = function('<SID>Tag')
         let sect.Omni = function('<SID>Omni')
         call add(sects, sect)
-
+        let lines = [self.name]
       endif
     endfor
 
   "-----------------------------------------------------------------------------
   elseif self.type ==? 'SEATBELT_TITLE'
 
+    let lines = [self.name]
     let lcount = 0
     let dlcount = 0
     for line in self.lines[1:]
       let lcount += 1
+      call add(lines, line)
       if line[0] != '$'
-
         let dlcount += 1
         if dlcount == 1
           let sect       = copy(self)
@@ -290,13 +309,14 @@ function! parser#section#Section() dict
         elseif dlcount == 2
           let sect.id   = str2nr(line[:9])
           let sect.lnum = sect.first + lcount
+          let sect.lines = lines
           let sect.Qf   = function('<SID>Qf')
           let sect.Tag  = function('<SID>Tag')
           let sect.Omni = function('<SID>Omni')
           call add(sects, sect)
           let dlcount = 0
+          let lines = [self.name]
         endif
-
       endif
     endfor
 
@@ -323,7 +343,8 @@ function! s:Qf() dict
     let qf = {}
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.lnum
-    let qf.text  = 'id_title_type'.'|'.self.name.'|'.self.type.'|'.self.id.'|'.self.title
+    let qf.type  = 'K'
+    let qf.text  = self.id.'|'.self.title.'|'.self.type
 
   return qf
 
@@ -342,6 +363,7 @@ function! s:Omni() dict
   let item.word = printf("%10s", self.id)
   let item.menu = self.title
   let item.dup  = 1
+  let item.info = join(self.lines,"\n")
   return item
 
 endfunction

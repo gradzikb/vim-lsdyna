@@ -135,8 +135,89 @@ function! lsdyna_element#ChangePid(line1, line2, ...)
 endfunction
 
 "-------------------------------------------------------------------------------
-"
+
 function! lsdyna_element#FindPid(line1, line2, ...)
+
+  " find keyword name
+  let kwName = getline(search('^\*','bcnW'))
+
+  "-----------------------------------------------------------------------------
+  " get all element line data and collect them by part ids
+
+  let pids = {} " dict with elements grouped by part ids 
+  let lines = getline(a:line1, a:line2)
+  if kwName =~? 'THICKNESS\|BETA\|MCID\|OFFSET\|DOF\|COMPOSITE'
+    for i in range(0, len(lines)-1, 2)
+      let pid = trim(lines[i][8:15])
+      if !has_key(pids, pid) | let pids[pid] = [] | endif
+      call add(pids[pid], lines[i])
+      call add(pids[pid], lines[i+1])
+    endfor
+  else
+    for i in range(0, len(lines)-1, 1)
+      let pid = trim(lines[i][8:15])
+      if !has_key(pids, pid) | let pids[pid] = [] | endif
+      call add(pids[pid], lines[i])
+    endfor
+  endif
+
+  "-----------------------------------------------------------------------------
+  " do stuff if no command arguments
+  if a:0 == 0
+
+    " sort all elements lines by pid and write them to file
+    let lines_to_write = []
+    for key in sort(keys(pids))
+      call add(lines_to_write, '$ Part: '.key)
+      call extend(lines_to_write, pids[key])
+    endfor
+    execute a:line1.','.a:line2.'delete'
+    call append(a:line1-1, lines_to_write)
+
+  "-----------------------------------------------------------------------------
+  " do stuff if command arguments
+  else
+
+    " take user pids from command arguments
+    " LsElemFindPid 1 5 10:20
+    let user_pids = []
+    for arg in a:000
+      if match(arg, ":") != -1
+        let ids = split(arg, ":")
+        for i in range(ids[0], ids[1])
+          call add(user_pids, i)
+        endfor
+      else
+        call add(user_pids, arg)
+      endif
+    endfor
+
+    let lines_to_write = [] " here I will store all lines to write to file
+
+    " process pids I want to find
+    for key in sort(user_pids)
+      if has_key(pids, key)
+        call add(lines_to_write, '$ Part: '.key)
+        call extend(lines_to_write, pids[key])
+        call remove(pids, key)
+      endif
+    endfor 
+
+    "process other pids
+    call add(lines_to_write, '$')
+    for key in keys(pids)
+      call extend(lines_to_write, pids[key])
+    endfor
+
+    " finally delete old lines and write a new ones
+    execute a:line1.','.a:line2.'delete'
+    call append(a:line1-1, lines_to_write)
+
+  endif
+
+endfunction
+
+function! lsdyna_element#FindPid1(line1, line2, ...)
 
   "-----------------------------------------------------------------------------
   " Function to sort/find elements with specific part id in element table.

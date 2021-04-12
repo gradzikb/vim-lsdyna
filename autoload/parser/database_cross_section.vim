@@ -64,6 +64,7 @@ function! parser#database_cross_section#Database_cross_section() dict
           let dbcs.Qf    = function('<SID>Qf')
           let dbcs.Tag   = function('<SID>Tag')
           let dbcs.Omni  = function('<SID>Omni')
+          let dbcs.SetTitle = function('<SID>SetTitle')
           call add(dbcss, dbcs)
           let dlcount = 0
         endif
@@ -92,6 +93,7 @@ function! parser#database_cross_section#Database_cross_section() dict
           let dbcs.Qf    = function('<SID>Qf')
           let dbcs.Tag   = function('<SID>Tag')
           let dbcs.Omni  = function('<SID>Omni')
+          let dbcs.SetTitle = function('<SID>SetTitle')
           call add(dbcss, dbcs)
           let dlcount = 0
         endif
@@ -114,6 +116,7 @@ function! parser#database_cross_section#Database_cross_section() dict
         let dbcs.Qf    = function('<SID>Qf')
         let dbcs.Tag   = function('<SID>Tag')
         let dbcs.Omni  = function('<SID>Omni')
+        let dbcs.SetTitle = function('<SID>SetTitle')
         call add(dbcss, dbcs)
 
       endif
@@ -138,6 +141,7 @@ function! parser#database_cross_section#Database_cross_section() dict
           let dbcs.Qf    = function('<SID>Qf')
           let dbcs.Tag   = function('<SID>Tag')
           let dbcs.Omni  = function('<SID>Omni')
+          let dbcs.SetTitle = function('<SID>SetTitle')
           call add(dbcss, dbcs)
           let dlcount = 0
         endif
@@ -167,7 +171,8 @@ function! s:Qf() dict
   let qf = {}
   let qf.bufnr = self.bufnr
   let qf.lnum  = self.lnum
-  let qf.text  = 'id_title_type'.'|'.self.name.'|'.self.type.'|'.self.id.'|'.self.title
+  let qf.type  = 'K'
+  let qf.text  = self.id.'|'.self.title.'|'.self.type
 
   return qf
 
@@ -201,6 +206,25 @@ function! s:Tag() dict
 
   let tag = self.id."\t".self.file."\t".self.lnum.";\"\tkind:DATABASE_CROSS_SECTION\ttitle:".self.title
   return tag
+
+endfunction
+
+function! s:SetTitle(title) dict
+
+  "-----------------------------------------------------------------------------
+  " Method:
+  "   Set a new title for *DATABASE_CROSS_SECTION keyword.
+  "-----------------------------------------------------------------------------
+
+  if self.type =~? '_ID'  
+    for i in range(1, len(self.lines)-1)
+      if self.lines[i][0] != '$'
+        let self.lines[i] = self.lines[i][:9] . a:title
+        let self.title = a:title
+        break
+      endif
+    endfor
+  endif
 
 endfunction
 
