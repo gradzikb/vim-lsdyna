@@ -64,6 +64,29 @@ syntax region lsdynaKeywordReg start=/^\*\a/ end=/^\*/me=s-1
  \ contains=@lsdynaKeywordCluster
 
 "-------------------------------------------------------------------------------
+"    Nodes i10
+"-------------------------------------------------------------------------------
+
+syntax match lsdynaNodeI10_02_Col '\%11c.\{16}'  contained
+syntax match lsdynaNodeI10_04_Col '\%43c.\{16}' contained
+syntax match lsdynaNodeI10_06_Col '\%67c.\{10}'  contained
+
+highlight default link lsdynaNodeI10_02_Col lsdynaColumn
+highlight default link lsdynaNodeI10_04_Col lsdynaColumn
+highlight default link lsdynaNodeI10_06_Col lsdynaColumn
+
+syntax cluster lsdynaNodeI10Cluster add=lsdynaComment
+syntax cluster lsdynaNodeI10Cluster add=lsdynaKeywordName
+syntax cluster lsdynaNodeI10Cluster add=lsdynaNodeI10_02_Col
+syntax cluster lsdynaNodeI10Cluster add=lsdynaNodeI10_04_Col
+syntax cluster lsdynaNodeI10Cluster add=lsdynaNodeI10_06_Col
+
+syntax region lsdynaNodeI10Reg
+ \ start = /\c^\*\(NODE\|AIRBAG_REFERENCE_GEOMETRY\) %\s*$/
+ \ end = /^\*/me=s-1
+ \ contains = @lsdynaNodeI10Cluster
+
+"-------------------------------------------------------------------------------
 "    Nodes
 "-------------------------------------------------------------------------------
 
@@ -81,10 +104,10 @@ syntax cluster lsdynaNodeCluster add=lsdynaNode_02_Col
 syntax cluster lsdynaNodeCluster add=lsdynaNode_04_Col
 syntax cluster lsdynaNodeCluster add=lsdynaNode_06_Col
 
-syntax region lsdynaNodeReg start=/\c^\*NODE *$/ end=/^\*/me=s-1
- \ contains=@lsdynaNodeCluster
-syntax region lsdynaAirbagRefReg start=/\c^\*AIRBAG_REF.*$/ end=/^\*/me=s-1
- \ contains=@lsdynaNodeCluster
+syntax region lsdynaNodeI10Reg
+ \ start = /\c^\*\(NODE\|AIRBAG_REFERENCE_GEOMETRY\)\s*$/
+ \ end = /^\*/me=s-1
+ \ contains = @lsdynaNodeCluster
 
 "-------------------------------------------------------------------------------
 "    Elements
@@ -115,6 +138,17 @@ syntax region lsdynaElemReg start=/\c^\*ELEMENT_.*$/ end=/^\*/me=s-1
 syntax region lsdynaAirbagShellReg start=/\c^\*AIRBAG_SHELL_.\+ *$/ end=/^\*/me=s-1
  \ contains=@lsdynaElemCluster
 syntax region lsdynaElemBeltSlipReg start=/\c^\*ELEMENT_SEATBELT_\a\+\s*$/ end=/^\*/me=s-1
+ \ contains=@lsdynaKeywordCluster
+
+"-------------------------------------------------------------------------------
+"    Elements I10
+"-------------------------------------------------------------------------------
+
+syntax region lsdynaElemI10Reg start=/\c^\*ELEMENT_\w\+ %\s*$/ end=/^\*/me=s-1
+ \ contains=@lsdynaKeywordCluster
+syntax region lsdynaAirbagShellReg start=/\c^\*AIRBAG_SHELL_\w\+ %\s*$/ end=/^\*/me=s-1
+ \ contains=@lsdynaKeywordCluster
+syntax region lsdynaElemI10BeltSlipReg start=/\c^\*ELEMENT_SEATBELT_\w\+ %\s*$/ end=/^\*/me=s-1
  \ contains=@lsdynaKeywordCluster
 
 "-------------------------------------EOF---------------------------------------

@@ -44,35 +44,35 @@ function! parser#node#Node() dict
   " Returns:
   "   List of node objects base on keyword object.
   " Members:
-  " - self.first : kword 1st line number
-  " - self.last  : kword last line number
-  " - self.bufnr : buffer number
-  " - self.file  : full file path
-  " - self.name  : kword name
-  " - self.type  : kword type
-  " - self.id    : kword id
-  " - self.title : kword title
-  " - self.nodes : dict of nodes
+  " - self.xxxx   : inherits from keyword abstract class
+  " - self.format : columns format (i8, i10, i20)
   " Methods:
+  " - self.Nodes()   : return dict with nodes
+  " - self.QF()      : return quickfix list
+  " - self.Replace() : replace nodes coordinates
+  " - self.Tag()     : return tags list
   "-----------------------------------------------------------------------------
 
-  "let self.write   = function('lsdyna_keyword#node_write')
-  "let self.replace = function('lsdyna_keyword#node_replace')
-  let self.Tag     = function('<SID>Tag')
-  let self.Qf      = function('<SID>Qf')
+  "-----------------------------------------------------------------------------
+  " memebers
+
+  if self.name =~? '%\s*$'
+    let self.format = 'i10'
+  elseif self.name =~? '+\s*$'
+    let self.format = 'i20'
+  else
+    let self.format = 'i8'
+  endif
+ 
+  "-----------------------------------------------------------------------------
+  " methods
+
   let self.Nodes   = function('<SID>Nodes')
+  let self.Qf      = function('<SID>Qf')
   let self.Replace = function('<SID>Replace')
-  "let self.Offset = function('<SID>Offset')
+  let self.Tag     = function('<SID>Tag')
 
-  "let self.nodes = {}
-  "for line in self.Datalines()[1:]
-  "  let id = str2nr(line[0:7])
-  "  let x  = str2float(line[8:23])
-  "  let y  = str2float(line[24:39])
-  "  let z  = str2float(line[40:55])
-  "  let self.nodes[id] = [x, y, z]
-  "endfor
-
+  "-----------------------------------------------------------------------------
   " get rid of members/mehods you do not want to inherit
   call filter(self, 'v:key[0] != "_"')
 
@@ -100,12 +100,12 @@ function! s:Qf() dict
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.first
     let qf.type  = 'U'
-    let qf.text  = self.name
+    let qf.text  = self.name.'|'.self.hide
 
   return qf
 
 endfunction
-"
+
 function! s:Tag() dict
 
   "-----------------------------------------------------------------------------
@@ -129,25 +129,30 @@ function! s:Nodes() dict
   "   Dict {'id':'[x, y, z]', ...}
   "-----------------------------------------------------------------------------
 
-  "let self.nodes = {}
   let nodes = {}
 
-  " long format
-  if self.Datalines()[0] =~? '+\s*$'
-    for line in self.Datalines()[1:]
-      let id = str2nr(line[0:19])
-      let x  = str2float(line[20:39])
-      let y  = str2float(line[40:59])
-      let z  = str2float(line[60:79])
-      let nodes[id] = [x, y, z]
-    endfor
-  " standard format
-  else
+  if self.format == 'i8'
     for line in self.Datalines()[1:]
       let id = str2nr(line[0:7])
       let x  = str2float(line[8:23])
       let y  = str2float(line[24:39])
       let z  = str2float(line[40:55])
+      let nodes[id] = [x, y, z]
+    endfor
+  elseif self.format == 'i10'
+    for line in self.Datalines()[1:]
+      let id = str2nr(line[0:9])
+      let x  = str2float(line[10:25])
+      let y  = str2float(line[26:41])
+      let z  = str2float(line[42:57])
+      let nodes[id] = [x, y, z]
+    endfor
+  elseif self.format == 'i20'
+    for line in self.Datalines()[1:]
+      let id = str2nr(line[0:19])
+      let x  = str2float(line[20:39])
+      let y  = str2float(line[40:59])
+      let z  = str2float(line[60:79])
       let nodes[id] = [x, y, z]
     endfor
   endif
@@ -168,12 +173,23 @@ function! s:Replace(nodes, offset) dict
   "   - ncount (number) : number of replaced nodes
   "-----------------------------------------------------------------------------
 
+  if self.format == 'i8'
+    let str_format = '%8s%16.6f%16.6f%16.6f'
+    let id_len     = 8
+  elseif self.format == 'i10'
+    let str_format = '%10s%16.6f%16.6f%16.6f'
+    let id_len     = 10
+  elseif self.format == 'i20'
+    let str_format = '%20s%20.6f%20.6f%20.6f'
+    let id_len     = 20
+  endif
+
   let ncount = 0
   for i in range(1, len(self.lines)-1)
     if self.lines[i][0] !=# '$'
-      let id  = str2nr(self.lines[i][0:7])-a:offset
+      let id = str2nr(self.lines[i]->strpart(0,id_len))-a:offset
       if has_key(a:nodes, id)
-        let self.lines[i] = printf("%8s%16.6f%16.6f%16.6f", id+a:offset, a:nodes[id][0], a:nodes[id][1], a:nodes[id][2])
+        let self.lines[i] = printf(str_format, id+a:offset, a:nodes[id][0], a:nodes[id][1], a:nodes[id][2])
         let ncount += 1
       endif
     endif

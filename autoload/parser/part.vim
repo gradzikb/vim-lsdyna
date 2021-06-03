@@ -60,6 +60,7 @@ function! parser#part#Part() dict
           "call add(lines, line)
           let part       = copy(self)
           let part.title = trim(line)
+          "let part.title = part.hide ? g:lsdynaCommentString .. ' ' .. part.title : part.title
         elseif dlcount == 2
           "call add(lines, line)
           let part.id    = str2nr(line[:9])
@@ -91,6 +92,7 @@ function! parser#part#Part() dict
         if dlcount == 1
           let part       = copy(self)
           let part.title = trim(line)
+          "let part.title = part.hide ? g:lsdynaCommentString .. ' ' .. part.title : part.title
         elseif dlcount == 2
           let part.id   = str2nr(line[:9])
           let part.lnum = part.first + lcount
@@ -120,6 +122,7 @@ function! parser#part#Part() dict
         if dlcount == 1
           let part       = copy(self)
           let part.title = trim(line)
+          "let part.title = part.hide ? g:lsdynaCommentString .. ' ' .. part.title : part.title
         elseif dlcount == 2
           let part.id   = str2nr(line[:9])
           let part.lnum = part.first + lcount
@@ -145,7 +148,9 @@ function! parser#part#Part() dict
       call add(lines, line)
       if line[0] != '$'
         let part       = copy(self)
+        "let part.title = ''
         let part.title = ''
+        "let part.title = part.hide ? g:lsdynaCommentString .. ' ' .. part.title : part.title
         let part.id    = str2nr(line[:9])
         let part.lnum  = part.first + lcount
         let part.lines = lines
@@ -179,7 +184,7 @@ function! s:Qf() dict
   let qf.bufnr = self.bufnr
   let qf.lnum  = self.lnum
   let qf.type  = 'K'
-  let qf.text  = self.id.'|'.self.title.'|'.self.type
+  let qf.text  = self.id.'|'.self.title.'|'.self.type.'|'.self.hide
 
   return qf
 

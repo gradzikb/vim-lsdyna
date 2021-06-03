@@ -203,7 +203,8 @@ function! lsdyna_complete#libKeywords(paths)
 
   let library = []
   for path in split(a:paths, ',')
-    let files = split(globpath(path, '**/*.k'))
+    "let files = split(globpath(path, '**/*.k'))
+    let files = split(globpath(path, '**/*.*'))
     for file in files
       let snippet = {}
       let snippet.path = file
@@ -270,7 +271,7 @@ function! lsdyna_complete#CompleteDone()
       stopinsert
     endif
 
-  elseif complete_mode == 'function'
+  elseif complete_mode == 'function' && g:lsdynaInclPathAutoSplit == 1
 
     let incl = lsdyna_parser#Keyword('.', '%', '')._Autodetect()[0]
     call incl.SetPath(incl.pathraw,'')
@@ -436,8 +437,6 @@ function! lsdyna_complete#CompletefuncPre()
   " also I do not have to add path separator manually to follow the path
   let b:match = globpath(include_paths->join(','), '*', 1, 1)
   call map(b:match, {_,val -> isdirectory(val) ? fnamemodify(val, ':t') .. '/' : fnamemodify(val, ':t')})
-
-  return
 
 endfunction
 

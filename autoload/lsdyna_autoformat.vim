@@ -40,66 +40,72 @@ function! lsdyna_autoformat#Autoformat() range
   " - None
   "-----------------------------------------------------------------------------
 
+  let s:line1 = a:firstline
+  let s:line2 = a:lastline
+
   " find keyword
   let keyword = getline(search('^\*\a','bcnW'))
 
   "-----------------------------------------------------------------------------
   if keyword =~? "*DEFINE_CURVE.*$"
-
-    call lsdyna_autoformat#define_curve(a:firstline, a:lastline)
-
+    call <SID>define_curve(a:firstline, a:lastline)
   "-----------------------------------------------------------------------------
   elseif keyword =~? '^\*NODE\s*$' ||
-       \ keyword =~? '^\*AIRBAG_REFERENCE_GEOMETRY\s*$'
-
-    call lsdyna_autoformat#node(a:firstline, a:lastline)
-
+       \ keyword =~? '^\*AIRBAG_REFERENCE_GEOMETRY\w*\s*$'
+    call <SID>Autoformat([8,16,16,16,8,8])
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*NODE %\s*$' ||
+       \ keyword =~? '^\*AIRBAG_REFERENCE_GEOMETRY\w* %\s*$'
+    call <SID>Autoformat([10,16,16,16,10,10])
   "-----------------------------------------------------------------------------
   elseif keyword =~? '^\*ELEMENT_PLOTEL\s*$' ||
        \ keyword =~? '^\*ELEMENT_BEAM\s*$' ||
        \ keyword =~? '^\*ELEMENT_SHELL\s*$' ||
        \ keyword =~? '^\*ELEMENT_SOLID\s*$' ||
-       \ keyword =~? '^\*AIRBAG_SHELL_REFERENCE_GEOMETRY\s*$'
-
-    call lsdyna_autoformat#element(a:firstline, a:lastline)
-
+       \ keyword =~? '^\*AIRBAG_SHELL_REFERENCE_GEOMETRY\w*\s*$'
+    call <SID>Autoformat([8,8,8,8,8,8,8,8,8,8])
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*ELEMENT_PLOTEL %\s*$' ||
+       \ keyword =~? '^\*ELEMENT_BEAM %\s*$' ||
+       \ keyword =~? '^\*ELEMENT_SHELL %\s*$' ||
+       \ keyword =~? '^\*ELEMENT_SOLID %\s*$' ||
+       \ keyword =~? '^\*AIRBAG_SHELL_REFERENCE_GEOMETRY\w* %\s*$'
+    call <SID>Autoformat([10,10,10,10,10,10,10,10,10,10])
   "-----------------------------------------------------------------------------
   elseif keyword =~? '\*ELEMENT_MASS\s*$'
-
-    call lsdyna_autoformat#element_mass(a:firstline, a:lastline)
-
+    call <SID>Autoformat([8, 8, 16, 8])
   "-----------------------------------------------------------------------------
-  elseif keyword =~? '\*ELEMENT_MASS_PART.*$'
-
-    call lsdyna_autoformat#element_mass_part(a:firstline, a:lastline)
-
+  elseif keyword =~? '\*ELEMENT_MASS %\s*$'
+    call <SID>Autoformat([10, 10, 16, 10])
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '\*ELEMENT_MASS_PART\w*\s*$'
+    call <SID>Autoformat([8, 16, 16, 16])
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '\*ELEMENT_MASS_PART\w %*\s*$'
+    call <SID>Autoformat([10, 16, 16, 16])
   "-----------------------------------------------------------------------------
   elseif keyword =~? '^\*ELEMENT_DISCRETE\s*$'
-
-    call lsdyna_autoformat#element_discrete(a:firstline, a:lastline)
-
+    call <SID>Autoformat([8,8,8,8,8,16,8,16])
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*ELEMENT_DISCRETE %\s*$'
+    call <SID>Autoformat([10,10,10,10,10,16,10,16])
   "-----------------------------------------------------------------------------
   elseif keyword =~? '^\*ELEMENT_SEATBELT\s*$'
-
-    call lsdyna_autoformat#element_seatbelt(a:firstline, a:lastline)
-
+    call <SID>Autoformat([8,8,8,8,8,16,8,8])
+  "-----------------------------------------------------------------------------
+  elseif keyword =~? '^\*ELEMENT_SEATBELT %\s*$'
+    call <SID>Autoformat([10,10,10,10,10,16,10,10])
   "-----------------------------------------------------------------------------
   elseif keyword =~? '^\*PARAMETER\s*$' ||
        \ keyword =~? '^\*PARAMETER_LOCAL\s*$'
-
-    call lsdyna_autoformat#parameter(a:firstline, a:lastline)
-
+    call <SID>parameter(a:firstline, a:lastline)
   "-----------------------------------------------------------------------------
   elseif keyword =~? '^\*PARAMETER_EXPRESSION\s*$' ||
        \ keyword =~? '^\*PARAMETER_EXPRESSION_LOCAL\s*$'
-
-    call lsdyna_autoformat#parameter_expr(a:firstline, a:lastline)
-
+    call <SID>parameter_expr(a:firstline, a:lastline)
   "-----------------------------------------------------------------------------
   else
-
-    call lsdyna_autoformat#keyword(a:firstline, a:lastline)
-
+    call <SID>Autoformat([10,10,10,10,10,10,10,10])
   endif
 
 endfunction
@@ -108,188 +114,29 @@ endfunction
 "    INTERNAL FUNCTIONS
 "-------------------------------------------------------------------------------
 
-function! lsdyna_autoformat#node(line1, line2)
+function! s:Autoformat(def)
 
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
+  for lnum in range(s:line1, s:line2)
+  
+    let line_str = getline(lnum)
+    if line_str =~? '^[*$]' | continue | endif
+    let line = split(line_str, '\s*,\s*\|\s\+')
 
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
-
-    " loop inside line
-    for j in range(len(line))
-      if j == 1 || j == 2 || j == 3
-        let line[j] = printf("%16s", line[j])
-      else
-        let line[j] = printf("%8s", line[j])
-      endif
+    let new_line = ''
+    for idx in range(len(line))
+      let str_format = '%'..a:def[idx]..'s'
+      let new_line ..= printf(str_format, line[idx])
     endfor
-    call setline(i, join(line, ""))
 
-  endfor
+    call setline(lnum, new_line)
 
-  " go to next line after the last one
-  call cursor(a:line2+1, 0)
-
-endfunction
-
-"-------------------------------------------------------------------------------
-"
-function! lsdyna_autoformat#element(line1, line2)
-
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
-
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
-
-    " set 8 length string for each item
-    call map(line, 'printf("%8s", v:val)')
-    " dump the line
-    call setline(i, join(line, ""))
-
-  endfor
-
-  " go to next line after the last one
-  call cursor(a:line2+1, 0)
+  endfor  
 
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_autoformat#element_discrete(line1, line2)
-
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
-
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
-
-    " loop inside line
-    for j in range(len(line))
-      if j == 5 || j == 7
-        let line[j] = printf("%16s", line[j])
-      else
-        let line[j] = printf("%8s", line[j])
-      endif
-    endfor
-    call setline(i, join(line, ""))
-
-  endfor
-
-  " go to next line after the last one
-  call cursor(a:line2+1, 0)
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! lsdyna_autoformat#element_seatbelt(line1, line2)
-
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
-
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
-
-    " loop inside line
-    for j in range(len(line))
-      if j == 5
-        let line[j] = printf("%16s", line[j])
-      else
-        let line[j] = printf("%8s", line[j])
-      endif
-    endfor
-    call setline(i, join(line, ""))
-
-  endfor
-
-  " go to next line after the last one
-  call cursor(a:line2+1, 0)
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! lsdyna_autoformat#element_mass(line1, line2)
-
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
-
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
-
-    " loop inside line
-    for j in range(len(line))
-      if j == 2
-        let line[j] = printf("%16s", line[j])
-      else
-        let line[j] = printf("%8s", line[j])
-      endif
-    endfor
-    call setline(i, join(line, ""))
-
-  endfor
-
-  " go to next line after the last one
-  call cursor(a:line2+1, 0)
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! lsdyna_autoformat#element_mass_part(line1, line2)
-
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
-
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line
-    let line = split(lineStr, '\s*,\s*\|\s\+')
-
-    " loop inside line
-    for j in range(len(line))
-      if j == 0
-        let line[j] = printf("%8s", line[j])
-      else
-        let line[j] = printf("%16s", line[j])
-      endif
-    endfor
-    call setline(i, join(line, ""))
-
-  endfor
-
-  " go to next line after the last one
-  call cursor(a:line2+1, 0)
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! lsdyna_autoformat#parameter(line1, line2)
+function! s:parameter(line1, line2)
 
   " loop over all selected lines
   for i in range(a:line1, a:line2)
@@ -333,7 +180,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_autoformat#parameter_expr(line1, line2)
+function! s:parameter_expr(line1, line2)
 
   " loop over all selected lines
   for i in range(a:line1, a:line2)
@@ -366,38 +213,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_autoformat#keyword(line1, line2)
-
-  " loop over all selected lines
-  for i in range(a:line1, a:line2)
-
-    " take current line
-    let lineStr = getline(i)
-    " ignore keyword and comment line
-    if lineStr =~? '^[*$]' | continue | endif
-    " split the line, decide to keep empty item at the beginning
-    if lineStr =~? '^\s*,'
-      let line = split(lineStr, '\s*,\s*\|\s\+', 1)
-    else
-      let line = split(lineStr, '\s*,\s*\|\s\+', 0)
-    endif
-
-    " set 10 length string for each item
-    call map(line, 'printf("%10s", v:val)')
-    " dump the line
-    call setline(i, join(line, ""))
-
-
-  endfor
-
-  " go to next line after the last one
-  call cursor(a:line2+1, 0)
-
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! lsdyna_autoformat#define_curve(line1, line2)
+function! s:define_curve(line1, line2)
 
   " take 1st line current line
   let lineStr = getline(a:line1)
@@ -407,7 +223,7 @@ function! lsdyna_autoformat#define_curve(line1, line2)
   " format 8x10
   if len(line) !=2 && lineStr !~ ","
 
-    call lsdyna_autoformat#keyword(a:line1, a:line1)
+    call <SID>Autoformat([10,10,10,10,10,10,10,10])
 
   " format 2x20
   else
@@ -436,4 +252,5 @@ function! lsdyna_autoformat#define_curve(line1, line2)
   call cursor(a:line2+1, 0)
 
 endfunction
+
 "-------------------------------------EOF---------------------------------------

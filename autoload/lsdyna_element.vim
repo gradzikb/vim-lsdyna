@@ -141,6 +141,20 @@ function! lsdyna_element#FindPid(line1, line2, ...)
   " find keyword name
   let kwName = getline(search('^\*','bcnW'))
 
+  " i10 format
+  if kwName =~? '%\s*$'
+    let a = 10
+    let z = 19
+  " i20 format
+  elseif kwName =~? '+\s*$'
+    let a = 20
+    let z = 39
+  " i8 format
+  else
+    let a = 8
+    let z = 15
+  endif
+
   "-----------------------------------------------------------------------------
   " get all element line data and collect them by part ids
 
@@ -148,14 +162,14 @@ function! lsdyna_element#FindPid(line1, line2, ...)
   let lines = getline(a:line1, a:line2)
   if kwName =~? 'THICKNESS\|BETA\|MCID\|OFFSET\|DOF\|COMPOSITE'
     for i in range(0, len(lines)-1, 2)
-      let pid = trim(lines[i][8:15])
+      let pid = trim(lines[i][a:z])
       if !has_key(pids, pid) | let pids[pid] = [] | endif
       call add(pids[pid], lines[i])
       call add(pids[pid], lines[i+1])
     endfor
   else
     for i in range(0, len(lines)-1, 1)
-      let pid = trim(lines[i][8:15])
+      let pid = trim(lines[i][a:z])
       if !has_key(pids, pid) | let pids[pid] = [] | endif
       call add(pids[pid], lines[i])
     endfor
@@ -217,123 +231,6 @@ function! lsdyna_element#FindPid(line1, line2, ...)
 
 endfunction
 
-function! lsdyna_element#FindPid1(line1, line2, ...)
-
-  "-----------------------------------------------------------------------------
-  " Function to sort/find elements with specific part id in element table.
-  "
-  " Arguments:
-  " - a:line1 : first line of selection
-  " - a:line2 : last line of selection
-  " - ...     : user part ids
-  " Return:
-  " - None
-  "-----------------------------------------------------------------------------
-
-  "-----------------------------------------------------------------------------
-  " if no arguments just sort element table with pids
-
-  if len(a:000) == 0
-
-    " sort lines respect to part id
-    execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
-
-    " loop over element lines
-    let lnum = a:line1
-    let endline = a:line2
-    while (lnum <= endline)
-
-      " write header for 1st part in the list
-      if (lnum == a:line1)
-        let str = '$ Part: ' . getline(lnum)[8:15]
-        call append(lnum-1, str)
-        let lnum += 1
-        continue
-      endif
-
-      " take current and next line
-      let line1 = getline(lnum)
-      let line2 = getline(lnum+1)
-
-      " compare part ids and put header line if not the same
-      if (line1[8:15] !~? line2[8:15])
-        " add header with part id
-        let str = '$ Part: ' . line2[8:15]
-        call append(lnum, str)
-        " one more line to complete whole loop
-        let endline += 1
-        " two extra line to skip header I just added
-        let lnum += 2
-        continue
-      endif
-
-      " move to next line (not used if I added header)
-      let lnum += 1
-
-      endwhile
-
-  else
-  "-----------------------------------------------------------------------------
-  " find only specific pids
-
-    " take user pids
-    let pids = []
-    for arg in a:000
-      if match(arg, ":") != -1
-        let ids = split(arg, ":")
-        for i in range(ids[0], ids[1])
-          call add(pids, i)
-        endfor
-      else
-        call add(pids, str2nr(arg))
-      endif
-    endfor
-
-    " sort pids
-    let pids = sort(pids, 'lsdyna_element#NumbersCompare')
-
-    " set last line from selection
-    let lend = a:line2
-
-    " sort lines respect to part id
-    execute a:line1 . ',' . a:line2 . 'sort /\%9c\(\s\|\d\)\{8}/ r'
-
-    " set cursor position to start search
-    call cursor(a:line1-1, 0)
-
-    " loop over part ids
-    for pid in pids
-
-      " find current pid
-      let snum = 8 - len(pid)
-      let regexp = '^.\{8}\s\{'. snum . '}'  . pid
-      let match = search(regexp, '', lend)
-
-      " found pid
-      if (match != 0)
-
-        " put header
-        call append(match-1, '$ Part: ' . pid)
-
-        " find end of range
-        call cursor(lend+2, 0)
-        call append(search(regexp, 'b', a:line1), '$')
-
-        " for every pid I found two extra lines are added
-        let lend = lend + 2
-
-      endif
-
-    endfor
-
-  endif
-
-endfunction
-
-function! lsdyna_element#NumbersCompare(i1, i2)
-   return a:i1 - a:i2
-endfunction
-
 "-------------------------------------------------------------------------------
 
 function! lsdyna_element#ReverseNormals(line1, line2)
@@ -348,33 +245,43 @@ function! lsdyna_element#ReverseNormals(line1, line2)
   " - None
   "-----------------------------------------------------------------------------
 
+  " find keyword name
+  let kwName = getline(search('^\*','bcnW'))
+  " i10 format
+  if kwName =~? '%\s*$'
+    let len = 10
+    let format = '%10s%10s%10s%10s%10s%10s'
+  " i20 format
+  elseif kwName =~? '+\s*$'
+    let len = 20
+    let format = '%20s%20s%20s%20s%20s%20s'
+  " i8 format
+  else
+    let len = 8
+    let format = '%8s%8s%8s%8s%8s%8s'
+  endif
+
   " lines loop
   for lnum in range(a:line1, a:line2)
 
     " take current line
     let line = getline(lnum)
-
     " skip comment/keyword lines
-    if line =~? "^[$*]"
-      continue
-    endif
-
-    " get element definition
-    let eid = line[0:7]
-    let pid = line[8:15]
-    let n1  = line[16:23]
-    let n2  = line[24:31]
-    let n3  = line[32:39]
-    let n4  = line[40:47]
+    if line =~? "^[$*]" | continue | endif
+    " split lines into columns
+    let l = []
+    for i in range(0,5,1)
+      let l += [strpart(line, i*len, len)]
+    endfor
 
     " revers tria element
-    if str2nr(n3) == str2nr(n4)
-      let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n1, n3, n2, n2)
-      "let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n3, n1, n2, n2)
+    if str2nr(l[3]) == str2nr(l[4])
+      "let newline = printf(format, eid, pid, n1, n3, n2, n2)
+      let newline = printf(format, l[0], l[1], l[2], l[4], l[3], l[3])
     " revers quad element
     else
-      let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n1, n4, n3, n2)
-      "let newline = printf("%8s%8s%8s%8s%8s%8s", eid, pid, n4, n1, n2, n3)
+      "let newline = printf(format, eid, pid, n1, n4, n3, n2)
+      let newline = printf(format, l[0], l[1], l[2], l[5], l[4], l[3])
     endif
 
     " dump line with new element definition
@@ -384,6 +291,60 @@ function! lsdyna_element#ReverseNormals(line1, line2)
 
   " restore cursor position
   call cursor(a:line1, 0)
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_element#ConvertI8I10(line1, line2, ...) abort
+
+  "-----------------------------------------------------------------------------
+  " Function to convert I8 definition to I10.
+  "
+  " Arguments:
+  " - a:line1  : first line of selection
+  " - a:line2  : last line of selection
+  " - ...      : conversion type i8->i10 or i10->i8
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  if a:0 == 0
+    echo 'Missing arguments.'
+    return
+  endif
+
+  " set column length
+  if a:1 == 'i10'
+    let clen = 8
+    let format = '%10s'
+  elseif a:1 == 'i8'
+    let clen = 10
+    let format = '%8s'
+  endif
+
+  " lines loop
+  for lnum in range(a:line1, a:line2)
+
+    let line = getline(lnum)
+    if line =~? '^\*ELEMENT'
+      silent execute 's/\s%\s*$//e'
+      if a:1 == 'i10'
+        execute "normal! A %\<ESC>"
+      endif
+    endif
+    if line =~? "^[$*]" | continue | endif
+
+    let new_line = ''
+    for i in range(8)
+      let col = strpart(line, i*clen, clen)
+      if empty(col) | break | endif " end of the line
+      let new_line ..= printf(format, trim(col))
+    endfor
+
+    call setline(lnum, new_line)
+
+  endfor
 
 endfunction
 

@@ -52,7 +52,7 @@ function! lsdyna_include#Open(lnum, flag)
       execute 'vertical split' fnamemodify(incl.path, ':p:h')
     elseif a:flag ==# 'e'
       if has('win32') || has('win64')
-        let dir_path =  substitute(fnamemodify(incl.path,':p:h','/','\','g'))
+        let dir_path =  substitute(fnamemodify(incl.path,':p:h'),'/','\','g')
         execute 'silent ! explorer' dir_path
       endif
     endif
@@ -229,7 +229,7 @@ function! lsdyna_include#Check()
   for item in getqflist({'id':qfid, 'items':''}).items
     let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')._Autodetect()
     for incl in incls
-      if !incl.read
+      if !incl.read && !incl.hide
         call add(qflist, incl.Qf())
       endif
     endfor
@@ -239,7 +239,7 @@ function! lsdyna_include#Check()
   if !empty(qflist)
     call setqflist([], ' ', {'items' : qflist,
     \                        'title' : 'Check include'})
-    call lsdyna_manager#QfOpen(getqflist({'id':0}).id)
+    call lsdyna_manager#QfOpen(getqflist({'id':0}).id, 0)
   endif
 
   return len(qflist)
@@ -251,7 +251,7 @@ endfunction
 function! lsdyna_include#Quit(bang, cmd)
 
   "-----------------------------------------------------------------------------
-  " Fundtion to check includes at write/quit.
+  " Function to check includes at write/quit.
   "
   " Arguments:
   " - None
@@ -268,5 +268,118 @@ function! lsdyna_include#Quit(bang, cmd)
   endif
 
 endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_include#CommentIncludes(bang, ...)
+
+  "-----------------------------------------------------------------------------
+  " Function to comment matching includes.
+  "
+  " Arguments:
+  " - bang : 0 : comment matching includes
+  "          1 : comment NOT matching includes
+  " - ...  : words to match include paths
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  let names = a:0 == 0 || a:1 == '*' ? '.' : join(split(a:1),'\|')
+ 
+  " function started with keyword manager
+  if &filetype == 'qf'
+    let qflist = getqflist()
+    let qfopen = 1
+    cclose
+  " keyword started w/o keyword manager
+  else
+    let qfid = lsdyna_vimgrep#Vimgrep('include', '%', '')
+    let qflist = getqflist({'id':qfid, 'items':''}).items
+    let qfopen = 0
+  endif
+
+  " parse keywords on qflist
+  let includes = []
+  for kw in qflist
+    call extend(includes, lsdyna_parser#Keyword(kw.lnum, kw.bufnr, 'f')._Autodetect())
+  endfor
+
+  " loop to comment matching includes
+  echo 'Commenting ...'
+  let nr = 0
+  let bufnr = bufnr('%')
+  for include in includes
+    " comment includes which does not match regex
+    if a:bang
+      if include.pathraw !~? names
+        let nr += 1
+        echo nr .. '. ' .. include.pathraw
+        silent execute 'buffer' include.bufnr
+        call include.Comment(g:lsdynaCommentString)
+        call include.Delete()
+        call include.Write()
+      endif
+    " comment includes which match regex
+    else
+      if include.pathraw =~? names
+        let nr += 1
+        echo nr .. '. ' .. include.pathraw
+        silent execute 'buffer' include.bufnr
+        call include.Comment(g:lsdynaCommentString)
+        call include.Delete()
+        call include.Write()
+      endif
+    endif
+  endfor
+  silent execute 'buffer' bufnr
+  
+  if qfopen
+    execute g:lsdynaManagerCommand
+  endif
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+"function! lsdyna_include#UnCommnetIncludes()
+"  
+"  "-----------------------------------------------------------------------------
+"  " Function to uncomment includes. The function assume whole *INCLUDE block
+"  " is commented with prefix "$-->".
+"  "
+"  " Arguments:
+"  " - None
+"  " Return:
+"  " - None
+"  "-----------------------------------------------------------------------------
+"
+"  let lnum = 1
+"  let incl_block = 0
+"  let nr = 0
+"
+"  " check every line in the file
+"  while lnum <= line('$')
+"
+"    " mark *INCLUDE block
+"    if getline(lnum) =~? '^\$-->\*INCLUDE'  
+"      let incl_block = 1
+"    endif
+"
+"    " remove prefix
+"    silent execute lnum .. 's/^\$-->//e'
+"
+"    " print message about uncomment
+"    if incl_block == 1 && getline(lnum)[0] !~? '[$*]'
+"      let nr += 1
+"      echo nr .. '. ' .. getline(lnum)
+"      let incl_block = 0
+"    endif
+"
+"    let lnum += 1
+"
+"  endwhile
+"  echo 'Uncommented ' .. nr .. ' includes.'
+"
+"endfunction
 
 "-------------------------------------EOF---------------------------------------

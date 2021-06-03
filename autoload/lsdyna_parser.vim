@@ -20,37 +20,34 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   " Keyword class.
   "
   " Create keyword object of any Ls-Dyna keyword in line {lnum} in buffer {bufnr}.
-  " Used as abstract class for more specialized classes as part, section.
-  " It change cursor position and does not restore it!
+  " Used as abstract class for more specialized classes as part, section, ... .
   "
   " Constructor:
   "   let kword = lsdyna_keyword#Keyword(lnum[, bufnr])
   " Arguments:
   "   - lnum  : keyword line number
   "   - bufnr : buffer number
-  "   - flags : c - restore (c)ursor position after parsing
-  "             n - use (n)oautocommand
-  "             f - keyword name is in a:lnum
+  "   - flags : not used anymore
   " Return:
   "   - dict : keyword class object
   " Members:
   "   - self.bufnr : buffer number with kword
-  "   - self.file  : file name with kword
+  "   - self.file  : file path name with kword
   "   - self.first : kword 1st line number in file
-  "   - self.last  : kword last line number
+  "   - self.last  : kword last line number in file
   "   - self.lines : list with all kword lines, includes comments lines
   "   - self.name  : full kword name (*PART, *SECTION, ...)
   "   - self.type  : kword type, substring of kword name after 1st '_' (INERTIA)
+  "   - self.hide  : status if the keyword is commented or not (0 - not commented, 1- commented)
   " Methods:
   "   - self.Comment()                 : comment kword body
+  "   - self.Uncomment()               : uncomment kword body
   "   - self.Datalines()               : Return all datalines (remove comment lines from kword body)
   "   - self.Delete()                  : delete kword body from file
   "   - self.Encrypt()                 : encrypt kword body
   "   - self.Write()                   : write kword body into file
-  " 
   "   - self._Autodetect()             : detect kword type and return child class
   "   - self._Kword()                  : return child class for any kword
-  "
   "   - self._Contact()                : return child class for *CONTACT
   "   - self._Database_cross_section() : return child class for *DATABASE_CROSS_SECTION
   "   - self._Define_coord()           : return child class for *DEFINE_COORDINATE
@@ -68,20 +65,10 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   "
   "-----------------------------------------------------------------------------
 
-  " load buffer if you are in diffrent
-
-  "if a:flags =~? 'c'
-  "  let save_cursor = getpos(".")
-  "  let save_cursor[0] = bufnr('%')
-  "endif
-
-  "if a:bufnr != bufnr('%')
-  "  let cmd = a:flags =~? 'n' ? 'noautocmd buffer ' : 'buffer '
-  "  execute cmd a:bufnr
-  "endif
-
-  let re_kword = '^*'         " regular expression to find keyword name
-  let re_dline = '^[^$]\|^$'  " regular expression to find data line
+  "let re_kword = '^*'         " regular expression to find keyword name
+  "let re_dline = '^[^$]\|^$'  " regular expression to find data line
+  let re_kword = '^\(\'..g:lsdynaCommentString..'\)\?\*'           " regular expression to find keyword name
+  let re_dline = '^\(\'..g:lsdynaCommentString..'\)\?\([^$]\|$\)'  " regular expression to find data line
 
   " save current cursor position so I can restore it later
   " getpos() set bufnr only for mark, so I overwrite it manually.
@@ -102,10 +89,8 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   let lnum_start = search(re_kword,'bWc')
   let next_kw = search(re_kword.'\|BEGIN PGP MESSAGE', 'W')
   if next_kw == 0
-    "normal! G "normal command does not works good fie foldings
     call cursor(line('$'), 0)
   else
-    "normal! k
     call cursor(line('.')-1, 0)
   endif
   let lnum_end = search(re_dline,'bWc')
@@ -118,21 +103,25 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   let kword.last  = lnum_end
   let kword.bufnr = a:bufnr
   let kword.file  = expand('%:p')
-  let kword.name  = toupper(trim(getline(lnum_start)))
-  let kword.type  = stridx(kword.name, '_') >= 0 ? kword.name[stridx(kword.name, '_')+1:] : ''
+  let kword.hide  = getline(kword.first) =~? '^\'..g:lsdynaCommentString ? 1 : 0
   let kword.lines = getline(lnum_start, lnum_end)
+  " remove comment prefix from all kword lines
+  if kword.hide
+    call map(kword.lines, {idx, val -> val[len(g:lsdynaCommentString):] })
+  endif
+  let kword.name  = toupper(trim(kword.lines[0]))
+  let kword.type  = stridx(kword.name, '_') >= 0 ? kword.name[stridx(kword.name, '_')+1:] : ''
 
   " class methods to operate on kword lines
   let kword.Comment                 = function('s:Comment')    " comment kword body
-  let kword.Datalines               = function('s:Datalines')  " Return all datalines (remove comment lines from kword body)
+  let kword.Datalines               = function('s:Datalines')  " return all datalines (remove comment lines from kword body)
   let kword.Delete                  = function('s:Delete')     " delete kword body from file
   let kword.Encrypt                 = function('s:Encrypt')    " encrypt kword body
   let kword.Write                   = function('s:Write')      " write kword body into file
-  let kword.Addheader               = function('s:AddHeader')
 
   " class methods to create specific kword objects
-  let kword._Autodetect             = function('s:Autodetect')       " autodetect kword base on name 
-  let kword._Kword                  = function('parser#kword#Kword') " genreal representation of keyword used for not supported keywords
+  let kword._Autodetect             = function('s:Autodetect')
+  let kword._Kword                  = function('parser#kword#Kword')
   let kword._Node                   = function('parser#node#Node')
   let kword._Part                   = function('parser#part#Part')
   let kword._Section                = function('parser#section#Section')
@@ -148,12 +137,7 @@ function! lsdyna_parser#Keyword(lnum, bufnr, flags)
   let kword._Include_path           = function('parser#include_path#Include_path')
   let kword._Database_cross_section = function('parser#database_cross_section#Database_cross_section')
 
-  "if a:flags =~? 'c'
-  "  execute 'noautocmd buffer ' . save_cursor[0]
-  "  call setpos('.', save_cursor)
-  "endif
-
-  " restor orginal cursor position
+  " restore original cursor position
   execute 'noautocmd buffer ' . save_cursor[0]
   call setpos('.', save_cursor)
 
@@ -212,6 +196,12 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
+function! s:Comment(prefix) dict
+  call map(self.lines, 'a:prefix .. v:val')
+endfunction
+
+"-------------------------------------------------------------------------------
+
 function! s:Datalines() dict
   return filter(copy(self.lines), 'v:val[0] != "$"')
 endfunction
@@ -227,33 +217,8 @@ function! s:Encrypt(lvl, vendor_date='') dict
     let lines_for_encrypt = vBlock + lines_for_encrypt + ['*VENDOR_END']
   endif
   let lines_after_encrypt = lsdyna_encryption#Encrypt(lines_for_encrypt)
-  "if !empty(a:vendor_date)
-  "  let vBlock = ['$*VENDOR', '$DATE      ' .. a:vendor_date]
-  "  let lines_after_encrypt = vBlock + lines_after_encrypt + ['$*VENDOR_END']
-  "endif
   let self.lines = extend(lines_open, lines_after_encrypt)
   return self.lines
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function! s:Comment() dict
-  call map(self.lines, '"$".v:val')
-endfunction
-
-"-------------------------------------------------------------------------------
-
-function s:AddHeader() dict
-  " head is too first sign short so I can add line index in loop
-  let header = '------10--------20--------30--------40--------50--------60--------70--------80'
-  let newLines = []
-  let i = 1
-  for line in self.Datalines()
-    call add(newLines, line)
-    call add(newLines, '$' .. i .. header)
-    let i += 1
-  endfor
-  let self.lines = newLines[:-2] " for loop make one header line to much
 endfunction
 
 "-------------------------------------EOF---------------------------------------

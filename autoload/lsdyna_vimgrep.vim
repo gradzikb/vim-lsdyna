@@ -33,11 +33,12 @@ function! lsdyna_vimgrep#Vimgrep(kwords, file, mode)
   let qfid_ = getqflist({'nr':0, 'id':0}).id
 
   " build regular expression for search pattern
-  " "part *Section" --> "^*\(PART\|SECTION\)"
+  " 'part *Section' --> '^*\(PART\|SECTION\)'
   let kwords = substitute(a:kwords, '*', '', 'g')
   let kwords = toupper(kwords)
   let kwords = split(kwords, '\s\+')
-  let search_pattern = '^*\('.join(kwords, '\|').'\)'
+  "let search_pattern = '^*\('.join(kwords, '\|').'\)'
+  let search_pattern = '^\(\' .. g:lsdynaCommentString .. '\)\?\*\('.join(kwords, '\|').'\)'
 
   " use current file if not defined
   if a:file =~ '\s*'
@@ -101,7 +102,8 @@ function! s:SearchIncludes(file, ...)
   endif
 
   " look for all includes in specific file
-  execute 'noautocmd silent! vimgrep /\c^*INCLUDE/j ' . a:file
+  "execute 'noautocmd silent! vimgrep /\c^*INCLUDE/j ' . a:file
+  execute 'noautocmd silent! vimgrep /\c^\('..g:lsdynaCommentString..'\)\?\*INCLUDE/j ' . a:file
   let qflist = getqflist()
 
   " I found nothing so I am out
@@ -111,15 +113,7 @@ function! s:SearchIncludes(file, ...)
   let includes_infile = []
   for item in qflist
       let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fc')._Include()
-      "call input(len(incls))
-      "call map(incls, {idx,val -> val.treelvl='9'})
-      "for i in range(len(incls))
-      "  call input(string(incls[i]))
-      "  let incls[i].treelvl = 5
-      "  echom incls[i].treelvl
-      "  call input(string(incls[i]))
-      "endfor
-      call extend(includes_infile, incls)
+        call extend(includes_infile, incls)
   endfor
 
   " loop over includes I found in current call and
@@ -127,7 +121,7 @@ function! s:SearchIncludes(file, ...)
   for incl in includes_infile
     call add(includes, incl)
     let file = lsdyna_include#Resolve(incl.path)
-    if file.read && !isdirectory(file.path)
+    if !incl.hide && file.read && !isdirectory(file.path)
       let includes = <SID>SearchIncludes(file.path, includes)
     endif
   endfor

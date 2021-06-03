@@ -146,7 +146,7 @@ function! s:Qf() dict
     let qf.lnum  = self.lnum
     let qf.type  = 'I'
     let qf.col   = 1
-    let qf.text  = fnamemodify(self.path,':h:t').'|'.self.read.'|'.self.type.'|'.self.file
+    let qf.text  = fnamemodify(self.path,':h:t').'|'.self.read.'|'.self.type.'|'.self.file.'|'.self.hide
 
   return qf
 

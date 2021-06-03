@@ -76,7 +76,7 @@ function! s:Qf() dict
   let qf.bufnr = self.bufnr
   let qf.lnum  = self.first
   let qf.type  = 'K'
-  let qf.text  = self.id.'|'.self.title.'|'.self.type
+  let qf.text  = self.id.'|'.self.title.'|'.self.type.'|'.self.hide
 
   return qf
 

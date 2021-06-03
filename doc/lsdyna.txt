@@ -32,6 +32,7 @@ CONTENTS
            7.1.3 LsTags........................|lsdyna-lsTags|
            7.1.4 LsManual......................|lsdyna-lsManual|
            7.1.5 LsMakeMarkers.................|lsdyna-lsMarkers|
+           7.1.6 LsCmdExec.....................|lsdyna-commandExec|
        7.2 Node commands.......................|lsdyna-nodeCommands|
            7.2.1 LsNodeScale...................|lsdyna-nodeScale|
            7.2.2 LsNodeRotate..................|lsdyna-nodeRotate|
@@ -39,10 +40,12 @@ CONTENTS
            7.2.4 LsNodePos6p...................|lsdyna-nodePos6p|
            7.2.5 LsNodeMirror..................|lsdyna-nodeMirror|
            7.2.6 LsNodeReplace.................|lsdyna-nodeReplace|
+           7.2.7 LsNodeFormat..................|lsdyna-nodeFormat|
        7.3 Element commands....................|lsdyna-elemCommands|
            7.3.1 LsElemFindPid.................|lsdyna-elemFindPid|
            7.3.2 LsElemChangePid...............|lsdyna-elemChangePid|
            7.3.3 LsElemReverseNormals..........|lsdyna-elemReverseNormals|
+           7.3.4 LsElemFormat..................|lsdyna-elemFormat|
        7.4 Curve commands......................|lsdyna-curveCommands|
            7.4.1 LsCurveScale..................|lsdyna-curveScale|
            7.4.2 LsCurveOffset.................|lsdyna-curveOffset|
@@ -57,6 +60,7 @@ CONTENTS
        7.6 Keyword commands....................|lsdyna-kwordCommands|
            7.6.1 LsKwordComment................|lsdyna-kwordComment|
            7.6.2 LsKwordDelete.................|lsdyna-kwordDelete|
+           7.6.3 LsInclComment.................|lsdyna-inclComment|
     8. Mappings & functions....................|lsdyna-mappings|
        8.1 Mappings list.......................|lsdyna-mapList|
        8.2 Comment/uncomment...................|lsdyna-comment|
@@ -90,9 +94,9 @@ Ls-Dyna filetype plugin overview:
 2. Installation                                            *lsdyna-installation*
 
 Requirements:
-  - (g)VIM 8.0 or higher
+  - (g)VIM 8.2.1176 or higher
 
-Note: All plugin features were tested in gVIM 8.1 under Windows 10.
+Note: All plugin features were tested in gVIM 8.2.1176 under Windows 10.
 
 Recommended is to use VIM packages for installation. See ":help packages".
 
@@ -301,15 +305,13 @@ in vimrc file with path to new location.
   let g:lsdynaLibKeywordsPath='C:\cae\lsdyna\lib_mat\,C:\cae\lsdyna\lib_contact\'
 <
 Note:
-- all keywords from default library are always available 
-- all files with *.k extension found in new paths and their subdirectories
-  will be used
+- all keywords from default library are always available
+- all files with found in new paths and their subdirectories will be used
 
 Library naming rules:
 - file name is used as completion string
 - file names must be lowercase
 - do not use any white signs
-- *.k extension is mandatory
 
 --------------------------------------------------------------------------------
 5.2 Keyword option completion                            *lsdyna-completeOption*
@@ -564,7 +566,7 @@ Note:
 Keyword manager (LsManager) create list of specific keywords (parts, sets, ...)
 and show it in separate window. You can use this list to get quick model
 overview and jump to specific place in model. The manager has also limited
-number of tools to manage keywords in your model.
+number of commands to manage keywords in your model.
 
 The manager is trigged with command ":LsManager". See |lsdyna-lsManager| for
 details.
@@ -594,7 +596,29 @@ In the simplest case is just ":LsManager" command followed by keyword name.
     +---------------------------------------------+
 
 In example above manager set list with *PART keywords.
-In example below we are looking for all *INCLUDE keywords.
+In example below manager set list with *INCLUDE keywords.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*INCLUDE                                     |
+    |../00_inc/include_A.inc                      |
+    |*INCLUDE                                     |
+    |../00_inc/include_B.inc                      |
+    |*INCLUDE_TRANSFORM                           |
+    |../00_inc/include_C.inc                      |
+    |$                                            |
+    |LsManager====================================|
+    | 1. include_A.inc     |                      |
+    | 2. include_B.inc     |                      |
+    | 3. include_C.inc     | TRANSFORM            |
+    |$                                            |
+    |command-line=================================+
+    |:LsManager include                           |<command>
+    +---------------------------------------------+
+
+By default the manager look for keywords only in current buffer. You can use
+bang '!' option to look in all include files.
 
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -617,29 +641,7 @@ In example below we are looking for all *INCLUDE keywords.
     |:LsManager! include                          |<command>
     +---------------------------------------------+
 
-Above we used "bang" option to tell the manager to look recursive for all
-includes not only in current buffer. See how it looks w/o "bang" switch.
-
-    +---------------------------------------------+
-    |lsdyna_model.key=============================|
-    |$                                            |
-    |*INCLUDE                                     |
-    |../00_inc/include_A.inc                      |
-    |*INCLUDE                                     |
-    |../00_inc/include_B.inc                      |
-    |*INCLUDE_TRANSFORM                           |
-    |../00_inc/include_C.inc                      |
-    |$                                            |
-    |LsManager====================================|
-    | 1. include_A.inc     |                      |
-    | 2. include_B.inc     |                      |
-    | 3. include_C.inc     | TRANSFORM            |
-    |$                                            |
-    |command-line=================================+
-    |:LsManager include                           |<command>
-    +---------------------------------------------+
-
-"bang" switch can be used with any keyword:
+Bang switch can be used with any keyword:
 :LsManager  define_curve --> look for *DEFINE_CURVE in current buffer only
 :LsManager! define_curve --> look for *DEFINE_CURVE in all includes
 
@@ -666,27 +668,24 @@ example with *PARAMETER keywords:
     | 2. I par02 = 2                      | [   ] |
     | 3. R par03 = 3.0                    | [L  ] |
     | 4. R par04 = 5.0 : 4.0 + par01      | [ E ] |
-    | 5. R par01 = 1.1                    | [   ] |
+    | 5. R par01 = 1.1                    | [  D] |
     | 6. R par04 = 3.0 : 4.0+(par01*-1.0) | [LED] |
     |$                                            |
     |command-line=================================+
     |:LsManager parameter                         |<command>
     +---------------------------------------------+
 
-Each parameter is marked with a flag:
+Parameter flags:
 - L : local
 - E : expression
 - D : duplicated
 
 --------------------------------------------------------------------------------
-LsManager commands
-
-LsManager window support predefined list of normal commands.
+LsManager commands                                      *lsdyna-managerCommands*
 
 Basic commands:
  <ESC>      : close LsManager window and put cursor on selected keyword
  <Enter>    : close LsManager window and jump to selected keyword
-
 Note: It makes difference only for *INCLUDE keywords.
 
 Move commands:
@@ -695,20 +694,36 @@ Move commands:
  </>pattern : search specific name on the list
  <xG>/<:x>  : jump to x item (line)
 
-Filter commands:
- <f> : filter inclusive the list
- <F> : filter exclusive the list
- <u> : undo filter
+Normal commands:
+ <b> : (b)ack to previous list view
+ <c> : (c)omment keyword
+ <C> : (c)omment all listed keywords
+ <u> : (u)ncomment keyword
+ <U> : (u)ncomment all listed keyword
+ <d> : (d)elete keyword from inputdeck file
+ <D> : (d)elete all listed keywords from inputdeck file
+ <x> : (d)elete item from manager list
+ <f> : (f)ind keyword (inclusive)
+ <F> : (f)ind keyword (exclusive)
+ <p> : (p)ut keyword after current position
+ <P> : (p)ut keyword before current position
+ <y> : (y)ank current keyword (overwrite register)
+ <Y> : (y)ank current keyword (extend register)
 
 Includes commands:
+ <r>  : rename include file path (change *INCLUDE keyword)
  <gf> : open include in current buffer, the same as <Enter>
  <gF> : open include in split window
  <gt> : open include in new tab
  <gT> : open include in new tab in background
- <R>  : rename include file (rename file on disc)
- <r>  : rename include file path (change *INCLUDE keyword, does not touch file)
- <C>  : copy include file (copy file on disc)
- <D>  : delete include file (deletes file from disc)
+ <gd> : open include directory in current buffer
+ <gD> : open include directory in split window
+ <gCtrl-d> : open include directory Windows file manager
+
+File commands:
+ <Ctrl-c>  : (c)opy include file on a disc
+ <Ctrl-d>  : (d)elete include file from a disc
+ <Ctrl-r>  : (r)ename include file on a disc
 
 --------------------------------------------------------------------------------
 LsManager mappings
@@ -1041,11 +1056,14 @@ Description:
   - 1st column is optional and used as marker name
 
 Syntax:
-  :[range]LsMakeMarkers [delimiter]
+  :[range]LsMakeMarkers [type] [delimiter]
 
 Arguments:
   range      : by default all lines in current buffer are used
-  delimiter  : delimiter used to split line (like ',', ';', ...) 
+  type       : marker type:
+               - ball
+               - cross
+  delimiter  : optional, delimiter used to split line (like ',', ';', ...) 
                if not set default ' ' is used
 
 Abbreviation:
@@ -1070,7 +1088,7 @@ Example:
     |                                             |
     +---------------------------------------------+
 >
-	:LsMakeMarkers
+	:LsMakeMarkers ball
 <
     +---------------------------------------------+
     |lsdyna_model_markers.key=====================|
@@ -1105,7 +1123,34 @@ Example with csv format:
     |                                             |
     +---------------------------------------------+
 >
-	:LsMakeMarkers ,
+	:LsMakeMarkers cross ,
+<
+--------------------------------------------------------------------------------
+7.1.6 LsCmdExec                                              *lsdyna-commandExec*
+
+Description:
+  Itself the command do nothing but it works as a wrapper between ":cdo" VIM
+  function and plugin command. It executes a command on all keyword lines.
+
+Syntax:
+  :LsCmdExec command
+
+Arguments:
+  command : command for execute
+
+Abbreviation:
+  "lce<Space>
+
+Example:
+  Offset node ids by 1000 for all *NODE in the file.
+
+  1st step: set quickfix list with all *NODE using keyword manager
+>
+	:LsManager node
+<
+  2nd step: execute offset function on all quickfix items
+>
+	:cdo LsCmdExec LsOffsetId n 1000
 <
 --------------------------------------------------------------------------------
 7.2 Node commands                                          *lsdyna-nodeCommands*
@@ -1183,7 +1228,7 @@ Arguments:
   Note: They are the same as in *DEFINE_TRANSFORMATION, ROTATE keyword.  
 
 Abbreviation:
-  None (lnr is used by LsNodeReplace command).
+  lnR<space>
 
 Example:
 
@@ -1417,6 +1462,55 @@ Example:
     +---------------------------------------------+
 
 --------------------------------------------------------------------------------
+7.2.7 LsNodeFormat                                            *lsdyna-nodeFormat*
+
+Description:
+  Convert node data line format between i8 and i10
+
+Syntax:
+  :[range]LsNodeFormat arg1
+
+Arguments:
+  arg1 : conversion type (mandatory)
+         - i8
+         - i10
+
+Abbreviation:
+  :lnf<Space>
+
+Example:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*NODE                                        |
+    |$#   nid       x       y       z             |
+   >|       1     1.0     1.0     1.0             |<visual line selection>
+   >|       2     2.0     2.0     2.0             |<visual line selection>
+   >|       3     3.0     3.0     3.0             |<visual line selection>
+    |$                                            |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:'<,'>LsNodeFormat i10
+<
+    +-----------------------------------------------+
+    |lsdyna_model.key===============================|
+    |$                                              |
+    |*NODE                                          |
+    |$#     nid       x       y       z             |
+    |         1     1.0    -1.0     1.0             |
+    |         2     2.0    -2.0     2.0             |
+    |         3     3.0    -3.0     3.0             |
+    |$                                              |
+    |$                                              |
+    |command-line===================================+
+    |                                               |
+    +-----------------------------------------------+
+
+--------------------------------------------------------------------------------
 7.3 Element commands                                       *lsdyna-elemCommands*
 
 Element commands are design to work with data lines under *ELEMENT_ keyword.
@@ -1588,6 +1682,51 @@ Example:
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+7.3.4 LsElemFormat                                            *lsdyna-elemFormat*
+
+Description:
+  Convert element data line format between i8 and i10
+
+Syntax:
+  :[range]LsElemFormat arg1
+
+Arguments:
+  arg1 : conversion type (mandatory)
+         - i8
+         - i10
+
+Abbreviation:
+  :leF<Space>
+
+Example:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*ELEMENT_SHELL                               |
+    |$#   eid     pid    n1     n2     n3     n4  |
+   >|       1       1     1      2      3      4  |<visual line selection>
+   >|       2       1     5      6      7      8  |<visual line selection>
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+>
+	:'<,'>LsElemFormat i10
+<
+    +---------------------------------------------------------+
+    |lsdyna_model.key=========================================|
+    |$                                                        |
+    |*ELEMENT_SHELL                                           |
+    |$#     eid       pid      n1       n2       n3       n4  |
+    |         1         1       1        4        3        2  |
+    |         2         1       5        8        7        6  |
+    |$                                                        |
+    |command-line=============================================+
+    |                                                         |
+    +---------------------------------------------------------+
 
 --------------------------------------------------------------------------------
 7.4 Curve commands                                        *lsdyna-curveCommands*
@@ -2058,9 +2197,6 @@ Arguments:
   With out bang only *DEFINE_CURVE under the cursor is write to the file.
   If "filename" is not set a curve is write to file bufferName_IDxx.crv
 
-Abbreviation:
-  :lcw<Space>
-
 Example:
 
     +---------------------------------------------+
@@ -2116,7 +2252,7 @@ The variable can be overwrite by user with new command in .vimrc file.
 	let g:lsdynaEncryptCommand = 'new_user command'
 <
 --------------------------------------------------------------------------------
-7.5.1 Encryption lines                                      *lsdyna-encrypLines*
+7.5.1 Encryption lines                                     *lsdyna-encryptLines*
 
 Description:
   Encrypt selected lines.
@@ -2126,6 +2262,9 @@ Syntax:
 
 Arguments:
   --date : optional, set date of encryption expire, format MM/DD/YYYY
+
+Abbreviation:
+  :lel<Space>
 
 Example:
 
@@ -2418,29 +2557,32 @@ be process before *DEFINE_).
 
 Description:
   Comment specific keywords from file.
+  'g:lsdynaCommentString' for comment is used.
 
 Syntax:
-  :LsKwordComment[!] kwordNames
+  :[range]LsKwordComment[!] kwordNames
 
 Arguments:
+  range      : optional, if set defined lines will be commented
   kwordNames : list of keywords
                '*' at the beginning is optional
                name is ignore case
-  bang '!' : comment all keywords but kwordNames
+               not used if range set
+  bang '!'   : comment all keywords but kwordNames
+               not used if range set
 
 Abbreviation:
   :lkc<Space>
 
 Example:
-  comment every *PART
-  :LsKwordComment part
-  :LsKwordComment *PART
-
-  comment all boundary
-  :LsKwordComment boundary
+  comment all boundary and contact
+  :LsKwordComment boundary contact
 
   comment all but *MAT
   :LsKwordComment! mat
+
+  comment lines 1-100
+  :1,100LsKwordComment
 
 --------------------------------------------------------------------------------
 7.6.2 LsKwordDelete                                         *lsdyna-kwordDelete*
@@ -2452,24 +2594,53 @@ Syntax:
   :LsKwordDelete[!] kwordNames
 
 Arguments:
+  range      : optional, if set defined lines will be deleted
   kwordNames : list of keywords separate with ' '
                '*' at the beginning is optional
                name is ignore case
-  bang '!' : delete all keywords but kwordNames
+               not used if range set
+  bang '!'   : delete all keywords but kwordNames
+               not used if range set
 
 Abbreviation:
   :lkd<Space>
 
 Example:
-  remove all *PART
-  :LsKwordDelete part
-  :LsKwordDelete *PART
-
   remove everything but *DEFINE_CURVE
   :LsKwordDelete! define_curve
 
   remove all everything but *NODE, *ELEMENT_ (keep mesh only)
-  "LsKwordDelete! node element
+  :LsKwordDelete! node element
+
+  remove lines 1-100
+  :1-100LsKwordDelete
+
+--------------------------------------------------------------------------------
+7.6.3 LsInclComment                                          *lsdyna-inclComment*
+
+Description:
+  Function to comment includes which match to name pattern.
+  'g:lsdynaCommentString' for comment is used.
+
+Syntax:
+  :LsInclCommnet name1 name2 ...
+  :LsInclCommnet! name1 name2 ...
+
+Arguments:
+  name : name to match with include path
+         optional, if not used all includes in the file will be commented
+  bang : comment all includes which DO NOT match "name" pattern
+
+Abbreviation:
+  :lic<Space>
+  :lic!<Space>
+
+Example:
+  comment all includes with 'mat' in name
+  :LsInclComment mat
+
+  comment all includes but not control, seat, dummy, belt
+  :LsInclComment! control dumm belt seat
 
 ================================================================================
 8. Mappings                                                    *lsdyna-mappings*

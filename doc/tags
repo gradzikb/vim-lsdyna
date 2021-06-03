@@ -1,4 +1,5 @@
 lsdyna-autoFormat	lsdyna.txt	/*lsdyna-autoFormat*
+lsdyna-commandExec	lsdyna.txt	/*lsdyna-commandExec*
 lsdyna-commands	lsdyna.txt	/*lsdyna-commands*
 lsdyna-comment	lsdyna.txt	/*lsdyna-comment*
 lsdyna-completeId	lsdyna.txt	/*lsdyna-completeId*
@@ -17,11 +18,13 @@ lsdyna-curveWrite	lsdyna.txt	/*lsdyna-curveWrite*
 lsdyna-elemChangePid	lsdyna.txt	/*lsdyna-elemChangePid*
 lsdyna-elemCommands	lsdyna.txt	/*lsdyna-elemCommands*
 lsdyna-elemFindPid	lsdyna.txt	/*lsdyna-elemFindPid*
+lsdyna-elemFormat	lsdyna.txt	/*lsdyna-elemFormat*
 lsdyna-elemReverseNormals	lsdyna.txt	/*lsdyna-elemReverseNormals*
-lsdyna-encrypLines	lsdyna.txt	/*lsdyna-encrypLines*
 lsdyna-encryptCommands	lsdyna.txt	/*lsdyna-encryptCommands*
 lsdyna-encryptFile	lsdyna.txt	/*lsdyna-encryptFile*
+lsdyna-encryptLines	lsdyna.txt	/*lsdyna-encryptLines*
 lsdyna-folding	lsdyna.txt	/*lsdyna-folding*
+lsdyna-inclComment	lsdyna.txt	/*lsdyna-inclComment*
 lsdyna-includeManager	lsdyna.txt	/*lsdyna-includeManager*
 lsdyna-includeName	lsdyna.txt	/*lsdyna-includeName*
 lsdyna-includeOpen	lsdyna.txt	/*lsdyna-includeOpen*
@@ -37,10 +40,12 @@ lsdyna-lsManager	lsdyna.txt	/*lsdyna-lsManager*
 lsdyna-lsManual	lsdyna.txt	/*lsdyna-lsManual*
 lsdyna-lsMarkers	lsdyna.txt	/*lsdyna-lsMarkers*
 lsdyna-lsTags	lsdyna.txt	/*lsdyna-lsTags*
+lsdyna-managerCommands	lsdyna.txt	/*lsdyna-managerCommands*
 lsdyna-mapList	lsdyna.txt	/*lsdyna-mapList*
 lsdyna-mappings	lsdyna.txt	/*lsdyna-mappings*
 lsdyna-miscCommands	lsdyna.txt	/*lsdyna-miscCommands*
 lsdyna-nodeCommands	lsdyna.txt	/*lsdyna-nodeCommands*
+lsdyna-nodeFormat	lsdyna.txt	/*lsdyna-nodeFormat*
 lsdyna-nodeMirror	lsdyna.txt	/*lsdyna-nodeMirror*
 lsdyna-nodePos6p	lsdyna.txt	/*lsdyna-nodePos6p*
 lsdyna-nodeReplace	lsdyna.txt	/*lsdyna-nodeReplace*

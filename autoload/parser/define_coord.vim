@@ -215,7 +215,7 @@ function! s:Qf() dict
   let qf.bufnr = self.bufnr
   let qf.lnum  = self.lnum
   let qf.type  = 'K'
-  let qf.text  = self.id.'|'.self.title.'|'.self.type
+  let qf.text  = self.id.'|'.self.title.'|'.self.type.'|'.self.hide
 
   return qf
 

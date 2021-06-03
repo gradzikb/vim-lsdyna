@@ -47,9 +47,9 @@ function! lsdyna_node#Transl(line1, line2, tx, ty, tz)
   " object nodes class
   let nodes = lsdyna_node#nodes()
 
-  call nodes.read(a:line1, a:line2)    " read nodes coordinates from file
-  call nodes.transl(t[0], t[1], t[2])  " translate coordinates
-  call nodes.write(a:line1)            " write new coordinates
+  let format = nodes.read(a:line1, a:line2)    " read nodes coordinates from file
+  call nodes.transl(t[0], t[1], t[2])          " translate coordinates
+  call nodes.write(a:line1, format)            " write new coordinates
 
   " delete nodes object
   unlet nodes
@@ -79,9 +79,9 @@ function! lsdyna_node#Scale(line1, line2, sx, sy, sz)
   " object nodes class
   let nodes = lsdyna_node#nodes()
 
-  call nodes.read(a:line1, a:line2)   " read nodes coordinates from file
-  call nodes.scale(s[0], s[1], s[2])  " scale coordinates
-  call nodes.write(a:line1)           " write new coordinates
+  let format = nodes.read(a:line1, a:line2)   " read nodes coordinates from file
+  call nodes.scale(s[0], s[1], s[2])          " scale coordinates
+  call nodes.write(a:line1, format)           " write new coordinates
 
   " delete nodes object
   unlet nodes
@@ -113,11 +113,11 @@ function! lsdyna_node#Rotate(line1, line2, vx, vy, vz, px, py, pz, angle)
   " object nodes class
   let nodes = lsdyna_node#nodes()
 
-  call nodes.read(a:line1, a:line2)          " read nodes coordinates from file
-  call nodes.transl(-p[0], -p[1], -p[2])     " translate to point (0, 0, 0)
-  call nodes.rotate(angle, v)                " rotate angle around vector v
-  call nodes.transl(p[0], p[1], p[2])        " translate back to point p
-  call nodes.write(a:line1)                  " write new coordinates
+  let format = nodes.read(a:line1, a:line2)    " read nodes coordinates from file
+  call nodes.transl(-p[0], -p[1], -p[2])       " translate to point (0, 0, 0)
+  call nodes.rotate(angle, v)                  " rotate angle around vector v
+  call nodes.transl(p[0], p[1], p[2])          " translate back to point p
+  call nodes.write(a:line1, format)            " write new coordinates
 
   " delete nodes object
   unlet nodes
@@ -165,7 +165,7 @@ function! lsdyna_node#Pos6p(line1, line2, p1x, p1y, p1z,
   let nodes = lsdyna_node#nodes()
 
   " read nodes from file
-  call nodes.read(a:line1, a:line2)
+  let format = nodes.read(a:line1, a:line2)
 
   " add points  P1, P2, P3 to nodes list, they need to be transform as well
   call add(nodes.nodes, {'id':'P3', 'x':P3[0], 'y':P3[1], 'z':P3[2]})
@@ -228,7 +228,7 @@ function! lsdyna_node#Pos6p(line1, line2, p1x, p1y, p1z,
   " three last items in the list
   call remove(nodes.nodes, -3, -1)
   " write new coordinates to file
-  call nodes.write(a:line1)
+  call nodes.write(a:line1, format)
 
   unlet nodes
 
@@ -253,9 +253,9 @@ function! lsdyna_node#Mirror(line1, line2, plane, base)
   " object nodes class
   let nodes = lsdyna_node#nodes()
 
-  call nodes.read(a:line1, a:line2)               " read nodes coordinates from file
+  let format = nodes.read(a:line1, a:line2)      " read nodes coordinates from file
   call nodes.mirror(a:plane, str2float(a:base))  " reflect coordinates
-  call nodes.write(a:line1)                       " write new coordinates
+  call nodes.write(a:line1, format)              " write new coordinates
 
   " delete nodes object
   unlet nodes
@@ -393,35 +393,72 @@ function! lsdyna_node#read(line1, line2) dict
   " - line1 (number) : first line to read nodes table
   " - line2 (number) : last line to read nodes table
   " Return:
-  " - none
+  " - format (string) : dataline format (i8, i10, i20)
   "-----------------------------------------------------------------------------
+
+  " check keyword so I know what format dataline I am processing
+  let kword = getline(search('^\*','bWc'))
+  if kword =~? '%\s*$'
+    let format = 'i10'
+  elseif kword =~? '+\s*$'
+    let format = 'i20'
+  else
+    let format = 'i8'
+  endif
 
   " loop over all specific lines
   let lpos = 0
-  for line in getline(a:line1, a:line2)
+  "----------------------------------------------------------------------------
+  if format == 'i8'
+    for line in getline(a:line1, a:line2)
+      if line[0] =~? "[*$]"
+        call add(self.skiplines, {'lpos':lpos, 'value':line})
+      else
+        let id = str2nr(line[0:7])
+        let x  = str2float(line[8:23])
+        let y  = str2float(line[24:39])
+        let z  = str2float(line[40:55])
+        call add(self.nodes, {'id':id, 'x':x, 'y':y, 'z':z})
+      endif
+      let lpos += 1
+    endfor
+  "----------------------------------------------------------------------------
+  elseif format == 'i10'
+    for line in getline(a:line1, a:line2)
+      if line[0] =~? "[*$]"
+        call add(self.skiplines, {'lpos':lpos, 'value':line})
+      else
+        let id = str2nr(line[0:9])
+        let x  = str2float(line[10:25])
+        let y  = str2float(line[26:41])
+        let z  = str2float(line[42:57])
+        call add(self.nodes, {'id':id, 'x':x, 'y':y, 'z':z})
+      endif
+      let lpos += 1
+    endfor
+  "----------------------------------------------------------------------------
+  elseif format == 'i20'
+    for line in getline(a:line1, a:line2)
+      if line[0] =~? "[*$]"
+        call add(self.skiplines, {'lpos':lpos, 'value':line})
+      else
+        let id = str2nr(line[0:19])
+        let x  = str2float(line[20:39])
+        let y  = str2float(line[40:59])
+        let z  = str2float(line[60:79])
+        call add(self.nodes, {'id':id, 'x':x, 'y':y, 'z':z})
+      endif
+      let lpos += 1
+    endfor
+  endif
 
-    "keyword or comment line
-    if line[0] =~? "[*$]"
-      " add skiped line and position
-      call add(self.skiplines, {'lpos':lpos, 'value':line})
-    " node data line
-    else
-      " get data from line
-      let id = str2nr(line[0:7])
-      let x  = str2float(line[8:23])
-      let y  = str2float(line[24:39])
-      let z  = str2float(line[40:55])
-      call add(self.nodes, {'id':id, 'x':x, 'y':y, 'z':z})
-    endif
-    let lpos += 1
-
-  endfor
+  return format
 
 endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_node#write(lnum) dict
+function! lsdyna_node#write(lnum, format) dict
 
   "-----------------------------------------------------------------------------
   " Class nodes function to write nodes coordinates into file.
@@ -432,10 +469,19 @@ function! lsdyna_node#write(lnum) dict
   " - none
   "-----------------------------------------------------------------------------
 
+  " set line format used to write nodes into a file
+  if a:format == 'i8'
+    let str_format = '%8s%16.8f%16.8f%16.8f'
+  elseif a:format == 'i10'
+    let str_format = '%10s%16.8f%16.8f%16.8f'
+  elseif a:format == 'i20'
+    let str_format = '%20s%20.8f%20.8f%20.8f'
+  endif
+
   " loop over all nodes to set formatting
   let lines = []
   for node in self.nodes
-    call add(lines, printf("%8s%16.8f%16.8f%16.8f", node.id, node.x, node.y, node.z))
+    call add(lines, printf(str_format, node.id, node.x, node.y, node.z))
   endfor
 
   " add skiped lines
@@ -597,20 +643,15 @@ function! lsdyna_node#ReplaceNodes(line1, line2, range, ...)
 
   let ncount = 0
   if a:range
-    " process range lines
-    for lnum in range(a:line1, a:line2)
-      let id = str2nr(getline(lnum)[0:7])
-      if has_key(source_nodes, id-offset)
-        let x = source_nodes[id][0] 
-        let y = source_nodes[id][1] 
-        let z = source_nodes[id][2] 
-        call setline(lnum, printf("%8s%16.6f%16.6f%16.6f", id+offset, x, y, z))
-        let ncount += 1
-      endif
-    endfor
+    " process current *NODE table
+    let kword = lsdyna_parser#Keyword(line('.'), '%', '')
+    let node = kword._Node()[0]
+    let ncount += node.Replace(source_nodes, offset)
+    call node.Delete()
+    call node.Write(kword.first)
   else
     " process whole file
-    execute 'noautocmd silent! vimgrep/\c^*NODE\s*$/j %'
+    execute 'noautocmd silent! vimgrep/\c^*NODE\( [%+]\)\?\s*$/j %'
     for item in getqflist()
       let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')
       let node = kword._Node()[0]
@@ -624,4 +665,48 @@ function! lsdyna_node#ReplaceNodes(line1, line2, range, ...)
   echo 'Replaced '.ncount.' nodes.'
 
 endfunction
+
+"-------------------------------------------------------------------------------
+
+function! lsdyna_node#ConvertI8I10(line1, line2, ...) abort
+
+  "-----------------------------------------------------------------------------
+  " Function to convert I8 definition to I10.
+  "
+  " Arguments:
+  " - a:line1  : first line of selection
+  " - a:line2  : last line of selection
+  " - ...      : conversion type i8->i10 or i10->i8
+  " Return:
+  " - None
+  "-----------------------------------------------------------------------------
+
+  if a:0 == 0
+    echo 'Missing arguments.'
+    return
+  endif
+
+  " set column length
+  if a:1 == 'i10'
+    let clen = 8
+    let format = '%10s'
+    let kword = '*NODE %'
+  elseif a:1 == 'i8'
+    let clen = 10
+    let format = '%8s'
+    let kword = '*NODE'
+  endif
+
+  " lines loop
+  for lnum in range(a:line1, a:line2)
+    let line = getline(lnum)
+    if line =~? '^\*NODE'
+      call setline(lnum, kword)
+    endif
+    if line =~? '^[$*]' | continue | endif
+    call setline(lnum, printf(format, trim(line[0:clen-1]))..line[clen:])
+  endfor
+
+endfunction
+
 "-------------------------------------EOF---------------------------------------

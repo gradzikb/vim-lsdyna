@@ -131,8 +131,7 @@ function! s:Qf() dict
     let qf.lnum  = self.first + self.pathlnum2
     let qf.col   = 1
     let qf.type  = 'I'
-    "let qf.text  = 'include'.'|'.self.name.'|'.self.type.'|'.fnamemodify(self.path,':t').'|'.self.read.'|'.self.file
-    let qf.text  = fnamemodify(self.path,':t').'|'.self.read.'|'.self.type.'|'.self.file
+    let qf.text  = fnamemodify(self.path,':t').'|'.self.read.'|'.self.type.'|'.self.file.'|'.self.hide
 
   return qf
 

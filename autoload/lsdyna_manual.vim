@@ -27,6 +27,7 @@ function! lsdyna_manual#Manual(arg1)
   " if argument is a string this is a keyowrd I am looking for
   if type(a:arg1) == v:t_number
     let kword = lsdyna_parser#Keyword(a:arg1, bufnr('%'), 'cn').name
+    let kword = substitute(kword, '\s*[+%]\s*$', '', '')
   elseif type(a:arg1) == v:t_string
     let kword = a:arg1
   endif
@@ -55,7 +56,7 @@ function! lsdyna_manual#Manual(arg1)
      let cmd = ':! '. g:lsdynaPathAcrobat.' '.file.' -P '.page
      silent execute cmd
   else
-    echo "No manual found for ".kword
+    echo 'No manual found for "'..kword..'"'
   endif
 
 endfunction

@@ -37,7 +37,13 @@ let b:lsdynaLibKeywords = lsdyna_complete#libKeywords(b:lsdynaLibKeywordsPath)
 " path to directory with Ls-Dyna Manual PDF files
 let g:lsdynaPathManual = expand('<sfile>:p:h:h')..'/manuals/'
 " global dictionaries used with the plugin
-source <sfile>:p:h:h/keywords/lsdyna_dict.vim
+source <sfile>:p:h:h/autoload/lsdyna_dict.vim
+" turn on include path auto split function
+if !exists("g:lsdynaInclPathAutoSplit")
+  let g:lsdynaInclPathAutoSplit = 1
+endif
+
+let g:lsdynaCommentString = '$-->'
 
 "-------------------------------------------------------------------------------
 "    COLORS
@@ -168,16 +174,17 @@ noremap <buffer><silent> <F11> :LsTags<CR>
 noremap <buffer><silent> <S-F11> :LsTags!<CR>
 " LsManager mappings (F12)
 noremap <buffer><silent> <F12>* :LsManager *<CR>
-noremap <buffer><silent> <F12>. :call lsdyna_manager#QfOpen(g:lsdyna_qfid_last)<CR>
+noremap <buffer><silent> <F12>. :call lsdyna_manager#QfOpen(g:lsdyna_qfid_last, 0)<CR>
 noremap <buffer><silent> <F12><C-s> :LsManager sensor<CR>
 noremap <buffer><silent> <F12><F12> :LsManager include<CR>
 noremap <buffer><silent> <F12>C :LsManager constrained<CR>
-noremap <buffer><silent> <F12>I :call lsdyna_manager#QfOpen(g:lsdyna_qfid_lastIncl)<CR>
+noremap <buffer><silent> <F12>I :call lsdyna_manager#QfOpen(g:lsdyna_qfid_lastIncl, 0)<CR>
 noremap <buffer><silent> <F12>P :LsManager parameter<CR>
 noremap <buffer><silent> <F12>S :LsManager set<CR>
 noremap <buffer><silent> <F12>a :LsManager airbag<CR>
 noremap <buffer><silent> <F12>b :LsManager boundary<CR>
 noremap <buffer><silent> <F12>c :LsManager contact<CR>
+noremap <buffer><silent> <F12>db :LsManager database<CR>
 noremap <buffer><silent> <F12>dC :LsManager define_coordinate<CR>
 noremap <buffer><silent> <F12>dc :LsManager define_curve<CR>
 noremap <buffer><silent> <F12>df :LsManager define_friction<CR>
@@ -202,6 +209,7 @@ noremap <buffer><silent> <S-F12>S :LsManager! set<CR>
 noremap <buffer><silent> <S-F12>a :LsManager! airbag<CR>
 noremap <buffer><silent> <S-F12>b :LsManager! boundary<CR>
 noremap <buffer><silent> <S-F12>c :LsManager! contact<CR>
+noremap <buffer><silent> <S-F12>db :LsManager! database<CR>
 noremap <buffer><silent> <S-F12>dC :LsManager! define_coordinate<CR>
 noremap <buffer><silent> <S-F12>dc :LsManager! define_curve<CR>
 noremap <buffer><silent> <S-F12>df :LsManager! define_friction<CR>
@@ -265,6 +273,7 @@ cnoreabbrev lnt LsNodeTranslate
 
 command! -buffer -range -nargs=* LsNodeRotate
  \ :call lsdyna_node#Rotate(<line1>,<line2>,<f-args>)
+cnoreabbrev lnR LsNodeRotate
 
 command! -buffer -range -nargs=* LsNodePos6p
  \ :call lsdyna_node#Pos6p(<line1>,<line2>,<f-args>)
@@ -296,9 +305,11 @@ cnoreabbrev loi LsOffsetId
 
 command! -buffer -range -nargs=* LsEncryptLines
  \ :call lsdyna_encryption#EncryptLines(<line1>,<line2>,<f-args>)
+cnoreabbrev lel LsEncryptLines
 
 command! -buffer -range -nargs=* -complete=file LsEncryptFile
  \ :call lsdyna_encryption#EncryptFile(<f-args>)
+"cnoreabbrev lef LsEncryptFile
 
 command! -buffer -nargs=1 -bang LsManager
  \ :call lsdyna_manager#Manager(<bang>0, <f-args>)
@@ -308,19 +319,40 @@ cnoreabbrev lm! LsManager!
 command! -buffer -nargs=1 LsManual
  \ :call lsdyna_manual#Manual(<f-args>)
 
-command! -buffer -nargs=+ -bang LsKwordDelete
- \ :call lsdyna_misc#KwordDelete(<bang>0, <f-args>)
+command! -buffer -range -nargs=? -bang LsKwordDelete
+ \ :call lsdyna_misc#KwordDelete(<bang>0, <range>, <line1>, <line2>, <f-args>)
 cnoreabbrev lkd LsKwordDelete
 cnoreabbrev lkd! LsKwordDelete!
 
-command! -buffer -nargs=+ -bang LsKwordComment
- \ :call lsdyna_misc#KwordComment(<bang>0, <f-args>)
+command! -buffer -range -nargs=? -bang LsKwordComment
+ \ :call lsdyna_misc#KwordComment(<bang>0, <range>, <line1>, <line2>, <f-args>)
 cnoreabbrev lkc LsKwordComment
 cnoreabbrev lkc! LsKwordComment!
 
-command! -buffer -nargs=? -range=% LsMakeMarkers
+command! -buffer -nargs=+ -range=% LsMakeMarkers
  \ :call lsdyna_misc#MakeMarkers(<line1>, <line2>, <f-args>)
 cnoreabbrev lmm LsMakeMarkers
+
+command! -buffer -nargs=1 LsCmdExec
+ \ :call lsdyna_misc#KwordExecCommand(<f-args>)
+cnoreabbrev lce LsCmdExec
+
+command! -buffer -nargs=? -bang LsInclComment
+ \ :call lsdyna_include#CommentIncludes(<bang>0, <f-args>)
+cnoreabbrev lic LsInclComment
+cnoreabbrev lic! LsInclComment!
+
+"command! -buffer -nargs=0 LsInclUncomment
+" \ :call lsdyna_include#UnCommnetIncludes()
+"cnoreabbrev liu LsInclUncomment
+
+command! -buffer -range -nargs=1 LsElemFormat
+ \ :call lsdyna_element#ConvertI8I10(<line1>,<line2>,<f-args>)
+cnoreabbrev leF LsElemFormat
+
+command! -buffer -range -nargs=1 LsNodeFormat
+ \ :call lsdyna_node#ConvertI8I10(<line1>,<line2>,<f-args>)
+cnoreabbrev lnf LsNodeFormat
 
 "-------------------------------------------------------------------------------
 "    COMPLETION
@@ -332,6 +364,9 @@ nnoremap <Tab> :<C-u>call lsdyna_complete#OmnifunctPre('')<CR>:<C-u>call lsdyna_
 inoremap <S-Tab> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>a<C-x><C-o>
 nnoremap <S-Tab> :<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>:<C-u>call lsdyna_complete#extendLine()<CR>s<C-x><C-o>
 
+inoremap <C-Tab> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>a<C-x><C-o>
+inoremap <C-Tab> :<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>:<C-u>call lsdyna_complete#extendLine()<CR>s<C-x><C-o>
+
 " mappings below olways works in terminal
 inoremap <C-x><c-o> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre('')<CR>a<C-x><C-o>
 nnoremap <C-x><c-o> :<C-u>call lsdyna_complete#OmnifunctPre('')<CR>:<C-u>call lsdyna_complete#extendLine()<CR>s<C-x><C-o>
@@ -339,7 +374,8 @@ inoremap <C-x><C-q> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>a<C-x><
 nnoremap <C-x><C-q> :<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>:<C-u>call lsdyna_complete#extendLine()<CR>s<C-x><C-o>
 
 " user filename completion
-inoremap <C-x><c-f> <ESC>:<C-u>call lsdyna_complete#CompletefuncPre()<CR>A<C-x><C-u>
+"inoremap <C-x><c-f> <ESC>:<C-u>call lsdyna_complete#CompletefuncPre()<CR>A<C-x><C-u>
+inoremap <expr> <C-x><C-f> getline('.')[0]=='$' ? '<C-x><C-f>' : '<ESC>:<C-u>call lsdyna_complete#CompletefuncPre()<CR>A<C-x><C-u>'
 
 "-------------------------------------------------------------------------------
 

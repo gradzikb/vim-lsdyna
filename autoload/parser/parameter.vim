@@ -186,7 +186,7 @@ function! s:Qf() dict
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.lnum
     let qf.type  = 'P'
-    let qf.text  = self.name.'|'.self.type.'|'.self.ptype.'|'.self.pname.'|'.self.pval.'|'.self.peval
+    let qf.text  = self.name.'|'.self.type.'|'.self.ptype.'|'.self.pname.'|'.self.pval.'|'.self.peval.'|'.self.hide
 
   return qf
 
