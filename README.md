@@ -45,14 +45,20 @@ Please read [documentation](https://github.com/gradzikb/vim-lsdyna/blob/master/d
 
 ## Installation
 
-For (g)VIM 8.0 or higher you can use native package manager
-`:help packages`
+The plugin required (g)VIM 8.2.1176 or higher.
 
-For lower (g)VIM version you must use third-party package manager:
-[Pathogen](https://github.com/tpope/vim-pathogen)
+Installation with (g)VIM native package manager `:help packages`
 
+Windows:
 ```
-cd ~/.vim/pack/cae_plugins/start/vim-lsdyna
+mkdir %USERPROFILE%\vimfiles\pack\cae_plugins\start\
+cd %USERPROFILE%\vimfiles\pack\cae_plugins\start\
+git clone https://github.com/gradzikb/vim-lsdyna
+```
+Linux
+```
+mkdir -p ~/.vim/pack/cae_plugins/start/
+cd ~/.vim/pack/cae_plugins/start/
 git clone https://github.com/gradzikb/vim-lsdyna
 ```
 
@@ -60,4 +66,4 @@ git clone https://github.com/gradzikb/vim-lsdyna
 
 The GNU General Public License
 
-Copyright &copy; 2020 Bartosz Gradzik
+Copyright &copy; 2021 Bartosz Gradzik
