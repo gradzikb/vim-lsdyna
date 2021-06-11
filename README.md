@@ -28,6 +28,11 @@ Inserting of keywords/options/ids/parameters never was easier.
 
 ![omni-completion](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/omni-completion.gif)
 
+### Keyword manager
+One tool to rule them all.
+
+![lsmanager](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/lsmanager.gif)
+
 ### Commands/functions/mappings
 Many great features to update your model directly in VIM.
 
