@@ -70,7 +70,8 @@ function! lsdyna_vimgrep#Vimgrep(kwords, file, mode)
     call setqflist([], ' ', {'items'   : map(incls, {_,val -> {'bufnr':val.bufnr, 'lnum':val.first}}),
                             \'title'   : ':vimgrep /\c' .. search_pattern .. '/j'})
   else
-    let files = file .. ' ' .. join(map(incls, 'v:val.path'))
+    " filter() --> remove hided *INCLUDES so I do not search inside them
+    let files = file .. ' ' .. join(map(filter(incls, '!v:val.hide'), 'v:val.path'))
     execute 'noautocmd silent! vimgrep /\c' .. search_pattern .. '/j ' .. files
     call setqflist([], 'a', {'title' : ':vimgrep /\c' .. search_pattern .. '/j'})
   endif
@@ -93,12 +94,12 @@ function! s:SearchIncludes(file, ...)
   let includes = a:0 > 0 ? a:1 : []
   if a:0 > 0
     let includes = a:1
-    let s:count += 1
+    "let s:count += 1
   else
     let includes = []
     " function call counter set to 1 for 1st function call
     " used to set include tree level
-    let s:count = 0
+    "let s:count = 0
   endif
 
   " look for all includes in specific file

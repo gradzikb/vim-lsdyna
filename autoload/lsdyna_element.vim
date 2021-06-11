@@ -162,14 +162,14 @@ function! lsdyna_element#FindPid(line1, line2, ...)
   let lines = getline(a:line1, a:line2)
   if kwName =~? 'THICKNESS\|BETA\|MCID\|OFFSET\|DOF\|COMPOSITE'
     for i in range(0, len(lines)-1, 2)
-      let pid = trim(lines[i][a:z])
+      let pid = trim(lines[i][a : z])
       if !has_key(pids, pid) | let pids[pid] = [] | endif
       call add(pids[pid], lines[i])
       call add(pids[pid], lines[i+1])
     endfor
   else
     for i in range(0, len(lines)-1, 1)
-      let pid = trim(lines[i][a:z])
+      let pid = trim(lines[i][a : z])
       if !has_key(pids, pid) | let pids[pid] = [] | endif
       call add(pids[pid], lines[i])
     endfor
@@ -275,7 +275,7 @@ function! lsdyna_element#ReverseNormals(line1, line2)
     endfor
 
     " revers tria element
-    if str2nr(l[3]) == str2nr(l[4])
+    if str2nr(l[4]) == str2nr(l[5])
       "let newline = printf(format, eid, pid, n1, n3, n2, n2)
       let newline = printf(format, l[0], l[1], l[2], l[4], l[3], l[3])
     " revers quad element
