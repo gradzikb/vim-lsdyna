@@ -42,7 +42,7 @@ source <sfile>:p:h:h/autoload/lsdyna_dict.vim
 if !exists("g:lsdynaInclPathAutoSplit")
   let g:lsdynaInclPathAutoSplit = 1
 endif
-
+" string used for comment
 let g:lsdynaCommentString = '$-->'
 
 "-------------------------------------------------------------------------------
@@ -77,11 +77,12 @@ setlocal listchars=tab:>-,trail:-
 setlocal list
 setlocal completeopt=menuone,noinsert
 "setlocal completepopup=align:item,border:off
-setlocal quickfixtextfunc=lsdyna_manager#QfFormatLine
+"setlocal quickfixtextfunc=lsdyna_manager#QfFormatLine
 setlocal omnifunc=lsdyna_complete#Omnifunc
 setlocal completefunc=lsdyna_complete#Completefunc
 "setlocal formatexpr=lsdyna_misc#Format()
 execute 'setlocal tags='..split(&rtp,',')[0]..'/.dtags'
+highlight QuickFixLine guifg=NONE guibg=NONE
 
 "-------------------------------------------------------------------------------
 "    FOLDING
@@ -108,8 +109,8 @@ augroup lsdyna-lsManager
   autocmd!
   " set Qf window look
   autocmd BufReadPost quickfix setlocal modifiable | silent call lsdyna_manager#QfWindow() | setlocal nomodifiable
-  autocmd FileType qf setlocal cursorline
-  autocmd FileType qf highlight QuickFixLine guifg=NONE guibg=NONE
+  "autocmd FileType qf setlocal cursorline
+  "autocmd FileType qf highlight QuickFixLine guifg=NONE guibg=NONE
   " focus view on quickfix item everytime a cursor is moved
   autocmd FileType qf autocmd CursorMoved <buffer> call lsdyna_manager#QfSetCursor()
 augroup END
@@ -151,7 +152,7 @@ command! -nargs=0 -bang WQ call lsdyna_include#Quit(<bang>0, "wq")
 cnoreabbrev <expr> w  (getcmdtype()==':' && getcmdline()== 'w') ?  'W' :  'w'
 cnoreabbrev <expr> wq (getcmdtype()==':' && getcmdline()=='wq') ? 'WQ' : 'wq'
 " autoformat function
-noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call lsdyna_autoformat#Autoformat()<CR>
+"noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call lsdyna_autoformat#Autoformat()<CR>
 noremap <buffer><script><silent> = :call lsdyna_autoformat#Autoformat()<CR>
 " begining and end lines
 inoreabbrev bof $-------------------------------------BOF---------------------------------------
@@ -341,10 +342,6 @@ command! -buffer -nargs=? -bang LsInclComment
  \ :call lsdyna_include#CommentIncludes(<bang>0, <f-args>)
 cnoreabbrev lic LsInclComment
 cnoreabbrev lic! LsInclComment!
-
-"command! -buffer -nargs=0 LsInclUncomment
-" \ :call lsdyna_include#UnCommnetIncludes()
-"cnoreabbrev liu LsInclUncomment
 
 command! -buffer -range -nargs=1 LsElemFormat
  \ :call lsdyna_element#ConvertI8I10(<line1>,<line2>,<f-args>)

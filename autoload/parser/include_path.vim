@@ -146,7 +146,11 @@ function! s:Qf() dict
     let qf.lnum  = self.lnum
     let qf.type  = 'I'
     let qf.col   = 1
-    let qf.text  = fnamemodify(self.path,':h:t').'|'.self.read.'|'.self.type.'|'.self.file.'|'.self.hide
+    "let qf.text  = fnamemodify(self.path,':h:t').'|'.self.read.'|'.self.type.'|'.self.file.'|'.self.hide
+    let qftext = copy(self)
+    call filter(qftext, 'type(v:val) != v:t_func') 
+    call remove(qftext, 'lines')
+    let qf.text  = string(qftext)
 
   return qf
 

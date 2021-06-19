@@ -700,30 +700,33 @@ Normal commands:
  <C> : (c)omment all listed keywords
  <u> : (u)ncomment keyword
  <U> : (u)ncomment all listed keyword
+ <R> : (r)everse comment/uncomment keywords
  <d> : (d)elete keyword from inputdeck file
  <D> : (d)elete all listed keywords from inputdeck file
- <x> : (d)elete item from manager list
+ <x> : delete item from manager list
+ <e> : execute ex command for each list item
  <f> : (f)ind keyword (inclusive)
  <F> : (f)ind keyword (exclusive)
  <p> : (p)ut keyword after current position
  <P> : (p)ut keyword before current position
- <y> : (y)ank current keyword (overwrite register)
- <Y> : (y)ank current keyword (extend register)
+ <y> : (y)ank current keyword (overwrite '+' register)
+ <Y> : (y)ank current keyword (extend '+' register)
+ <Ctrl-y> : (y)ank all keywords into '+' register
 
 Includes commands:
- <r>  : rename include file path (change *INCLUDE keyword)
+ <r>  : rename include file path (change *INCLUDE keyword only)
  <gf> : open include in current buffer, the same as <Enter>
  <gF> : open include in split window
  <gt> : open include in new tab
  <gT> : open include in new tab in background
  <gd> : open include directory in current buffer
  <gD> : open include directory in split window
- <gCtrl-d> : open include directory Windows file manager
+ <gCtrl-d> : open include directory in Windows file manager
 
 File commands:
- <Ctrl-c>  : (c)opy include file on a disc
- <Ctrl-d>  : (d)elete include file from a disc
- <Ctrl-r>  : (r)ename include file on a disc
+ <Ctrl-c>  : (c)opy include file
+ <Ctrl-d>  : (d)elete include file
+ <Ctrl-r>  : (r)ename include file
 
 --------------------------------------------------------------------------------
 LsManager mappings
@@ -2652,9 +2655,10 @@ You might want to use different load leader, See ":help maplocalleader".
 --------------------------------------------------------------------------------
 8.1 Mappings list                                               *lsdyna-mapList*
 
+List of mappings not listed in others chapters.
+
   Key            | Action
  ----------------+-------------------------------------------------------------
-  <F1>           | open manual for keyword under the cursor |lsdyna-lsManual|
   ]]             | jump to next keyword
   [[             | jump to previous keyword
   4<Space>       | put "$" at the beginning of the line (works only if "4" is in 1st col)
@@ -2717,8 +2721,8 @@ To uncomment select the same lines and use <Alt-c> once again.
 8.3 Data line autoformatting                                 *lsdyna-autoFormat*
 
 The plugin has simple autoformatting function. The function is trigged with
-<\\> mapping (can be different if VIM local leader is changed). The function try
-to format lines under specific keyword according to Ls-Dyna syntax rules.
+<=> mapping. The function try to format lines under specific keyword according 
+to Ls-Dyna syntax rules.
 
 Note:
 It can be used also for conversion from free to fixed format.
@@ -2738,7 +2742,7 @@ Example: Column position adjusting
     |                                             |
     +---------------------------------------------+
 >
-	<\\>
+	<=>
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -2769,7 +2773,7 @@ Coma has a special meaning for auto format function, it defines column end.
     |                                             |
     +---------------------------------------------+
 >
-	<\\>
+	<=>
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -2804,7 +2808,7 @@ The function support more than two entries in *DEFINE_CURVE
     |                                             |
     +---------------------------------------------+
 >
-	<\\>
+	<=>
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|
@@ -2831,6 +2835,7 @@ The function support more than two entries in *DEFINE_CURVE
 
 The function is able recognise parameter type (integer, real, character) and
 set correct prefix (I, R, C). If prefix is defined it will not be overwrite.
+
 Note:
 Only one parameter in line is supported.
 
@@ -2850,7 +2855,7 @@ Only one parameter in line is supported.
     |                                             |
     +---------------------------------------------+
 >
-	<\\>
+	<=>
 <
     +---------------------------------------------+
     |lsdyna_model.key=============================|

@@ -100,7 +100,11 @@ function! s:Qf() dict
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.first
     let qf.type  = 'U'
-    let qf.text  = self.name.'|'.self.hide
+    "let qf.text  = self.name.'|'.self.hide
+    let qftext = copy(self)
+    call filter(qftext, 'type(v:val) != v:t_func') 
+    call remove(qftext, 'lines')
+    let qf.text  = string(qftext)
 
   return qf
 

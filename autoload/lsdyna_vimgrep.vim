@@ -37,7 +37,6 @@ function! lsdyna_vimgrep#Vimgrep(kwords, file, mode)
   let kwords = substitute(a:kwords, '*', '', 'g')
   let kwords = toupper(kwords)
   let kwords = split(kwords, '\s\+')
-  "let search_pattern = '^*\('.join(kwords, '\|').'\)'
   let search_pattern = '^\(\' .. g:lsdynaCommentString .. '\)\?\*\('.join(kwords, '\|').'\)'
 
   " use current file if not defined
@@ -73,14 +72,15 @@ function! lsdyna_vimgrep#Vimgrep(kwords, file, mode)
     " filter() --> remove hided *INCLUDES so I do not search inside them
     let files = file .. ' ' .. join(map(filter(incls, '!v:val.hide'), 'v:val.path'))
     execute 'noautocmd silent! vimgrep /\c' .. search_pattern .. '/j ' .. files
-    call setqflist([], 'a', {'title' : ':vimgrep /\c' .. search_pattern .. '/j'})
+    "call setqflist([], 'a', {'title' : ':vimgrep /\c' .. search_pattern .. '/j'})
   endif
 
+  " quickfix id of the latest created list
   let qfid = getqflist({'nr':'$', 'id':0}).id
 
   " restore previous current qf list
-  let qfnr = getqflist({'id':qfid_, 'nr':''}).nr
-  silent execute qfnr .. 'chistory'
+  "let qfnr = getqflist({'id':qfid_, 'nr':''}).nr
+  "silent execute qfnr .. 'chistory'
 
   return qfid
 
@@ -90,31 +90,21 @@ endfunction
 
 function! s:SearchIncludes(file, ...)
 
-  " carry over includes found in previous search
+  " list of includes to start
   let includes = a:0 > 0 ? a:1 : []
-  if a:0 > 0
-    let includes = a:1
-    "let s:count += 1
-  else
-    let includes = []
-    " function call counter set to 1 for 1st function call
-    " used to set include tree level
-    "let s:count = 0
-  endif
 
   " look for all includes in specific file
-  "execute 'noautocmd silent! vimgrep /\c^*INCLUDE/j ' . a:file
   execute 'noautocmd silent! vimgrep /\c^\('..g:lsdynaCommentString..'\)\?\*INCLUDE/j ' . a:file
   let qflist = getqflist()
 
-  " I found nothing so I am out
+  " I've found nothing so I am out
   if !len(qflist) | return includes | endif
 
   " collect all *INCLUDE in current file
   let includes_infile = []
   for item in qflist
-      let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fc')._Include()
-        call extend(includes_infile, incls)
+      let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, '')._Include()
+      call extend(includes_infile, incls)
   endfor
 
   " loop over includes I found in current call and

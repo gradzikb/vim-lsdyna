@@ -46,7 +46,7 @@ function! lsdyna_manager#Manager(bang, kword) abort
 
   " oops ... I found nothing ... goodbye
   if len(vimgrepQfList) == 0
-    echo 'No ' . a:kword . ' found.'
+    echo 'No '..a:kword..' found.'
     return
   endif
 
@@ -73,8 +73,9 @@ function! lsdyna_manager#Manager(bang, kword) abort
   call setpos('.', save_cursor)
 
   " set new qf list with new items
-  call setqflist([], ' ', {'items' : qflist,
-  \                        'title' : 'LsManager '.a:kword
+  call setqflist([], ' ', {'title'            : 'LsManager '.a:kword,
+  \                        'items'            : qflist,
+  \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'
   \                       })
   "
   " save qf list id so I can used it from history
@@ -168,28 +169,36 @@ function lsdyna_manager#QfFormatLine(info)
   " Return:
   " - See :help quickfix-window-function
   "-----------------------------------------------------------------------------
+  
+  "call input(string(a:info))
 
-  " get items from qf list displayed in qf window
+  " qf list items
   let items = getqflist({'id':a:info.id, 'items':''}).items
 
+  "-----------------------------------------------------------------------------
   " 1st loop to collect informations
-  let maxlen = 0 " max length of keyword title to adjust table
-  let treelvls = {} " inclination level for include tree
-  let paramNames = [] " list of all parameters name, used to find duplicates
+
+  let maxlen = 0      " max length of keyword title to adjust table
+  let treelvls = {}   " inclination level for include tree
+  let paramNames = [] " list of all parameter names, used to find duplicates
 
   for idx in range(a:info.start_idx - 1, a:info.end_idx - 1)
+
+    " unpack qftext dictionary
+    let qftext = eval(items[idx].text)
+
+    "-------------------------------------------------------------------------
     if items[idx].type == 'K'
 
-      let qfline = split(items[idx].text, '|', 1)
-      let kwordName = qfline[1]
-      let length = len(kwordName)
-      let maxlen = length > maxlen ? length : maxlen
+      " find the longest name in the list, used to adjust column width
+      let namelen = len(qftext.title)
+      let maxlen = namelen > maxlen ? namelen : maxlen
 
+    "-------------------------------------------------------------------------
     elseif items[idx].type == 'I'
 
-      let qfline = split(items[idx].text, '|', 1)
-      let inclName = qfline[0]
-      let inclDir  = qfline[3]
+      let inclName = fnamemodify(qftext.path,':t')
+      let inclDir  = qftext.file
       if !exists('parent_dir')
         let parent_dir = []
       endif
@@ -213,52 +222,55 @@ function lsdyna_manager#QfFormatLine(info)
       let maxlen = length > maxlen ? length : maxlen
       let treelvls[idx] = repeat(' ', treelvl) " include name prefix to print like tree view
 
+    "-------------------------------------------------------------------------
     elseif items[idx].type == 'P'
 
-      let qfline = split(items[idx].text, '|', 1)
-      let paramName = qfline[3]
-      let paramNames += [paramName]
+      " collect parameter names, used to find duplicates
+      let paramNames += [qftext.pname]
 
     endif
+
   endfor
+
+
+  "-----------------------------------------------------------------------------
+  " main loop to format each line of QF list
 
   let qflines = []
   for idx in range(a:info.start_idx - 1, a:info.end_idx - 1)
 
+    " unpack qftext dictionary
+    let qftext = eval(items[idx].text)
+
     "-------------------------------------------------------------------------
     " format line as keyword
     if items[idx].type == 'K'
-      let qftext = split(items[idx].text, '|', 1)
-      let id     = printf('%9s', qftext[0])
-      let title  = printf('%-'..max([57,maxlen])..'s', qftext[1])
-      let type   = qftext[2]
-      let hide   = qftext[3] ? '$' : ' ' 
+      let id    = printf('%9s', qftext.id)
+      let title = printf('%-'..max([57,maxlen])..'s', qftext.title)
+      let type  = qftext.type
+      let hide  = qftext.hide ? '$' : ' ' 
       call add(qflines, hide..id..' '..title..' | '.. type)
 
     "-------------------------------------------------------------------------
     " format line as include
     elseif items[idx].type == 'I'
 
-      let qftext   = split(items[idx].text, '|', 1)
-      let inclName = treelvls[idx]..qftext[0]
-      let path  = printf('%-'..max([68, maxlen])..'s', inclName)
-      let read  = qftext[1] <= 0 ? 'error' : ''
-      let type  = qftext[2]
-      let hide  = qftext[4] ? '$ ' : '  ' 
+      let path  = printf('%-'..max([68, maxlen])..'s', treelvls[idx]..fnamemodify(qftext.path,':t'))
+      let read  = qftext.read <= 0 ? 'error' : ''
+      let type  = qftext.type
+      let hide  = qftext.hide ? '$ ' : '  ' 
       call add(qflines, hide..path..' | '..type..' '..read)
 
     "-------------------------------------------------------------------------
     " format lines as parameter
     elseif items[idx].type == 'P'
-      let qftext = split(items[idx].text, '|', 1)
-      let ktype  = qftext[1] =~# 'EXPRESSION' ? 'E' : ' '
-      let pscope = qftext[1] =~# 'LOCAL' ? 'L' : ' '
-      let ptype  = qftext[2]
-      let pname  = printf('%9s', qftext[3])
-      let pval   = qftext[4]
-      let peval  = qftext[5]
-      "let pdub   = qftext[6] ? 'D' : ' '
-      let pdub   = count(paramNames, qftext[3], 1) > 1 ? 'D' : ' '
+      let ktype  = qftext.type =~# 'EXPRESSION' ? 'E' : ' '
+      let pscope = qftext.type =~# 'LOCAL' ? 'L' : ' '
+      let ptype  = qftext.ptype
+      let pname  = printf('%9s', qftext.pname)
+      let pval   = qftext.pval
+      let peval  = qftext.peval
+      let pdub   = count(paramNames, qftext.pname, 1) > 1 ? 'D' : ' '
       " I want to print parameter expression only if I need to
       " if parameter value is just a number there is no point to print expression
       if pval =~ '^[-+]\?\d\+\.\?\d*\([eE][-+]\?\d\+\)\?$'
@@ -279,9 +291,8 @@ function lsdyna_manager#QfFormatLine(info)
     "-------------------------------------------------------------------------
     " format line as unknown keyword, print only keyword name
     elseif items[idx].type == 'U'
-      let qftext = split(items[idx].text, '|', 1)
-      let kname = qftext[0]
-      let hide  = qftext[1] ? '$ ' : '  '
+      let kname = qftext.name
+      let hide  = qftext.hide ? '$ ' : '  '
       call add(qflines, hide..kname)
 
     "-------------------------------------------------------------------------
@@ -302,7 +313,7 @@ function! lsdyna_manager#QfWindow()
 
   "-----------------------------------------------------------------------------
   " Function to set status line and define normal commands for qf window.
-  " Depend on qf content might be diffrent.
+  " Depend on qf content might be different.
   " Arguments:
   " - None
   " Return:
@@ -320,8 +331,7 @@ function! lsdyna_manager#QfWindow()
   setlocal nolist
   setlocal number
   setlocal nowrap
-  "let &l:statusline = '(b)ack-view un(c)omment (D|d)elete (F|f)ind (h)ide-$ (y)ank (P|p)ut '
-  let &l:statusline = '(h)elp (b)ack (u)n(c)omment (d)elete (f)ind (y)ank (p)ut (x)item '
+  let &l:statusline = '(h)elp (b)ack (u)n(c)omment (d)elete (e)xecute (f)ind (y)ank (p)ut (x)item '
 
   nnoremap <buffer><silent> b :call <SID>QfFilterUndo()<CR>
   nnoremap <buffer><silent> c :call <SID>QfNormalCmd('c')<CR>
@@ -333,11 +343,14 @@ function! lsdyna_manager#QfWindow()
   nnoremap <buffer><silent> D :call <SID>QfNormalCmd('D')<CR>
   nnoremap <buffer><silent> y :call <SID>QfNormalCmd('y')<CR>
   nnoremap <buffer><silent> Y :call <SID>QfNormalCmd('Y')<CR>
+  nnoremap <buffer><silent> <C-y> :call <SID>QfNormalCmd('C-y')<CR>
   nnoremap <buffer><silent> p :call <SID>QfNormalCmd('p')<CR>
   nnoremap <buffer><silent> P :call <SID>QfNormalCmd('P')<CR>
+  nnoremap <buffer><silent> R :call <SID>QfNormalCmd('R')<CR>
   nnoremap <buffer><silent> h :call <SID>QfNormalCmd('h')<CR>
   nnoremap <buffer><silent> f :call <SID>QfFilter('','')<CR>
   nnoremap <buffer><silent> F :call <SID>QfFilter('','exclusive')<CR>
+  nnoremap <buffer> e :silent cdo LsCmdExe 
   "nnoremap <buffer><silent> h :call <SID>QfFilter('\$','exclusive')<CR>
   nnoremap <buffer><silent> <ESC> :cclose<CR>zz
   nnoremap <buffer><silent> <CR> :cclose<CR>zz
@@ -396,181 +409,155 @@ function! s:QfNormalCmd(cmd)
   " - None
   "-----------------------------------------------------------------------------
 
+  " show help (list of commands for LsManager
   if a:cmd ==# 'h'
     cclose
     silent execute 'help lsdyna-managerCommands'
+  "-----------------------------------------------------------------------------
+  " yank current keyword
   elseif a:cmd ==# 'y'
-    cclose
-    normal "+yak
-    call lsdyna_manager#QfOpen(g:lsdyna_qfid_last, 0)
+    let qf = eval(getqflist()[line('.')-1].text)
+    call setreg('+', getbufline(bufname(qf.bufnr), qf.first, qf.last), 'l')
   "-----------------------------------------------------------------------------
+  " yank current keyword (extend)
   elseif a:cmd ==# 'Y'
-    cclose
-    let tmp = @l " save content of 'l' register, next line will overwrite it
-    normal "lyak
-    call setreg('+', @l, 'a')
-    let @l = tmp " restore content of 'l' register
-    call lsdyna_manager#QfOpen(g:lsdyna_qfid_last, 0)
+    let qf = eval(getqflist()[line('.')-1].text)
+    call setreg('+', getbufline(bufname(qf.bufnr), qf.first, qf.last), 'al')
   "-----------------------------------------------------------------------------
+  " yank all keywords from list
+  elseif a:cmd ==# 'C-y'
+    call setreg('+', [], 'l') " empty register first
+    for item in getqflist()
+      let qf = eval(item.text)
+      call setreg('+', getbufline(bufname(qf.bufnr), qf.first, qf.last), 'al')
+    endfor
+  "-----------------------------------------------------------------------------
+  " put after current keyword
   elseif a:cmd ==# 'p'
+    let qf = eval(getqflist()[line('.')-1].text)
+    call appendbufline(bufname(qf.bufnr), qf.last, getreg('+', 1, 1))
     cclose
-    let kword = lsdyna_parser#Keyword(line('.'), bufnr('%'), '') 
-    silent execute kword.last..'put +'
     silent execute g:lsdynaManagerCommand
   "-----------------------------------------------------------------------------
+  " put before current keyword
   elseif a:cmd ==# 'P'
+    let qf = eval(getqflist()[line('.')-1].text)
+    call appendbufline(bufname(qf.bufnr), qf.first-1, getreg('+', 1, 1))
     cclose
-    let kword = lsdyna_parser#Keyword(line('.'), bufnr('%'), '') 
-    silent execute kword.first-1..'put +'
     silent execute g:lsdynaManagerCommand
   "-----------------------------------------------------------------------------
+  " delete current keyword
   elseif a:cmd ==# 'd'
+    let qf = eval(getqflist()[line('.')-1].text)
     cclose
-    normal dak
+    silent execute qf.first ',' qf.last 'delete'
     silent execute g:lsdynaManagerCommand
   "-----------------------------------------------------------------------------
+  " delete all keywords
   elseif a:cmd ==# 'D'
     cclose
     silent execute 'cdo LsCmdExe LsKwordDelete'
-    "silent execute g:lsdynaManagerCommand
   "-----------------------------------------------------------------------------
+  " remove current item from the list
   elseif a:cmd ==# 'x'
     let lnum = line('.')
     let qflist = getqflist()
     call remove(qflist, lnum-1)
-    call setqflist([], ' ', {'items' : qflist,
-    \                        'title' : 'LsManager delete'
+    call setqflist([], ' ', {'title' : 'LsManager delete',
+    \                        'items' : qflist,
+    \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'
     \                       })
     call lsdyna_manager#QfOpen(getqflist({'id':0}).id, lnum)
   "-----------------------------------------------------------------------------
+  " comment current keyword
   elseif a:cmd ==# 'c'
-    " this function is so complex because I do not want rebuild whole
-    " LsManager lists to update only one item
-    " comment only if not commented yet
-    if getline('.') !~? '\$'
-      let lnum = line('.')-1 " position on qf list
-      let qflist = getqflist()
+    let lnum = line('.')
+    let qflist = getqflist()
+    let qf = eval(qflist[lnum-1].text)
+    if !qf.hide
+      let qf.hide = 1
+      let qflist[lnum-1].text = string(qf)
+      " the way below is very slow, not know why
+      "let lines = getbufline(bufname(qf.bufnr), qf.first, qf.last)
+      "call map(lines, 'g:lsdynaCommentString..v:val')
+      "call setbufline(bufname(qf.bufnr), qf.first, lines)
       cclose
-      " comment keyword
-      let kword = lsdyna_parser#Keyword(qflist[lnum].lnum, qflist[lnum].bufnr, '')
-      if !kword.hide
-        silent execute kword.first..','..kword.last..'s/^/'..g:lsdynaCommentString
-      endif
-      " update qf list entry so I know it is commented
-      " hide flag for different keywords types is on different position
-      let qftype = getqflist()[lnum].type
-      if qftype == 'U'
-        let id = 1
-      elseif qftype == 'K'
-        let id = 3
-      elseif qftype == 'I'
-        let id = 4
-      elseif qftype == 'P'
-        let id = 6
-      endif
-      " update kword hide status
-      let qftext = split(qflist[lnum].text, '|', 1)
-      let qftext[id] = 1 " kword.hide flag
-      let qflist[lnum].text = join(qftext,'|')
-      " refresh qf list
-      call setqflist([], ' ', {'items' : qflist,
-      \                        'title' : 'LsManager comment'
+      silent execute qf.first ',' qf.last 's/^/'..g:lsdynaCommentString
+      call setqflist([], ' ', {'title' : 'LsManager comment',
+      \                        'items' : qflist,
+      \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'
       \                       })
-      call lsdyna_manager#QfOpen(getqflist({'id':0}).id, lnum+1)
+      call lsdyna_manager#QfOpen(getqflist({'id':0}).id, lnum)
     endif
   "-----------------------------------------------------------------------------
+  " comment all keywords
   elseif a:cmd ==# 'C'
     cclose
+    let bufnr_1st = bufnr('%')
     for item in getqflist()
-        let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, '')
-        if !kword.hide
-          silent execute kword.first..','..kword.last..'s/^/'..g:lsdynaCommentString
+        let qf = eval(item.text)
+        execute 'noautocmd buffer' qf.bufnr
+        if !qf.hide
+          silent execute qf.first ',' qf.last 's/^/'..g:lsdynaCommentString
         endif
     endfor
+    " I must go back to 1st buffer before new LsManager list will be created
+    execute 'noautocmd buffer' bufnr_1st
     silent execute g:lsdynaManagerCommand
   "-----------------------------------------------------------------------------
+  " uncomment current keyword
   elseif a:cmd ==# 'u'
-    " this function is so complex because I do not want rebuild whole
-    " LsManager lists to update only one item
-    " uncomment only if commented yet
-    if getline('.') =~? '\$'
-      let lnum = line('.')-1 " position on qf list
-      let qflist = getqflist()
+    let lnum = line('.')
+    let qflist = getqflist()
+    let qf = eval(qflist[lnum-1].text)
+    if qf.hide
+      let qf.hide = 0
+      let qflist[lnum-1].text = string(qf)
       cclose
-      " comment keyword
-      let kword = lsdyna_parser#Keyword(qflist[lnum].lnum, qflist[lnum].bufnr, '')
-      if kword.hide
-        silent execute kword.first..','..kword.last..'s/^'..g:lsdynaCommentString..'/'
-      endif
-      " update qf list entry so I know it is commented
-      " hide flag for different keywords types is on different position
-      let qftype = getqflist()[lnum].type
-      if qftype == 'U'
-        let id = 1
-      elseif qftype == 'K'
-        let id = 3
-      elseif qftype == 'I'
-        let id = 4
-      elseif qftype == 'P'
-        let id = 6
-      endif
-      " update kword hide status
-      let qftext = split(qflist[lnum].text, '|', 1)
-      let qftext[id] = 0 " kword.hide flag
-      let qflist[lnum].text = join(qftext,'|')
-      " refresh qf list
-      call setqflist([], ' ', {'items' : qflist,
-      \                        'title' : 'LsManager comment'
+      silent execute qf.first ',' qf.last 's/^'..g:lsdynaCommentString..'/'
+      call setqflist([], ' ', {'title' : 'LsManager uncomment',
+      \                        'items' : qflist,
+      \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'
       \                       })
-      call lsdyna_manager#QfOpen(getqflist({'id':0}).id, lnum+1)
+      call lsdyna_manager#QfOpen(getqflist({'id':0}).id, lnum)
     endif
   "-----------------------------------------------------------------------------
+  " uncomment all keywords
   elseif a:cmd ==# 'U'
     cclose
+    let bufnr_1st = bufnr('%')
     for item in getqflist()
-        let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, '')
-        if kword.hide
-          silent execute kword.first..','..kword.last..'s/^'..g:lsdynaCommentString..'/'
+        let qf = eval(item.text)
+        if qf.hide
+          execute 'noautocmd buffer' qf.bufnr
+          silent execute qf.first ',' qf.last 's/^'..g:lsdynaCommentString..'/'
         endif
     endfor
+    " I must go back to 1st buffer before new LsManager list will be created
+    execute 'noautocmd buffer' bufnr_1st
     silent execute g:lsdynaManagerCommand
+  "-----------------------------------------------------------------------------
+  " reverse comment/uncomment
+  elseif a:cmd ==# 'R'
+    let lnum = line('.')
+    cclose
+    let bufnr_1st = bufnr('%')
+    for item in getqflist()
+        let qf = eval(item.text)
+        execute 'noautocmd buffer' qf.bufnr
+        if qf.hide
+          silent execute qf.first ',' qf.last 's/^'..g:lsdynaCommentString..'/'
+        else
+          silent execute qf.first ',' qf.last 's/^/'..g:lsdynaCommentString
+        endif
+    endfor
+    " I must go back to 1st buffer before new LsManager list will be created
+    execute 'noautocmd buffer' bufnr_1st
+    silent execute g:lsdynaManagerCommand
+    call cursor(lnum, 0)
   endif
 
 endfunction
-
-"-------------------------------------------------------------------------------
-
-"function! s:QfUncomment()
-"
-"  "-----------------------------------------------------------------------------
-"  " Function to uncomment keyword for current qf item.
-"  " Arguments:
-"  " - None
-"  " Return:
-"  " - None
-"  "-----------------------------------------------------------------------------
-"
-"  let lnum = line('.')-1
-"  let qflist = getqflist()
-"
-"  " update qf list entry so I know I commented it
-"  let qftext = split(qflist[lnum].text, '|', 1)
-"  let qftext[-1] = 0
-"  let qflist[lnum].text = join(qftext,'|')
-"
-"  cclose
-"
-"  " commenting keyowrd
-"  let kword = lsdyna_parser#Keyword(qflist[lnum].lnum, qflist[lnum].bufnr, '')
-"  call setline(kword.first, map(getline(kword.first, kword.last), {idx, val -> val[len(g:lsdynaCommentString):]}))
-" 
-"  " refresh qf list
-"  call setqflist([], ' ', {'items' : qflist,
-"  \                        'title' : 'LsManager uncomment'
-"  \                       })
-"  call lsdyna_manager#QfOpen(getqflist({'id':0}).id, lnum+1)
-"
-"endfunction
 
 "-------------------------------------------------------------------------------
 
@@ -589,7 +576,7 @@ function! s:QfFilter(string, flag)
   "-----------------------------------------------------------------------------
 
   " if filter name missing ask for it
-  let fname = !empty(a:string) ? a:string : input('Filter: ') 
+  let fname = !empty(a:string) ? a:string : input('Find: ') 
 
   if empty('fname') | return | endif
 
@@ -614,10 +601,10 @@ function! s:QfFilter(string, flag)
   endif
 
   " set a new qf list with filter items
-  call setqflist([], ' ', {'items' : qflist_filter,
-  \                        'title' : 'LsManager filter - '.fname
+  call setqflist([], ' ', {'title' : 'LsManager filter - '..fname,
+  \                        'items' : qflist_filter,
+  \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'
   \                       })
-  "\                        'quickfixtextfunc' : '<SID>QfFormatLine' 
   call lsdyna_manager#QfOpen(getqflist({'id':0}).id, 0) " open current qf list
 
 endfunction

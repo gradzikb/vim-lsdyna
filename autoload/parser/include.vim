@@ -131,7 +131,11 @@ function! s:Qf() dict
     let qf.lnum  = self.first + self.pathlnum2
     let qf.col   = 1
     let qf.type  = 'I'
-    let qf.text  = fnamemodify(self.path,':t').'|'.self.read.'|'.self.type.'|'.self.file.'|'.self.hide
+    "let qf.text  = fnamemodify(self.path,':t').'|'.self.read.'|'.self.type.'|'.self.file.'|'.self.hide
+    let qftext = copy(self)
+    call filter(qftext, 'type(v:val) != v:t_func') 
+    call remove(qftext, 'lines')
+    let qf.text  = string(qftext)
 
   return qf
 
@@ -151,7 +155,6 @@ function! s:Tag() dict
 
 endfunction
 
-"function! s:SetPath(path, flag) dict
 function! parser#include#SetPath(path, flag) dict
 
   "-----------------------------------------------------------------------------

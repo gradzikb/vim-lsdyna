@@ -186,7 +186,11 @@ function! s:Qf() dict
     let qf.bufnr = self.bufnr
     let qf.lnum  = self.lnum
     let qf.type  = 'P'
-    let qf.text  = self.name.'|'.self.type.'|'.self.ptype.'|'.self.pname.'|'.self.pval.'|'.self.peval.'|'.self.hide
+    "let qf.text  = self.name.'|'.self.type.'|'.self.ptype.'|'.self.pname.'|'.self.pval.'|'.self.peval.'|'.self.hide
+    let qftext = copy(self)
+    call filter(qftext, 'type(v:val) != v:t_func') 
+    call remove(qftext, 'lines')
+    let qf.text  = string(qftext)
 
   return qf
 
