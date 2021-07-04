@@ -696,9 +696,8 @@ Move commands:
 
 Normal commands:
  <b> : (b)ack to previous list view
- <c> : (c)omment keyword
+ <c> : toggle between (c)omment and un(c)omment keyword
  <C> : (c)omment all listed keywords
- <u> : (u)ncomment keyword
  <U> : (u)ncomment all listed keyword
  <R> : (r)everse comment/uncomment keywords
  <d> : (d)elete keyword from inputdeck file
@@ -710,8 +709,10 @@ Normal commands:
  <p> : (p)ut keyword after current position
  <P> : (p)ut keyword before current position
  <y> : (y)ank current keyword (overwrite '+' register)
- <Y> : (y)ank current keyword (extend '+' register)
- <Ctrl-y> : (y)ank all keywords into '+' register
+ <Y> : (y)ank all keywords into '+' register
+ <Ctrl-y> : (y)ank current keyword (extend '+' register)
+ <4> : hide all commented items (on English layout keyboard '$' and '4' share key)
+ <$> : show only commented items
 
 Includes commands:
  <r>  : rename include file path (change *INCLUDE keyword only)

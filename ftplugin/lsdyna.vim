@@ -362,7 +362,7 @@ inoremap <S-Tab> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>a<C-x><C-o
 nnoremap <S-Tab> :<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>:<C-u>call lsdyna_complete#extendLine()<CR>s<C-x><C-o>
 
 inoremap <C-Tab> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>a<C-x><C-o>
-inoremap <C-Tab> :<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>:<C-u>call lsdyna_complete#extendLine()<CR>s<C-x><C-o>
+nnoremap <C-Tab> :<C-u>call lsdyna_complete#OmnifunctPre('i')<CR>:<C-u>call lsdyna_complete#extendLine()<CR>s<C-x><C-o>
 
 " mappings below olways works in terminal
 inoremap <C-x><c-o> <ESC>:<C-u>call lsdyna_complete#OmnifunctPre('')<CR>a<C-x><C-o>
