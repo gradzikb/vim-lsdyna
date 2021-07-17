@@ -626,6 +626,7 @@ function! lsdyna_node#ReplaceNodes(line1, line2, range, ...)
 
   let source_nodes = {}
   setlocal shortmess+=A
+  "execute 'noautocmd silent! vimgrep/\c^*NODE\s\?[+%]\?\s*$/j ' . file
   execute 'noautocmd silent! vimgrep/\c^*NODE\( [%+]\)\?\s*$/j ' . file
   for item in getqflist()
     let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')
