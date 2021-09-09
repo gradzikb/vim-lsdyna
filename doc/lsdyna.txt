@@ -109,13 +109,13 @@ Single user installation:
 <
 For example whole plugin structure might looks like this:
 >
-    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\autoload\
-    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\colors\
-    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\doc\
-    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\ftdetect\
-    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\ftplugin\
-    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\keywords\
-    C:\Users\bartosz\vimfiles\cae\start\vim-lsdyna\syntax\
+    C:\Users\bartosz\vimfiles\pack\cae\start\vim-lsdyna\autoload\
+    C:\Users\bartosz\vimfiles\pack\cae\start\vim-lsdyna\colors\
+    C:\Users\bartosz\vimfiles\pack\cae\start\vim-lsdyna\doc\
+    C:\Users\bartosz\vimfiles\pack\cae\start\vim-lsdyna\ftdetect\
+    C:\Users\bartosz\vimfiles\pack\cae\start\vim-lsdyna\ftplugin\
+    C:\Users\bartosz\vimfiles\pack\cae\start\vim-lsdyna\keywords\
+    C:\Users\bartosz\vimfiles\pack\cae\start\vim-lsdyna\syntax\
 <
 Multi user installation:
 ------------------------

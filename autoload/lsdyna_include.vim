@@ -202,6 +202,7 @@ function! lsdyna_include#Touch(command)
     call incl.SetPath(new_path, '')
     call incl.Delete()
     call incl.Write()
+    call cursor(incl.lnum + incl.pathlnum1 - 1, 0)
 
   endif
 
@@ -338,48 +339,5 @@ function! lsdyna_include#CommentIncludes(bang, ...)
   endif
 
 endfunction
-
-"-------------------------------------------------------------------------------
-
-"function! lsdyna_include#UnCommnetIncludes()
-"  
-"  "-----------------------------------------------------------------------------
-"  " Function to uncomment includes. The function assume whole *INCLUDE block
-"  " is commented with prefix "$-->".
-"  "
-"  " Arguments:
-"  " - None
-"  " Return:
-"  " - None
-"  "-----------------------------------------------------------------------------
-"
-"  let lnum = 1
-"  let incl_block = 0
-"  let nr = 0
-"
-"  " check every line in the file
-"  while lnum <= line('$')
-"
-"    " mark *INCLUDE block
-"    if getline(lnum) =~? '^\$-->\*INCLUDE'  
-"      let incl_block = 1
-"    endif
-"
-"    " remove prefix
-"    silent execute lnum .. 's/^\$-->//e'
-"
-"    " print message about uncomment
-"    if incl_block == 1 && getline(lnum)[0] !~? '[$*]'
-"      let nr += 1
-"      echo nr .. '. ' .. getline(lnum)
-"      let incl_block = 0
-"    endif
-"
-"    let lnum += 1
-"
-"  endwhile
-"  echo 'Uncommented ' .. nr .. ' includes.'
-"
-"endfunction
 
 "-------------------------------------EOF---------------------------------------
