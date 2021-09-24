@@ -238,8 +238,9 @@ function! lsdyna_include#Check()
 
   " open manager
   if !empty(qflist)
-    call setqflist([], ' ', {'items' : qflist,
-    \                        'title' : 'Check include'})
+    call setqflist([], ' ', {'title' : 'Check include',
+    \                        'items' : qflist,
+    \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'})
     call lsdyna_manager#QfOpen(getqflist({'id':0}).id, 0)
   endif
 
