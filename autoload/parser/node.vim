@@ -165,18 +165,31 @@ function! s:Nodes() dict
 
 endfunction
 
-function! s:Replace(nodes, offset) dict
+function! s:Replace(nodes, offset, ...) dict
 
   "-----------------------------------------------------------------------------
   " Method:
   "   Replace nodes in current node object.
   " Arguments:
-  "   - nodes (dict)    : dictinary with new nodes in format as in self.Nodes()
+  "   - nodes (dict)    : dictionary with new nodes in format as in self.Nodes()
   "   - offset (number) : offset used to compare nodes id
+  "   - ...             : first (a:1) and last (a:2) node item to swap
   " Returns:
   "   - ncount (number) : number of replaced nodes
   "-----------------------------------------------------------------------------
 
+  " set indexes for self.lines list on which I swap nodes
+  if a:0 == 0
+    " skip 1st item (it has kword name)
+    let lstart = 1
+    let lend   = len(self.lines)-1
+  else
+    " user selected range
+    let lstart = a:1
+    let lend   = a:2
+  endif
+
+  " find kword format
   if self.format == 'i8'
     let str_format = '%8s%16.6f%16.6f%16.6f'
     let id_len     = 8
@@ -189,7 +202,7 @@ function! s:Replace(nodes, offset) dict
   endif
 
   let ncount = 0
-  for i in range(1, len(self.lines)-1)
+  for i in range(lstart, lend)
     if self.lines[i][0] !=# '$'
       let id = str2nr(self.lines[i]->strpart(0,id_len))-a:offset
       if has_key(a:nodes, id)

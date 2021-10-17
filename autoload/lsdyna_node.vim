@@ -647,7 +647,7 @@ function! lsdyna_node#ReplaceNodes(line1, line2, range, ...)
     " process current *NODE table
     let kword = lsdyna_parser#Keyword(line('.'), '%', '')
     let node = kword._Node()[0]
-    let ncount += node.Replace(source_nodes, offset)
+    let ncount += node.Replace(source_nodes, offset, a:line1-kword.first, a:line2-kword.first)
     call node.Delete()
     call node.Write(kword.first)
   else

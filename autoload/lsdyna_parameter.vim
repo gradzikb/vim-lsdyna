@@ -159,7 +159,7 @@ endfunction
 
 function s:Subs_Pi(string)
   let pi = '3.14159653589'
-  return substitute(a:string, '\c\(^\|\H\)\zsPI\ze\W', pi, 'g')
+  return substitute(a:string, '\c\(^\|\H\)\zsPI\ze\(\W\|$\)', pi, 'g')
 endfunction
 
 "-------------------------------------------------------------------------------
