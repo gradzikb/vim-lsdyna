@@ -36,29 +36,27 @@ function! lsdyna_include#Open(lnum, flag)
 
   let incl = lsdyna_parser#Keyword(a:lnum, bufnr('%'), 'nc')._Include()[0]
 
-  if incl.read
-    if a:flag ==# 'b'
+    if a:flag ==# 'b' && incl.read
       execute 'edit' incl.path
-    elseif a:flag ==# 's'
+    elseif a:flag ==# 's' && incl.read
       execute 'vertical split' incl.path
-    elseif a:flag ==# 't'
+    elseif a:flag ==# 't' && incl.read
       execute 'tabnew' incl.path
-    elseif a:flag ==# 'T'
+    elseif a:flag ==# 'T' && incl.read
       execute 'tabnew' incl.path
       execute 'tabprevious'
-    elseif a:flag ==# 'd'
+    elseif a:flag ==# 'd' && isdirectory(fnamemodify(incl.path, ':p:h'))
       execute 'edit' fnamemodify(incl.path, ':p:h')
-    elseif a:flag ==# 'D'
+    elseif a:flag ==# 'D' && isdirectory(fnamemodify(incl.path, ':p:h'))
       execute 'vertical split' fnamemodify(incl.path, ':p:h')
-    elseif a:flag ==# 'e'
+    elseif a:flag ==# 'e' && isdirectory(fnamemodify(incl.path, ':p:h'))
       if has('win32') || has('win64')
         let dir_path =  substitute(fnamemodify(incl.path,':p:h'),'/','\','g')
         execute 'silent ! explorer' dir_path
       endif
+    else
+      echo 'Path ' .. incl.path .. ' not found!'
     endif
-  else
-    echo 'Path ' .. incl.path .. ' not found!'
-  endif
 
 endfunction
 
