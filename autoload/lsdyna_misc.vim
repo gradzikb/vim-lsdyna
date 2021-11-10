@@ -256,10 +256,14 @@ function s:MarkerBall(name, x, y, z, id)
   let dyna_lines += map(elements, { _, val -> printf('%8d%8d%8d%8d%8d%8d', val[0], val[1], val[2], val[3], val[4], val[5]) })
 
   let dyna_lines += ['$']
-  let dyna_lines += ['*SET_NODE_LIST_GENERATE_TITLE']
+  "let dyna_lines += ['*SET_NODE_LIST_GENERATE_TITLE']
+  "let dyna_lines += ['Marker - ' .. a:name]
+  "let dyna_lines += [nodes[0][0:7]]
+  "let dyna_lines += [nodes[0][0:7] .. nodes[-1][0:7]]
+  let dyna_lines += ['*SET_SHELL_LIST_GENERATE_TITLE']
   let dyna_lines += ['Marker - ' .. a:name]
-  let dyna_lines += [nodes[0][0:7]]
-  let dyna_lines += [nodes[0][0:7] .. nodes[-1][0:7]]
+  let dyna_lines += [elements[0][0:7]]
+  let dyna_lines += [elements[0][0:7] .. elements[-1][0:7]]
 
   return dyna_lines
 
