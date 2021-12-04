@@ -456,7 +456,7 @@ function! s:QfNormalCmd(cmd)
   "-----------------------------------------------------------------------------
   " delete all keywords
   elseif a:cmd ==# 'D'
-    call <SID>QfNormalCmd('Y') " yank all items 
+    call <SID>QfNormalCmd('Y') " yank all items
     cclose
     silent execute 'cdo LsCmdExe LsKwordDelete'
   "-----------------------------------------------------------------------------
@@ -611,7 +611,9 @@ function! s:QfFilter(string, flag)
   " store filter history
   let qfid = getqflist({'id':0}).id
   let g:lsdyna_qfid_last = qfid
-  if qflist_filter[0].type == 'I' | let g:lsdyna_qfid_lastIncl = qfid | endif
+  if !empty(qflist_filter)
+    if qflist_filter[0].type == 'I' | let g:lsdyna_qfid_lastIncl = qfid | endif
+  endif
 
   " open current qf list
   call lsdyna_manager#QfOpen(getqflist({'id':0}).id, 0)

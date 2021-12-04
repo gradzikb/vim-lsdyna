@@ -2192,7 +2192,7 @@ Description:
   Write x and y curve points to extarnal file in XYDATA HyperGraph format.
 
 Synatx:
-  :LsCurveCut[!] [filename]
+  :LsCurveWrite[!] [filename]
 
 Arguments:
   filename - file path (optional)

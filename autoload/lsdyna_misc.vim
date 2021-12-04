@@ -69,9 +69,10 @@ function! lsdyna_misc#KwordDelete(bang, range, line1, line2, ...)
   " range set, delete all specific lines
   else
     " I must not delete line by line since it will change order of my lines
-    " first I set mark for lines I want to delete and nest I do it in one step
+    " first I set mark for lines I want to delete and next I do it in one step
     silent execute a:line1..','..a:line2..'s/^/'..'vim-lsdyna-line-to-delete'
-    silent execute 'g/vim-lsdyna-line-to-delete/d'
+    " block hole register is used to not change unnamed register
+    silent execute 'g/vim-lsdyna-line-to-delete/delete _'
   endif
 
 endfunction

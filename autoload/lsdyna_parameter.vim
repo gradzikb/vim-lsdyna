@@ -32,7 +32,7 @@ function s:MatchPairBracketPos(string, start)
 
   " look forward
   if a:string[a:start] == '('
-  
+
     for i in range(a:start, len(a:string))
       if a:string[i] == '(' | let countMatch += 1 | endif
       if a:string[i] == ')' | let countMatch -= 1 | endif
@@ -42,7 +42,7 @@ function s:MatchPairBracketPos(string, start)
 
   " look backward
   elseif a:string[a:start] == ')'
-  
+
     for i in range(a:start, 0, -1)
       if a:string[i] == '(' | let countMatch += 1 | endif
       if a:string[i] == ')' | let countMatch -= 1 | endif
@@ -157,7 +157,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function s:Subs_Pi(string)
+function s:Subs_const(string)
   let pi = '3.14159653589'
   return substitute(a:string, '\c\(^\|\H\)\zsPI\ze\(\W\|$\)', pi, 'g')
 endfunction
@@ -174,12 +174,32 @@ function s:Eval_func(string)
   " - expr : string with result of evaluation
   " ----------------------------------------------------------------------------
 
-  " dictionary with user function
+  " list of supported functions
   let funcs = {}
-  "let funcs.min  = function('<SID>MIN')
-  let funcs.min  = {arg1, arg2 -> arg1 < arg2 ? arg1 : arg2}
-  let funcs.max  = {arg1, arg2 -> arg1 > arg2 ? arg1 : arg2}
-  let funcs.sign = {arg1, arg2 -> arg2 < 0 ? -1.0 * arg1 : arg1}
+  " some of them is not needed on this list since vim support them (sin, cos,
+  " ...) but having them here make them ignore case
+  let funcs.min   = {arg1, arg2 -> arg1 < arg2 ? arg1 : arg2}
+  let funcs.max   = {arg1, arg2 -> arg1 > arg2 ? arg1 : arg2}
+  let funcs.sign  = {arg1, arg2 -> arg2 < 0 ? -1.0 * arg1 : arg1}
+  let funcs.cos   = {arg1 -> cos(arg1)}
+  let funcs.sin   = {arg1 -> sin(arg1)}
+  let funcs.tan   = {arg1 -> tan(arg1)}
+  let funcs.acos  = {arg1 -> acos(arg1)}
+  let funcs.asin  = {arg1 -> asin(arg1)}
+  let funcs.atan  = {arg1 -> atan(arg1)}
+  let funcs.cosh  = {arg1 -> cosh(arg1)}
+  let funcs.sinh  = {arg1 -> sinh(arg1)}
+  let funcs.tanh  = {arg1 -> tanh(arg1)}
+  let funcs.acosh = {arg1 -> acosh(arg1)}
+  let funcs.asinh = {arg1 -> asinh(arg1)}
+  let funcs.atanh = {arg1 -> atanh(arg1)}
+  let funcs.sqrt  = {arg1 -> sqrt(arg1)}
+  let funcs.pow   = {arg1, arg2 -> pow(arg1, arg2)}
+  let funcs.mod   = {arg1, arg2 -> mod(arg1, arg2)}
+  let funcs.abs   = {arg1 -> abs(arg1)}
+  let funcs.exp   = {arg1 -> exp(arg1)}
+  let funcs.log   = {arg1 -> log(arg1)}
+  let funcs.log10 = {arg1 -> log10(arg1)}
 
   " re to find any supported function in expression
   let reFuncName = '\c'.join(keys(funcs),'(\|').'('
@@ -191,11 +211,11 @@ function s:Eval_func(string)
     let idx = match(expr, reFuncName)
 
     " nope, there is nothing to do here ... bye
-    if idx == -1 | break | endif    
+    if idx == -1 | break | endif
 
     " function name used for eval (min, max, sign, ...), I remove '\|(' from end
     let fname = tolower(matchstr(expr, reFuncName)[0:-2])
-  
+
     " first get function arguments, text between round brackets
     let pos_open_bracket  = stridx(expr, '(', idx)
     let pos_close_bracket = <SID>MatchPairBracketPos(expr, pos_open_bracket)
@@ -206,7 +226,7 @@ function s:Eval_func(string)
       let str_args = <SID>Eval_func(str_args)
     endif
 
-    " eval args valus and return expression value
+    " eval args values and return expression value
     let args = str_args->split(',')->map('eval(v:val)')
     let eval = call(funcs[fname], args)
 
@@ -216,7 +236,6 @@ function s:Eval_func(string)
     let expr = strpart(expr, 0, str_start) . string(eval) . strpart(expr, str_end+1)
 
   endwhile
-  
   return expr
 
 endfunction
@@ -225,9 +244,13 @@ endfunction
 
 function s:Eval_expression(expr)
 
-  let expr = <SID>Subs_Pi(a:expr)
+  " substitute constant values (like PI)
+  let expr = <SID>Subs_const(a:expr)
+  " substitute power function A**B --> pow(A,B)
   let expr = <SID>Subs_power(expr)
+  " eval functions (min(), sin(), sqrt(), ...)
   let expr = <SID>Eval_func(expr)
+
   let eval = eval(expr)
   return string(eval)
 
