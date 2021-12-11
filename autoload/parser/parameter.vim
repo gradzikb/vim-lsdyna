@@ -149,6 +149,7 @@ function! parser#parameter#Parameter(...) dict
             let param.ptype = toupper(lline[i][0])
             let param.pval  = trim(substitute(lline[i+1], '[&<>\s]', '', 'g'))
             "let param.dub   = has_key(g:lsdyna_manager_parameters, toupper(param.pname)) ? 1 : 0
+            " using printf() help me with float precision, :help floating-point-precision
             let param.peval = lsdyna_parameter#Eval(param.pval)
             let g:lsdyna_manager_parameters[toupper(param.pname)] = param.peval
             let param.Qf    = function('<SID>Qf')

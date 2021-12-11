@@ -280,7 +280,7 @@ function lsdyna_manager#QfFormatLine(info)
         if ptype == 'R'
           let peval = peval == '?' ? printf('%-10s', peval).' : ' : printf('%-10.3g', str2float(peval)).' : '
         elseif ptype == 'I'
-          let peval = peval == '?' ? printf('%-10s', peval).' : ' : printf('%-10d', str2nr(peval)).' : '
+          let peval = peval == '?' ? printf('%-10s', peval).' : ' :  printf('%-10d', float2nr(str2float(peval))).' : '
         else
           let peval = peval == '?' ? printf('%-10s', peval).' : ' : printf('%-10s', peval).' : '
         endif

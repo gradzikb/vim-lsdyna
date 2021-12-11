@@ -252,7 +252,8 @@ function s:Eval_expression(expr)
   let expr = <SID>Eval_func(expr)
 
   let eval = eval(expr)
-  return string(eval)
+  "return string(eval)
+  return printf('%.10e', eval)
 
 endfunction
 
