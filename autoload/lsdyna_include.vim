@@ -74,7 +74,7 @@ function! lsdyna_include#GetIncludePaths()
   "-----------------------------------------------------------------------------
 
   let paths = []
-  let qfid = lsdyna_vimgrep#Vimgrep('include_path', '%', '')
+  let qfid = lsdyna_vimgrep#Vimgrep('include_path', {})
   for item in getqflist({'id':qfid, 'items':''}).items
     let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')._Include_path()
     call extend(paths, map(incls, 'v:val.path'))
@@ -85,7 +85,7 @@ function! lsdyna_include#GetIncludePaths()
 endfunction
 
 "-------------------------------------------------------------------------------
-
+let s:i = 1
 function! lsdyna_include#Resolve(path)
 
   "-----------------------------------------------------------------------------
@@ -99,6 +99,7 @@ function! lsdyna_include#Resolve(path)
   "                        1 - file can be read
   "-----------------------------------------------------------------------------
 
+let s:i+=1
   " include path respect to master (current working directory)
   if filereadable(a:path) || isdirectory(a:path)
     return {'read':1, 'path':a:path}
@@ -223,7 +224,7 @@ function! lsdyna_include#Check()
   "-----------------------------------------------------------------------------
 
   " collect all broken includes
-  let qfid = lsdyna_vimgrep#Vimgrep('include', '%', '')
+  let qfid = lsdyna_vimgrep#Vimgrep('include', {})
   let qflist = []
   for item in getqflist({'id':qfid, 'items':''}).items
     let incls = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fnc')._Autodetect()
@@ -236,9 +237,15 @@ function! lsdyna_include#Check()
 
   " open manager
   if !empty(qflist)
-    call setqflist([], ' ', {'title' : 'Check include',
-    \                        'items' : qflist,
-    \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'})
+    call setqflist([], ' ', #{title            : 'Check include',
+    \                         items            : qflist,
+    \                         quickfixtextfunc : 'lsdyna_quickfix#Include_textfunc',
+    \                         context          : {'type'              :'include',
+    \                                             'quickfixbufferfunc':'lsdyna_quickfix#Include_bufferfunc',
+    \                                             'quickfixtextfunc'  :'lsdyna_quickfix#Include_textfunc',
+    \                                             'command'           :''}
+    \})
+
     call lsdyna_manager#QfOpen(getqflist({'id':0}).id, 0)
   endif
 
@@ -293,7 +300,7 @@ function! lsdyna_include#CommentIncludes(bang, ...)
     cclose
   " keyword started w/o keyword manager
   else
-    let qfid = lsdyna_vimgrep#Vimgrep('include', '%', '')
+    let qfid = lsdyna_vimgrep#Vimgrep('include', {})
     let qflist = getqflist({'id':qfid, 'items':''}).items
     let qfopen = 0
   endif

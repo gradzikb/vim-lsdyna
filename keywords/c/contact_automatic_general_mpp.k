@@ -6,7 +6,7 @@ $#  ignore      bckt    lcbckt    ns2trk   inititr    paramx              caprm8
 $#    ssid      msid     sstyp     mstyp    sboxid    mboxid       spr       mpr
          ?                   ?
 $#      fs        fd        dc        vc       vdc    penchk        bt        dt
-         ?         ?                          20.0
+         ?         ?       1.0                20.0
 $#     sfs       sfm       sst       mst      sfst      sfmt       fsf       vsf
 
 $#    soft    sofscl    lcidab    maxpar     sbopt     depth     bsort    frcfrq

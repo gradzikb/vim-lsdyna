@@ -9,54 +9,64 @@
 "
 "-------------------------------------------------------------------------------
 
-function! lsdyna_vimgrep#Vimgrep(kwords, file, mode)
+"function! lsdyna_vimgrep#Vimgrep(kwords, file, mode)
+function! lsdyna_vimgrep#Vimgrep(what, options)
 
   "-----------------------------------------------------------------------------
   " Vimgrep wrapper to look for Ls-Dyna keywords.
   "
   " Arguments:
-  " - kword : list of keywords for search (* - any keyword)
-  " - file  : file where to start search (% - current buffer)
-  " - mode  : search mode
-  "           ''  - a:file only
-  "           'i' - a:file + includes
-  "           'r' - reverse selection (look for any kw but not a:kword)
+  " - what (string)  : words to search
+  " - options (dict) : vimgrep options
+  "   - options.files : list of files to search
+  "   - options.includes : flag to search inside includes
+  "   - options.notlook : reverse flag for search pattern
+  "   - options.type    : search type
+  "     - 'string' : search literal string
+  "     - 'kword'  : search ls-dyna keywords
+  "
   " Return:
-  " - None
-  " Examples:
-  "   lsdyna_vimgrep#Vimgrep('part', '%', 'b')
-  "   lsdyna_vimgrep#Vimgrep('part section mat', '%', 'b')
-  "   lsdyna_vimgrep#Vimgrep('*', '%', 'i')
+  " - qf (number) : quicklist id with search results
   "-----------------------------------------------------------------------------
 
-  " save current qf list id
-  let qfid_ = getqflist({'nr':0, 'id':0}).id
+  "-----------------------------------------------------------------------------
+  " set options
+  let options = {}
+  let options.files    = get(a:options, 'files', '%')
+  let options.includes = get(a:options, 'includes', 0)
+  let options.notlook  = get(a:options, 'notlook', 0)
+  let options.type     = get(a:options, 'type', 'kword')
 
-  " build regular expression for search pattern
-  " 'part *Section' --> '^*\(PART\|SECTION\)'
-  let kwords = substitute(a:kwords, '*', '', 'g')
-  let kwords = toupper(kwords)
-  let kwords = split(kwords, '\s\+')
-  let search_pattern = '^\(\' .. g:lsdynaCommentString .. '\)\?\*\('.join(kwords, '\|').'\)'
+  "-----------------------------------------------------------------------------
+  " process options
 
-  " use current file if not defined
-  if a:file =~ '\s*'
-    let file = '%'
+  if options.type ==? 'string'
+    let search_pattern = split(a:what, '\s\+')
+    let search_pattern = '\(' .. join(search_pattern, '\|') .. '\)'
+  elseif options.type ==? 'kword'
+    " 'part *Section' --> '^*\(PART\|SECTION\)'
+    let kwords = substitute(a:what, '*', '', 'g')
+    let kwords = toupper(kwords)
+    let kwords = split(kwords, '\s\+')
+    let search_pattern = '^\(\' .. g:lsdynaCommentString .. '\)\?\*\('.join(kwords, '\|').'\)'
   endif
 
-  " reverse flag, search all keywords but not defined 
-  if a:mode =~? 'r'
-    let search_pattern = search_pattern.'\@!'
+  if options.notlook
+    let search_pattern = search_pattern .. '\@!'
   endif
 
-  " include flag, search in all include files
-  if a:mode =~? 'i'
-    let incls = <SID>SearchIncludes(file)
+  if options.includes
+    let incls = <SID>SearchIncludes(options.files)
   else
     let incls = []
   endif
 
-  if search_pattern =~? 'INCLUDE' && a:mode =~? 'i'
+  "-----------------------------------------------------------------------------
+
+  " save current qf list id
+  "let qfid_ = getqflist({'nr':0, 'id':0}).id
+
+  if search_pattern =~? 'INCLUDE' && options.includes
      " If I am looking for *INCLUDE keywords in many files there is no point
      " to use "vimgrep" second time since "SearchIncludes" already did the job.
      " Another advantage is file order in quickfix list.
@@ -66,19 +76,30 @@ function! lsdyna_vimgrep#Vimgrep(kwords, file, mode)
      " - include_B.inc             include_A2.inc
      " - include_B1.inc            include_B1.inc
      "
-    call setqflist([], ' ', {'items'   : map(incls, {_,val -> {'bufnr':val.bufnr, 'lnum':val.first}}),
-                            \'title'   : ':vimgrep /\c' .. search_pattern .. '/j'})
+    call setqflist([], ' ', #{
+    \    items: map(incls, {_,val -> {'bufnr':val.bufnr, 'lnum':val.first}}),
+    \    title: 'Vimgrep '..search_pattern,
+    \    context: #{type:'vimgrep', 
+    \               command: ':vimgrep /\c'..search_pattern..'/j'},
+    \    })
+ 
   else
     " filter() --> remove hided *INCLUDES so I do not search inside them
-    let files = file .. ' ' .. join(map(filter(incls, '!v:val.hide'), 'v:val.path'))
+    let files = options.files .. ' ' .. join(map(filter(incls, '!v:val.hide'), 'v:val.path'))
     execute 'noautocmd silent! vimgrep /\c' .. search_pattern .. '/j ' .. files
-    "call setqflist([], 'a', {'title' : ':vimgrep /\c' .. search_pattern .. '/j'})
+    call setqflist([], 'r', #{
+    \    nr: '$',
+    \    title: 'Vimgrep '..search_pattern,
+    \    context: #{type:'vimgrep', 
+    \               command: ':vimgrep /\c'..search_pattern..'/j'},
+    \    })
   endif
 
   " quickfix id of the latest created list
   let qfid = getqflist({'nr':'$', 'id':0}).id
+  "echo getqflist({'id':qfid, 'items':''}).items
 
-  " restore previous current qf list
+  " restore old qf list
   "let qfnr = getqflist({'id':qfid_, 'nr':''}).nr
   "silent execute qfnr .. 'chistory'
 

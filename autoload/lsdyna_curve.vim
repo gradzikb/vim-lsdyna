@@ -474,7 +474,8 @@ function! lsdyna_curve#resample(step) dict
   let last = self.curve[-1].x
 
   " interpolation loop
-  while x < last
+  "while x < last --> do not know why but in some cases it leads to TRUE if x==last
+  while x < last+(a:step*0.1) " add 10% of step to be sure WHILE loop include last point
 
     " find two neighbour points for x value
     for i in range(start, len)
@@ -496,7 +497,8 @@ function! lsdyna_curve#resample(step) dict
   endwhile
 
   " add last point
-  call add(curve, self.curve[-1])
+  " not used since WHILE loop include the last point
+  "call add(curve, self.curve[-1])
 
   " save new curve
   let self.curve = curve

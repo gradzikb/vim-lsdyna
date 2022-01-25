@@ -49,12 +49,20 @@ function! lsdyna_manual#Manual(arg1)
   if page
     if has("win32") || has("win64")
       let file = substitute(file,'/','\','g')
-      let cmd = '!start /B '. g:lsdynaPathAcrobat.' /A page='.page.' '.file
-      silent execute cmd
+      if filereadable(g:lsdynaPathAcrobat)
+        let cmd = '!start /B "'. g:lsdynaPathAcrobat.'" /n /A page='.page.' '.file
+        silent execute cmd
+      else
+        echo "File" g:lsdynaPathAcrobat "does not exist!"
+      endif
     endif
   elseif has("unix")
-     let cmd = ':! '. g:lsdynaPathAcrobat.' '.file.' -P '.page
-     silent execute cmd
+      if filereadable(g:lsdynaPathAcrobat)
+        let cmd = ':! '. g:lsdynaPathAcrobat.' '.file.' -P '.page
+        silent execute cmd
+      else
+        echo "File " .. g:lsdynaPathAcrobat .. "does not exist!"
+      endif
   else
     echo 'No manual found for "'..kword..'"'
   endif

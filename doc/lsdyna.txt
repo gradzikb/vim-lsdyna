@@ -67,6 +67,8 @@ CONTENTS
        8.3 Data line autoformating.............|lsdyna-autoFormat|
        8.4 Text objects........................|lsdyna-textObject|
        8.5 Tags................................|lsdyna-tags|
+       8.6 Quickpeek...........................|lsdyna-quickpeek|
+       8.7 X-Reference.........................|lsdyna-xref|
     9. Includes ...............................|lsdyna-includes|
        9.1 File name completions ..............|lsdyna-includeName|
        9.2 Open includes ......................|lsdyna-includeOpen|
@@ -684,9 +686,11 @@ Parameter flags:
 LsManager commands                                      *lsdyna-managerCommands*
 
 Basic commands:
- <ESC>      : close LsManager window and put cursor on selected keyword
+ <ESC>      : close LsManager window and restore cursor position
  <Enter>    : close LsManager window and jump to selected keyword
-Note: It makes difference only for *INCLUDE keywords.
+Note: For *INCLUDE it works differently
+ <ESC>      : close LsManager window and jump to selected keyword
+ <Enter>    : close LsManager window and open selected include file
 
 Move commands:
  <j>/<Down> : select next item (move one line down)
@@ -753,26 +757,47 @@ collect all *MAT in all includes use <Shift-F12> and <m>, *LOAD in all includes
 
 How to get list of *SET? Well, <F12><s> is already used for *SECTION so it
 must be <s> but with some modifier, <F12><Shift-S> gives *SET and
-<F12><Ctrl-s> gives *SENSOR. 
+<F12><Ctrl-s> gives *SENSOR. In some cases two letter combination is used.
 
-In case of *DEFINE_ keywords two letter is used to describe keyword:
-- <F12><dc> --> *DEFINE_CURVE
-- <F12><dC> --> *DEFINE_COORDINATE
-- <F12><dv> --> *DEFINE_VECTOR
-- <F12><dt> --> *DEFINE_TRANSFORMATION
+  +-----------------+--------------------------------------+
+  |  Normal command | Ex command                           |
+  +-----------------+--------------------------------------+
+  | <F12><a>        | :LsManager airbag                    |
+  | <F12><b>        | :LsManager boundary                  |
+  | <F12><c>        | :LsManager contact                   |
+  | <F12><Ctrl-c>   | :LsManager control                   |
+  | <F12><Shift-c>  | :LsManager constrained               |
+  | <F12><dC>       | :LsManager define_coordinate         |
+  | <F12><db>       | :LsManager database                  |
+  | <F12><dc>       | :LsManager define_curve              |
+  | <F12><df>       | :LsManager define_friction           |
+  | <F12><dt>       | :LsManager define_transformation     |
+  | <F12><dv>       | :LsManager define_vector             |
+  | <F12><e>        | :LsManager element                   |
+  | <F12><i>        | :LsManager include                   |
+  | <F12><l>        | :LsManager load                      |
+  | <F12><m>        | :LsManager mat                       |
+  | <F12><n>        | :LsManager node                      |
+  | <F12><p>        | :LsManager part                      |
+  | <F12><Shift-p>  | :LsManager parameter                 |
+  | <F12><s>        | :LsManager section                   |
+  | <F12><Ctrl-s>   | :LsManager sensor                    |
+  | <F12><Shift-s>  | :LsManager set                       |
+  | <F12><x>        | :LsManager database_cross_section    |
+  +-----------------+--------------------------------------+
+  | <F12><*>        | list all keywords                    |
+  | <F12><.>        | show last search                     |
+  | <F12></>        | search for specific keyword          |
+  | <F12><F12>      | favorite search (default include)*   |
+  | <F12><Shift-i>  | show last include search             |
+  +-----------------+--------------------------------------+
 
-Special mappings (the same list apply to <Shift-F12>):
-- <F12><*>   : list all keywords (":LsManager *")
-- <F12><.>   : show last search list ("." coma normal command in VIM
-               repeat the last command)
-- <F12></>   : search for specific keyword ("/" is VIM normal command for
-               search)
-- <F12><F12> : favorite command, it is the fastest combination to type,
-               the idea is a user can set to most often used search,
-               by default is set for includes search (<F12><i>)
-- <F12><Shift-i> : show last include search
+*
+Favorite command, it is the fastest combination to type, the idea is a user can
+set to most often used search, by default is set for includes search (<F12><i>).
 
 Note:
+The same list of mappings works with <Shift-F12>.
 To get list of all mappings use command ":nmap <F12>".
 
 ================================================================================
@@ -1017,16 +1042,18 @@ Normal mappings:
 Description:
   Open Ls-Dyna pdf manual at page with specific keyword.
 
-  Requriments:
+  Requirements:
   - Windows operating system
   - Adobe Acrobat Reader
   - Ls-Dyna R9.0 pdf manual files
 
   Configuration:
   - set in 'vimrc' file variable 'g:lsdynaPathAcrobat' to path with Adobe
-    Acrobat Reader, by default it is set to:
-    "C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe"'
-  - download following manual files and put them into 'manuals' directory 
+    Acrobat Reader executable file, by default it is set to:
+>
+  let g:lsdynaPathAcrobat = 'C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe'
+<
+  - download following manual files and put them into 'manuals' directory
     http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_I_R9.0.pdf
     http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_II_R9.0.pdf
     http://ftp.lstc.com/anonymous/outgoing/jday/manuals/LS-DYNA_Manual_Volume_III_R9.0.pdf
@@ -2649,32 +2676,77 @@ Example:
 ================================================================================
 8. Mappings                                                    *lsdyna-mappings*
 
-This chapter collect list of mappings not related to any function. 
-<ll> means local leader, which is a special key in VIM.  By default it is "\".
-You might want to use different load leader, See ":help maplocalleader".
+This chapter collect list of all mappings and small useful plugin tools.
 
 --------------------------------------------------------------------------------
 8.1 Mappings list                                               *lsdyna-mapList*
 
-List of mappings not listed in others chapters.
+<ll> stands for local leader key, see ':help <LocalLeader>' for details.
+By default local leader is set to backslash key '\'. It means <ll>c is two
+keys mapping '\c', press and release 1st key and next press 2nd key.
 
-  Key            | Action
- ----------------+-------------------------------------------------------------
-  ]]             | jump to next keyword
-  [[             | jump to previous keyword
-  4<Space>       | put "$" at the beginning of the line (works only if "4" is in 1st col)
-  <ll>c          | put empty comment line below
-  <ll>C          | put empty comment line above
-  <ll>0          | separator with title below
-  <ll>1          | separator line (type 1) below
-  <ll><Shift-1>  | separator with title above
-  <ll><Shift-2>  | separator line (type 1) above
+  +------+------------+-----------------------------------------------------+
+  | Mode | Mappings   | Description                                         |
+  +------+------------+-----------------------------------------------------+
+  | n    | ]]         | jump to next keyword                                |
+  | n    | [[         | jump to previous keyword                            |
+  | n,v  | =          | autoformat selected lines, |lsdyna-autoFormat|        |
+  | i    | 4<space>   | start line with '$' (must be in 1st col.)           |
+  | o    | <ak>       | motion operator, |lsdyna-textObject|                  |
+  | n    | <ll>*      | search column string under the cursor               |
+  | n    | <ll>c      | comment/uncomment line(s) |lsdyna-comment|            |
+  | n,v  | <ll>q      | quickpeek (look in current file) |lsdyna-quickpeek|   |
+  | n,v  | <ll>Q      | quickpeek (look in include files)  |lsdyna-quickpeek| |
+  | n,v  | <ll>x      | x-ref (look in current file) |lsdyna-xref|            |
+  | n,v  | <ll>X      | x-ref (look in include files)  |lsdyna-xref|          |
+  | n    | <ll>0      | insert title section                                |
+  | n    | <ll>1      | insert empty comment line                           |
+  | n    | <ll>2      | insert separation line (type 1)                     |
+  | n    | <ll>3      | insert separation line (type 2)                     |
+  | i    | <C-x><C-f> | complete include file name |lsdyna-includeName|       |
+  | n    | gf         | open include file in current window                 |
+  | n    | gF         | open include file in new split window               |
+  | n    | gt         | open include file in new tab                        |
+  | n    | gT         | open include file in new tab in background          |
+  | n    | gd         | open include directory in current window            |
+  | n    | gD         | open include directory in new split window          |
+  | n    | g<C-d>     | open include directory MS Windows file manager      |
+  | n    | <F12>...   | LsManager (current file), |lsdyna-kwordManager|       |
+  | n    | <S-F12>... | LsManager (includes) |lsdyna-kwordManager|            |
+  | n,i  | <C-x><C-o> | omni-completion (current file) |lsdyna-completeOmni|  |
+  | n,i  | <C-x><C-q> | omni-completion (current file) |lsdyna-completeOmni|  |
+  | n    | <F1>       | Open Ls-Dyna manual for keyword under the cursor    |
+  +------+------------+-----------------------------------------------------+
+
+VIM modes:
+- n : normal
+- i : insert
+- v : visual
+- o : operator pending
+
+Alternative mappings
+--------------------
+
+Here is list of alternative mappings. Disadvantage is that mappings to <Alt> key
+and <Tab> key not always work correctly. In most cases it is problem of used
+terminal. Check your terminal documentation how to support Alt/Meta/Tab keys.
+
+  +------------+-----------+----------------------------------------------------+
+  | Command    | Alter cmd | Description                                        |
+  +------------+-----------+----------------------------------------------------+
+  | <ll>c      | <A-c>     | comment/uncomment line(s) |lsdyna-comment|           |
+  | <ll>q      | <A-q>     | quickpeek (look in current file) |lsdyna-quickpeek|  |
+  | <ll>x      | <A-x>     | x-reference (look in current file) |lsdyna-xref|     |
+  | =          | <A-e>     | autoformat selected lines, |lsdyna-autoFormat|       |
+  | <C-x><C-o> | <Tab>     | omni-completion (current file) |lsdyna-completeOmni| |
+  | <C-x><C-q> | <S-Tab>   | omni-completion (includes) |lsdyna-completeOmni|     |
+  +------------+-----------+----------------------------------------------------+
 
 --------------------------------------------------------------------------------
 8.2 Comment/uncomment                                           *lsdyna-comment*
 
 The function is used to comment/uncomment line/lines in Ls-Dyna keyword file.
-Function is mapped with <Alt-c> or <Ctrl-c>.
+Function is mapped with <ll>c or <Alt-c>.
 
 If selected line starts with "$" it will be uncommented, if the line does not
 start with "$" it will be commented. If you selected more than one line
@@ -3071,6 +3143,490 @@ Use <Ctrl-w>] to make the same with normal command.
     |command-line=================================+
     |                                             |
     +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+8.6 Quickpeek                                                  *lsdyna-quickpeek*
+
+Quickpeek shows keyword/parameter preview of selected id/name in separate popup
+window.
+
+The feature is trigged by:
+- <ll>q : preview keywords from current buffer
+- <ll>Q : preview keywords from *INCLUDE
+- <A-q> : the same as <ll>q
+
+Normal commands mappings for popup window:
+- <Enter> : jump to preview keyword
+- <ESC>   : close popup window
+- <q>     : close popup window
+
+The function behaves differently depend on which VIM mode is trigged (normal,
+charwise visual, linewise visual).
+
+Example of use in normal mode (keyword id):
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PART                                        |
+    |$#title                                      |
+    |Part                                         |
+    |$#      pid     secid       mid              |
+    |       1001      1001      1001              |<set cursor on mat id>
+    |$                             ^              |<use <A-q> in normal mode>
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Popup window with material id 1001 will show up:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PART                                        |
+    |$#title                                      |
+    |Part                                         |
+    |$#      pid     secid       mid              |
+    |       1001      1001      1001              |
+    | +Quickpeek-------------------------------x  |
+    | |*MAT_ELASTIC_TITLE                      |  |
+    | |$# title                                |  |
+    | |Steel                                   |  |
+    | |$#     mid        ro         e        pr|  |
+    | |      1001  7.85e-06     210.0       0.3|  |
+    | +----------------------------------------@  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Keyword selection is made by the header:
+ - mid  --> *MAT_
+ - sid  --> *SECTION_
+ - lcid --> *DEFINE_CURVE_
+ - ...
+>
+In case of multiple choice selection menu will popup first.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*CONTACT_AUTOMATIC_SURFACE_TO_SURFACE        |
+    |$#    ssid      msid     sstyp     mstyp     |
+    |        10        10         2         2     |
+    |$#      f+----------x       dc        vc     |
+    |       0.|*PART     |      1.0               |
+    |$#     sf|*SET_PART |      sst       mst     |
+    |         |*SET_NODE |                        |
+    |$#    sof+----------@   lcidab    maxpar     |
+    |                                             |
+    |$#  penmax    thkopt    shlthk     snlog     |
+    |                                             |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Example of use in normal mode (parameter name):
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |R      thk 2.5                               |
+    |*PARAMETER_EXPRESSION                        |
+    |R    dbthk thk*2.0                           |
+    |$                                            |
+    |*SECTION_SHELL                               |
+    |$#   secid    elform      shrf       nip     |
+    |      1001         1     0.833         2     |
+    |$#      t1        t2        t3        t4     |
+    |    &dbthk                                   |<set cursor on param name>
+    | +Quickpeek-------------------------------x  |<use <A-q> in normal mode>
+    | |*PARAMETER_EXPRESSION                   |  |
+    | |$ EVAL: 5.0                             |  |<new eval line is added with>
+    | |R    dbthk thk*2.0                      |  |<parameter value>
+    | +----------------------------------------@  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+2nd quickpeek on parameter name take parameter value and use it as id.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ lcd for mat 1001                           |
+    |I      lcid 123                              |
+    |$                                            |
+    |*MAT_SPRING_NONLINEAR_ELASTIC                |
+    |$#     mid       lcd       lcr               |
+    |      1001     &lcid         0               |<spring char. is defined>
+    |$                                            |<by "lcid" parameter>
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Spring-char                                  |
+    |$#    lcid      sidr       sfa       sfo     |
+    |       123         0       1.0       1.0     |
+    |$#              disp               force     |
+    |                -1.0               -10.0     |
+    |                 0.0                 0.0     |
+    |                 1.0                 5.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+1st quick peek on parameter &lcid shows *PARAMETER keyword:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ lcd for mat 1001                           |
+    |I      lcid 123                              |
+    |$                                            |
+    |*MAT_SPRING_NONLINEAR_ELASTIC                |
+    |$#     mid       lcd       lcr               |
+    |      1001     &lcid         0               |<A-q>
+    | +Quickpeek-------------------------------x  |
+    | |*PARAMETER                              |  |
+    | |$ EVAL: 123                             |  |
+    | |I     lcid 123                          |  |
+    | +----------------------------------------@  |
+    |$#              disp               force     |
+    |                -1.0               -10.0     |
+    |                 0.0                 0.0     |
+    |                 1.0                 5.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+2nd quick peek shows curve referred by the parameter value.
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ lcd for mat 1001                           |
+    |I      lcid 123                              |
+    |$                                            |
+    |*MAT_SPRING_NONLINEAR_ELASTIC                |
+    |$#     mid       lcd       lcr               |
+    |      1001     &lcid         0               |<A-q>
+    | +Quickpeek-------------------------------x  |
+    | |*DEFINE_CURVE_TITLE                     |  |
+    | |$# title                                |  |
+    | |Spring-char                             |  |
+    | |$#    lcid      sidr       sfa       sfo|  |
+    | |       123         0       1.0       1.0|  |
+    | |$#              disp               force|  |
+    | |                -1.0               -10.0|  |
+    | |                 0.0                 0.0|  |
+    | |                 1.0                 5.0|  |
+    | +----------------------------------------@  |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+In visual model Quickpeek takes selected text and substitute any parameters
+and in-line expressions with their values.
+
+Example of use in linewise visual mode (V):
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ stop angle [deg]                           |
+    |I stopAng  37.0                              |
+    |*PARAMETER_EXPRESSION                        |
+    |$ deg-to-rad conversion factor               |
+    |R deg2rad 180.0/3.14                         |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Spring-stop                                  |
+    |$#    lcid      sidr       sfa       sfo     |
+   >|       123         0  &deg2rad       1.0     |<select line (V) and use <A-c>>
+    |$#       angle [deg]       torque [kNmm]     |
+    |                0.0,                 0.0     |
+    |          <stopAng>,                 0.0     |
+    |        <stopAng+1>,             1.0e+05     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Window with selected line and substituted parameters value will be show:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ stop angle [deg]                           |
+    |I stopAng  37.0                              |
+    |*PARAMETER_EXPRESSION                        |
+    |$ deg-to-rad conversion factor               |
+    |R deg2rad 3.14/180                           |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Spring-stop                                  |
+    |$#    lcid      sidr       sfa       sfo     |
+    |       123         0  &deg2rad       1.0     |
+    | +Quickpeek--------------------------------x |
+    | |       123         0    0.0175       1.0 | |
+    | +-----------------------------------------@ |
+    |         <stopAng+1>,            1.0e+05     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+To preview whole keyword select more lines:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ stop angle [deg]                           |
+    |I stopAng  37.0                              |
+    |*PARAMETER_EXPRESSION                        |
+    |$ deg-to-rad conversion factor               |
+    |R deg2rad 180.0/3.14                         |
+    |$                                            |
+   >|*DEFINE_CURVE_TITLE                          |<
+   >|$# title                                     |<
+   >|Spring-stop                                  |<
+   >|$#    lcid      sidr       sfa       sfo     |<
+   >|       123         0  &deg2rad       1.0     |<select lines (V) and use <A-c>>
+   >|$#       angle [deg]       torque [kNmm]     |<
+   >|                0.0,                 0.0     |<
+   >|          <stopAng>,                 0.0     |<
+   >|        <stopAng+1>,             1.0e+05     |<
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ stop angle [deg]                           |
+    |I stopAng  37.0                              |
+    |*PARAMETER_EXPRESSION                        |
+    |$ deg-to-rad conversion factor               |
+    |R deg2rad 3.14/180                           |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    | +Quickpeek--------------------------------x |
+    | |*DEFINE_CURVE_TITLE                      | |
+    | |$# title                                 | |
+    | |Spring-stop                              | |
+    | |$#    lcid      sidr       sfa       sfo | |
+    | |       123         0    0.0175       1.0 | |
+    | |$#       angle [deg]       torque [kNmm] | |
+    | |                0.0,                 0.0 | |
+    | |               37.0,                 0.0 | |
+    | |               38.0,             1.0e+05 | |
+    | +-----------------------------------------@ |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Example of use in charwise visual mode (v):
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ stop angle [deg]                           |
+    |I stopAng  37.0                              |
+    |*PARAMETER_EXPRESSION                        |
+    |$ deg-to-rad conversion factor               |
+    |R deg2rad 180.0/3.14                         |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Spring-stop                                  |
+    |$#    lcid      sidr       sfa       sfo     |
+   >|       123         0  &deg2rad       1.0     |
+    |$#       angle [deg]       torque [kNmm]     |
+    |                0.0,                 0.0     |
+    |          <stopAng>,                 0.0     |
+    |        <stopAng+1>,             1.0e+05     |
+    |$       ^^^^^^^^^^^                          |<select in-line expr>
+    |$                                            |<and use <A-c>>
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Small window with results is showed:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |$ stop angle [deg]                           |
+    |I stopAng  37.0                              |
+    |*PARAMETER_EXPRESSION                        |
+    |$ deg-to-rad conversion factor               |
+    |R deg2rad 180.0/3.14                         |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Spring-stop                                  |
+    |$#    lcid      sidr       sfa       sfo     |
+   >|       123         0  &deg2rad       1.0     |
+    |$#       ang+------x       torque [kNmm]     |
+    |            | 38.0 |                 0.0     |
+    |            +------@                 0.0     |
+    |        <stopAng+1>,             1.0e+05     |
+    |$       ^^^^^^^^^^^                          |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+--------------------------------------------------------------------------------
+8.7 X-Reference                                                    *lsdyna-xref*
+
+X-Reference looks for references for selected parameter name and keyword id.
+
+The feature is trigged by:
+- <ll>x : reference in current buffer
+- <ll>X : reference in *INCLUDE
+- <A-x> : the same as <ll>x
+
+Example with parameter name reference:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |I      ttf  12.0                             |<put cursor on "ttf">
+    |*PARAMETER_EXPRESSION                        |<and use <A-x>>
+    |I ttfShift ttf + 2.5                         |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Spring-char                                  |
+    |$#    lcid      sidr       sfa       sfo     |
+    |       101         0       1.0       1.0     |
+    |$#          time [ms]             sf [-]     |
+    |                 0.0,                0.0     |
+    |               <ttf>,                0.0     |
+    |           <ttf+1.0>,                1.0     |
+    |              1000.0,                1.0     |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+List of references is showed in LsManager window:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PARAMETER                                   |
+    |I      ttf  12.0                             |
+    |*PARAMETER_EXPRESSION                        |
+    |I ttfShift ttf + 2.5                         |
+    |$                                            |
+    |*DEFINE_CURVE_TITLE                          |
+    |$# title                                     |
+    |Time_to_fire                                 |
+    |$#    lcid      sidr       sfa       sfo     |
+    |       101         0       1.0       1.0     |
+    |$#          time [ms]             sf [-]     |
+    |                 0.0,                0.0     |
+    |               <ttf>,                0.0     |
+    |           <ttf+1.0>,                1.0     |
+    |              1000.0,                1.0     |
+    |LsManager====================================|
+    | 1. ttf               | PARAMETER            |
+    | 2. ttfShift          | PARAMETER_EXPRESSION |
+    | 3. 101 Time_to_fire  | DEFINE_CURVE_TITLE   |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Example with keyword id reference:
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PART                                        |
+    |$# title                                     |
+    |Part-101                                     |
+    |$#     pid     secid       mid               |
+    |       101       200       200               |<x-ref to pid 101>
+    |*SECTION_SOLID_TITLE                         |
+    |$# title                                     |
+    |Section-101                                  |
+    |$#   secid    elform       aet               |
+    |       200         1                         |
+    |*CONSTRAINED_RIGID_BODIES                    |
+    |$#    pidm      pids     iflag               |
+    |       200       101                         |
+    |*SET_PART_LIST_TITLE                         |
+    |$# title                                     |
+    |Set-10                                       |
+    |$#     sid       da1       da2               |
+    |        10                                   |
+    |$#    pid1      pid2      pid3               |
+    |       101                                   |
+    |$                                            |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+    +---------------------------------------------+
+    |lsdyna_model.key=============================|
+    |$                                            |
+    |*PART                                        |
+    |$# title                                     |
+    |Part-101                                     |
+    |$#     pid     secid       mid               |
+    |       101       200       200               |
+    |*SECTION_SOLID_TITLE                         |
+    |$# title                                     |
+    |Section-101                                  |
+    |$#   secid    elform       aet               |
+    |       200         1                         |
+    |*CONSTRAINED_RIGID_BODIES                    |
+    |$#    pidm      pids     iflag               |
+    |       200       101                         |
+    |*SET_PART_LIST_TITLE                         |
+    |$# title                                     |
+    |Set-10                                       |
+    |$#     sid       da1       da2               |
+    |        10                                   |
+    |$#    pid1      pid2      pid3               |
+    |       101                                   |
+    |$                                            |
+    |LsManager====================================|
+    | 1. 101 Part-101      | PART                 |
+    | 2. 200 Section-101   | SECTION_SOLID        |<wrong!>
+    | 3.   0               | CONST_RIGID_BODIES   |
+    | 4.  10 Set-10        | SET_PART             |
+    |command-line=================================+
+    |                                             |
+    +---------------------------------------------+
+
+Note:
+This example shows limitation of x-ref tool for ids. It add *SECTION_SOLID to
+reference list which is wrong. Section does not reference to part in any way,
+but its title include string "101". The x-ref tool just looks for each keyword
+which has matching id (string). Be prepare the list of reference has a lot of
+keywords which does not reference for specific id from ls-dyna point of view.
 
 ================================================================================
 9. Includes                                                    *lsdyna-includes*

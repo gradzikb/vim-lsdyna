@@ -5,7 +5,7 @@
 " Language:     VIM Script
 " Filetype:     LS-Dyna FE solver input file
 " Maintainer:   Bartosz Gradzik <bartosz.gradzik@hotmail.com>
-" Last Change:  23.10 2019
+" Last Change:  25.12.2021
 "
 " History of change:
 "
@@ -18,15 +18,15 @@
 "    CLASS
 "-------------------------------------------------------------------------------
 
-function! parser#mat#Mat() dict
+function! parser#define_friction#Define_friction() dict
 
   "-----------------------------------------------------------------------------
   " Class:
-  "   Represent *MAT keyword object.
+  "   Represent *DEFINE_FRICTION keyword object.
   " Inherits:
   "   Keyword class.
   " Returns:
-  "   List of material objects base on keyword object.
+  "   List of define_friction objects base on keyword object.
   " Members:
   " - self.xxxx  : inherit from parent class
   " - self.id    : kword id
@@ -38,15 +38,15 @@ function! parser#mat#Mat() dict
   " - self.Tag()  : set tag file line
   "-----------------------------------------------------------------------------
 
-  " members and methods starting with '_' will not be inherit
+  " get rid of members/methods you do not want to inherit
   call filter(self, 'v:key[0] != "_"')
 
   " local variables
   let datalines = self.Datalines()
 
   " new members
-  let self.id    = self.name =~# '_TITLE' ? str2nr(datalines[2][:9]) : str2nr(datalines[1][:9])
-  let self.title = self.name =~# '_TITLE' ? trim(datalines[1])       : ''
+  let self.id    = self.name =~? 'TITLE' ? str2nr(datalines[2][:9]) : str2nr(datalines[1][:9])
+  let self.title = self.name =~? 'TITLE' ? trim(datalines[1])       : ''
   let self.Qf    = function('<SID>Qf')
   let self.Tag   = function('<SID>Tag')
   let self.Omni  = function('<SID>Omni')
@@ -63,20 +63,19 @@ function! s:Qf() dict
 
   "-----------------------------------------------------------------------------
   " Method:
-  "   Convert part object to quickfix item.
+  "   Convert keyword object to quickfix item.
   " Returns:
   "   Quickfix list item (:help setqflist()).
   "-----------------------------------------------------------------------------
 
-    let qf = {}
-    let qf.bufnr = self.bufnr
-    let qf.lnum  = self.first
-    let qf.type  = 'K'
-    "let qf.text  = self.id.'|'.self.title.'|'.self.type.'|'.self.hide
-    let qftext = copy(self)
-    call filter(qftext, 'type(v:val) != v:t_func') 
-    call remove(qftext, 'lines')
-    let qf.text  = string(qftext)
+  let qf = {}
+  let qf.bufnr = self.bufnr
+  let qf.lnum  = self.first
+  let qf.type  = 'K'
+  let qftext = copy(self)
+  call filter(qftext, 'type(v:val) != v:t_func') 
+  call remove(qftext, 'lines')
+  let qf.text  = string(qftext)
 
   return qf
 
@@ -94,9 +93,8 @@ function! s:Omni() dict
   let item = {}
   let item.word = printf("%10s", self.id)
   let item.menu = self.title
-  let item.dup  = 0
-  let item.info = join(self.lines, "\n")
-  let item.popup = join(self.lines, "\n")
+  let item.dup  = 1
+
   return item
 
 endfunction
@@ -110,7 +108,7 @@ function! s:Tag() dict
   "   Tag file line (:help tags-file-format).
   "-----------------------------------------------------------------------------
 
-  let tag = self.id."\t".self.file."\t".self.first.";\"\tkind:MATERIAL\ttitle:".self.title
+  let tag = self.id."\t".self.file."\t".self.first.";\"\tkind:DEFINE_FRICTION\ttitle:".self.title
 
   return tag
 

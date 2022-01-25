@@ -18,19 +18,20 @@
 "    CLASS
 "-------------------------------------------------------------------------------
 
-function! parser#mat#Mat() dict
+function! parser#define_cpm_vent#Define_cpm_vent() dict
 
   "-----------------------------------------------------------------------------
   " Class:
-  "   Represent *MAT keyword object.
+  "   Represent *DEFINE_CPM_VENT keyword object.
   " Inherits:
   "   Keyword class.
   " Returns:
-  "   List of material objects base on keyword object.
+  "   List of define_coord objects base on keyword object.
   " Members:
   " - self.xxxx  : inherit from parent class
   " - self.id    : kword id
   " - self.title : kword title
+  " - self.lnum  : line number with id
   " Methods:
   " - self.xxxx() : inherit from parent class
   " - self.Omni() : set omni-completion dictionary
@@ -38,20 +39,44 @@ function! parser#mat#Mat() dict
   " - self.Tag()  : set tag file line
   "-----------------------------------------------------------------------------
 
-  " members and methods starting with '_' will not be inherit
+  " get rid of members/mehods you do not want to inherit
   call filter(self, 'v:key[0] != "_"')
 
-  " local variables
-  let datalines = self.Datalines()
+  " list to store all keyword objects
+  let cpmvents = []
 
-  " new members
-  let self.id    = self.name =~# '_TITLE' ? str2nr(datalines[2][:9]) : str2nr(datalines[1][:9])
-  let self.title = self.name =~# '_TITLE' ? trim(datalines[1])       : ''
-  let self.Qf    = function('<SID>Qf')
-  let self.Tag   = function('<SID>Tag')
-  let self.Omni  = function('<SID>Omni')
+  "-----------------------------------------------------------------------------
+  "if self.type ==? ''
 
-  return [self]
+    let lcount = 0
+    let dlcount = 0
+    let lines = [self.name]
+    for line in self.lines[1:]
+      let lines += [line] 
+      let lcount += 1
+      if line[0] != '$'
+        let dlcount += 1
+        if dlcount == 1
+          let cpmvent       = copy(self)
+          let cpmvent.id    = str2nr(line[:9])
+          let cpmvent.lnum  = cpmvent.first + lcount
+          let cpmvent.title = ''
+        elseif dlcount == 2
+          let cpmvent.lines = lines
+          let cpmvent.Qf    = function('<SID>Qf')
+          let cpmvent.Tag   = function('<SID>Tag')
+          let cpmvent.Omni  = function('<SID>Omni')
+          call add(cpmvents, cpmvent)
+          let dlcount = 0
+          let lines = [self.name] " 1st line for next kword
+        endif
+
+      endif
+    endfor
+
+  "endif
+
+  return cpmvents
 
 endfunction
 
@@ -63,20 +88,19 @@ function! s:Qf() dict
 
   "-----------------------------------------------------------------------------
   " Method:
-  "   Convert part object to quickfix item.
+  "   Convert keyword object to quickfix item.
   " Returns:
   "   Quickfix list item (:help setqflist()).
   "-----------------------------------------------------------------------------
 
-    let qf = {}
-    let qf.bufnr = self.bufnr
-    let qf.lnum  = self.first
-    let qf.type  = 'K'
-    "let qf.text  = self.id.'|'.self.title.'|'.self.type.'|'.self.hide
-    let qftext = copy(self)
-    call filter(qftext, 'type(v:val) != v:t_func') 
-    call remove(qftext, 'lines')
-    let qf.text  = string(qftext)
+  let qf = {}
+  let qf.bufnr = self.bufnr
+  let qf.lnum  = self.lnum
+  let qf.type  = 'K'
+  let qftext = copy(self)
+  call filter(qftext, 'type(v:val) != v:t_func') 
+  call remove(qftext, 'lines')
+  let qf.text  = string(qftext)
 
   return qf
 
@@ -94,9 +118,8 @@ function! s:Omni() dict
   let item = {}
   let item.word = printf("%10s", self.id)
   let item.menu = self.title
-  let item.dup  = 0
-  let item.info = join(self.lines, "\n")
-  let item.popup = join(self.lines, "\n")
+  "let item.dup  = 1
+
   return item
 
 endfunction
@@ -110,7 +133,7 @@ function! s:Tag() dict
   "   Tag file line (:help tags-file-format).
   "-----------------------------------------------------------------------------
 
-  let tag = self.id."\t".self.file."\t".self.first.";\"\tkind:MATERIAL\ttitle:".self.title
+  let tag = self.id."\t".self.file."\t".self.lnum.";\"\tkind:DEFINE_CPM_VENT\ttitle:".self.title
 
   return tag
 

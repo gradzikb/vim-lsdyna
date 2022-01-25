@@ -58,7 +58,7 @@ function! lsdyna_misc#KwordDelete(bang, range, line1, line2, ...)
 
   if a:range == 0
     let kw_lnum = 0
-    let qfid = lsdyna_vimgrep#Vimgrep(join(a:000), '%', a:bang ? 'r' : '')
+    let qfid = lsdyna_vimgrep#Vimgrep(join(a:000), #{notlook:a:bang})
     for item in getqflist({'id':qfid, 'items':''}).items
       " after I delete kword number of lines will change, it means kw position will
       " change. I must substract number of lines I deleted from kw position.
@@ -69,7 +69,7 @@ function! lsdyna_misc#KwordDelete(bang, range, line1, line2, ...)
   " range set, delete all specific lines
   else
     " I must not delete line by line since it will change order of my lines
-    " first I set mark for lines I want to delete and next I do it in one step
+    " first I prefix all lines I want to delete and next I do it in one step
     silent execute a:line1..','..a:line2..'s/^/'..'vim-lsdyna-line-to-delete'
     " block hole register is used to not change unnamed register
     silent execute 'g/vim-lsdyna-line-to-delete/delete _'
@@ -87,7 +87,7 @@ function! lsdyna_misc#KwordComment(bang, range, line1, line2, ...)
 
   " no range, look for specyfic keywords
   if a:range == 0
-      let qfid = lsdyna_vimgrep#Vimgrep(join(a:000), '%', a:bang ? 'r' : '')
+      let qfid = lsdyna_vimgrep#Vimgrep(join(a:000), #{includes:a:bang})
       for item in getqflist({'id':qfid, 'items':''}).items
         let kword = lsdyna_parser#Keyword(item.lnum, item.bufnr, '')
         call kword.Comment(g:lsdynaCommentString)
@@ -317,6 +317,15 @@ function s:MarkerCross(name, x, y, z, id)
   let dyna_lines += map(elements, { _, val -> printf('%8d%8d%8d%8d', val[0], val[1], val[2], val[3]) })
 
   return dyna_lines
+
+endfunction
+
+"-------------------------------------------------------------------------------
+
+function lsdyna_misc#Asteriks() abort
+
+  let kword = lsdyna_parser#Keyword(line('.'), bufnr('%'), '')
+  let @/ = kword.GetText({'cword':''}).cword
 
 endfunction
 

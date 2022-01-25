@@ -53,7 +53,9 @@ lsdyna-nodeRotate	lsdyna.txt	/*lsdyna-nodeRotate*
 lsdyna-nodeScale	lsdyna.txt	/*lsdyna-nodeScale*
 lsdyna-nodeTranslate	lsdyna.txt	/*lsdyna-nodeTranslate*
 lsdyna-offsetId	lsdyna.txt	/*lsdyna-offsetId*
+lsdyna-quickpeek	lsdyna.txt	/*lsdyna-quickpeek*
 lsdyna-syntax	lsdyna.txt	/*lsdyna-syntax*
 lsdyna-tags	lsdyna.txt	/*lsdyna-tags*
 lsdyna-textObject	lsdyna.txt	/*lsdyna-textObject*
+lsdyna-xref	lsdyna.txt	/*lsdyna-xref*
 lsdyna.txt	lsdyna.txt	/*lsdyna.txt*

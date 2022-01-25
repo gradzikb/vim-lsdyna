@@ -22,7 +22,7 @@ set cpo&vim
 
 " path to Acrobat Reader exe file, used with :LsManual
 if !exists("g:lsdynaPathAcrobat")
-  let g:lsdynaPathAcrobat = '"C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe" /n'
+  let g:lsdynaPathAcrobat = 'C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe'
 endif
 " command used for encryption
 if !exists("g:lsdynaEncryptCommand")
@@ -37,7 +37,8 @@ let b:lsdynaLibKeywords = lsdyna_complete#libKeywords(b:lsdynaLibKeywordsPath)
 " path to directory with Ls-Dyna Manual PDF files
 let g:lsdynaPathManual = expand('<sfile>:p:h:h')..'/manuals/'
 " global dictionaries used with the plugin
-source <sfile>:p:h:h/autoload/lsdyna_dict.vim
+source <sfile>:p:h:h/autoload/lsdyna_config_options.vim
+source <sfile>:p:h:h/autoload/lsdyna_config_headers.vim
 " turn on include path auto split function
 if !exists("g:lsdynaInclPathAutoSplit")
   let g:lsdynaInclPathAutoSplit = 1
@@ -75,14 +76,14 @@ setlocal wildmode=list,full
 setlocal textwidth=80
 setlocal listchars=tab:>-,trail:-
 setlocal list
-setlocal completeopt=menuone,noinsert
-"setlocal completepopup=align:item,border:off
-"setlocal quickfixtextfunc=lsdyna_manager#QfFormatLine
+setlocal completeopt=menuone,noinsert,preview
+setlocal previewheight=20
+"setlocal completepopup=align:menu,border:off
 setlocal omnifunc=lsdyna_complete#Omnifunc
 setlocal completefunc=lsdyna_complete#Completefunc
-"setlocal formatexpr=lsdyna_misc#Format()
 execute 'setlocal tags='..split(&rtp,',')[0]..'/.dtags'
 highlight QuickFixLine guifg=NONE guibg=NONE
+setlocal winaltkeys=no
 
 "-------------------------------------------------------------------------------
 "    FOLDING
@@ -108,12 +109,23 @@ augroup END
 augroup lsdyna-lsManager
   autocmd!
   " set Qf window look
-  autocmd BufReadPost quickfix setlocal modifiable | silent call lsdyna_manager#QfWindow() | setlocal nomodifiable
+  "autocmd BufReadPost quickfix setlocal modifiable | silent call lsdyna_manager#QfWindow() | setlocal nomodifiable
+  "autocmd BufReadPost quickfix setlocal modifiable | silent call getqflist({'context':''}).context.quickfixwindowfunc() | setlocal nomodifiable
+  "autocmd QuickFixCmdPost setlocal modifiable | try | call call(getqflist({'context':''}).context.quickfixwindowfunc, []) | endtry | setlocal nomodifiable
+  autocmd BufReadPost quickfix setlocal modifiable | silent call Test() | setlocal nomodifiable
   "autocmd FileType qf setlocal cursorline
   "autocmd FileType qf highlight QuickFixLine guifg=NONE guibg=NONE
   " focus view on quickfix item everytime a cursor is moved
   autocmd FileType qf autocmd CursorMoved <buffer> call lsdyna_manager#QfSetCursor()
+  "autocmd FileType qf autocmd CursorMoved <buffer> call lsdyna_manager#QfPopup()
 augroup END
+
+function Test()
+  let qf_context = getqflist({'context':''}).context
+  if !empty(qf_context) && qf_context->has_key('quickfixbufferfunc')
+    call call(qf_context.quickfixbufferfunc, [])
+  endif
+endfunction
 
 "-------------------------------------------------------------------------------
 "    MAPPINGS
@@ -122,18 +134,15 @@ augroup END
 " change 4 -> '$' sign at the line beginning
 inoreabbrev 4 <C-R>=(col('.')==1 ? '$' : 4)<CR>
 " comment/uncomment line
-noremap <silent><buffer> <M-c> :call lsdyna_misc#CommentLine()<CR>j
-noremap <silent><buffer> <c-c> :call lsdyna_misc#CommentLine()<CR>j
-" put empty comment line below
-nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
-" put empty comment line above
-nnoremap <silent><buffer> <LocalLeader>C O$<ESC>0
-" put separator line above
-nnoremap <silent><buffer> <LocalLeader>1 o$-------------------------------------------------------------------------------<ESC>0
-nnoremap <silent><buffer> <LocalLeader>2 o$-------10--------20--------30--------40--------50--------60--------70--------80<ESC>0
-" put separator line below
-nnoremap <silent><buffer> <LocalLeader>! O$-------------------------------------------------------------------------------<ESC>0
-nnoremap <silent><buffer> <LocalLeader>@ O$-------10--------20--------30--------40--------50--------60--------70--------80<ESC>0
+noremap <silent><buffer> <localleader>c :call lsdyna_misc#CommentLine()<CR>j
+noremap <silent><buffer> <A-c> :call lsdyna_misc#CommentLine()<CR>j
+"noremap <silent><buffer> <c-c> :call lsdyna_misc#CommentLine()<CR>j
+" put empty comment line
+"nnoremap <silent><buffer> <LocalLeader>c o$<ESC>0
+nnoremap <silent><buffer> <LocalLeader>1 o$<ESC>0
+" put separator line
+nnoremap <silent><buffer> <LocalLeader>2 o$-------------------------------------------------------------------------------<ESC>0
+nnoremap <silent><buffer> <LocalLeader>3 o$-------10--------20--------30--------40--------50--------60--------70--------80<ESC>0
 " put title separator line below
 nnoremap <silent><buffer> <LocalLeader>0 o$<ESC>79a-<ESC>yypO$<ESC>A    
 " put title separator line above
@@ -154,6 +163,7 @@ cnoreabbrev <expr> wq (getcmdtype()==':' && getcmdline()=='wq') ? 'WQ' : 'wq'
 " autoformat function
 "noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call lsdyna_autoformat#Autoformat()<CR>
 noremap <buffer><script><silent> = :call lsdyna_autoformat#Autoformat()<CR>
+noremap <buffer><script><silent> <A-e> :call lsdyna_autoformat#Autoformat()<CR>
 " begining and end lines
 inoreabbrev bof $-------------------------------------BOF---------------------------------------
 inoreabbrev eof $-------------------------------------EOF---------------------------------------
@@ -171,8 +181,8 @@ onoremap <buffer><silent> ak :call lsdyna_misc#KeywordTextObject()<CR>
 " ls-dyna manuall
 noremap <buffer><silent> <F1> :call lsdyna_manual#Manual(line('.'))<CR>
 " tags
-noremap <buffer><silent> <F11> :LsTags<CR>
-noremap <buffer><silent> <S-F11> :LsTags!<CR>
+"noremap <buffer><silent> <F11> :LsTags<CR>
+"noremap <buffer><silent> <S-F11> :LsTags!<CR>
 " LsManager mappings (F12)
 noremap <buffer><silent> <F12>* :LsManager *<CR>
 noremap <buffer><silent> <F12>. :call lsdyna_manager#QfOpen(g:lsdyna_qfid_last, 0)<CR>
@@ -185,6 +195,7 @@ noremap <buffer><silent> <F12>S :LsManager set<CR>
 noremap <buffer><silent> <F12>a :LsManager airbag<CR>
 noremap <buffer><silent> <F12>b :LsManager boundary<CR>
 noremap <buffer><silent> <F12>c :LsManager contact<CR>
+noremap <buffer><silent> <F12><C-c> :LsManager control<CR>
 noremap <buffer><silent> <F12>db :LsManager database<CR>
 noremap <buffer><silent> <F12>dC :LsManager define_coordinate<CR>
 noremap <buffer><silent> <F12>dc :LsManager define_curve<CR>
@@ -210,6 +221,7 @@ noremap <buffer><silent> <S-F12>S :LsManager! set<CR>
 noremap <buffer><silent> <S-F12>a :LsManager! airbag<CR>
 noremap <buffer><silent> <S-F12>b :LsManager! boundary<CR>
 noremap <buffer><silent> <S-F12>c :LsManager! contact<CR>
+noremap <buffer><silent> <F12><C-c> :LsManager! control<CR>
 noremap <buffer><silent> <S-F12>db :LsManager! database<CR>
 noremap <buffer><silent> <S-F12>dC :LsManager! define_coordinate<CR>
 noremap <buffer><silent> <S-F12>dc :LsManager! define_curve<CR>
@@ -225,6 +237,18 @@ noremap <buffer><silent> <S-F12>p :LsManager! part<CR>
 noremap <buffer><silent> <S-F12>s :LsManager! section<CR>
 noremap <buffer><silent> <S-F12>x :LsManager! database_cross_section<CR>
 noremap <buffer><silent><expr> <S-F12>/ ':LsManager! '.input('LsManager ').'<CR>'
+ 
+"nnoremap <buffer><silent> <a-q> :call lsdyna_quickpeek#Quickpeek('', {'includes':0})<CR>
+"noremap <buffer><silent><expr> <a-q> ':call lsdyna_quickpeek#Quickpeek("", {"mode":"'..mode()..'"})<CR>'
+noremap <buffer><silent><expr> <a-q> ':<c-u>call lsdyna_quickpeek#Quickpeek("", {"mode":"'..mode()..'"})<CR>'
+nnoremap <buffer><silent> <LocalLeader>q :call lsdyna_quickpeek#Quickpeek('', {'includes':0})<CR>
+nnoremap <buffer><silent> <LocalLeader>Q :call lsdyna_quickpeek#Quickpeek('', {'includes':1})<CR>
+
+nnoremap <buffer><silent> <a-x> :call lsdyna_xref#Xref('', {'includes':0})<CR>
+nnoremap <buffer><silent> <LocalLeader>x :call lsdyna_xref#Xref('', {'includes':0})<CR>
+nnoremap <buffer><silent> <LocalLeader>X :call lsdyna_xref#Xref('', {'includes':1})<CR>
+
+nnoremap <buffer><silent> <LocalLeader>* :call lsdyna_misc#Asteriks()<CR>/<C-r>/<CR>
 
 "-------------------------------------------------------------------------------
 "    COMMANDS

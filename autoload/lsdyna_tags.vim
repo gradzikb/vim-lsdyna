@@ -28,9 +28,9 @@ function! lsdyna_tags#Lstags(bang, ...)
   let kword = a:0 ? a:1 : '*'
 
   if a:bang
-    let qfid = lsdyna_vimgrep#Vimgrep(kword, '%', 'i')
+    let qfid = lsdyna_vimgrep#Vimgrep(kword, #{includes:1})
   else
-    let qfid = lsdyna_vimgrep#Vimgrep(kword, '%', '')
+    let qfid = lsdyna_vimgrep#Vimgrep(kword, #{includes:0})
   endif
 
   " parsing keywords change cursor position and I want to stay in place

@@ -28,17 +28,17 @@ function! lsdyna_manager#Manager(bang, kword) abort
   "-----------------------------------------------------------------------------
 
   " global list to store all parameters {pname:peval}
-  " I need it to evaluate parameter values
+  " I need this list for evaluation of all parameters
   let g:lsdyna_manager_parameters = {}
 
   " w/o  bang --> search keyword in current buffer only
   " with bang --> search keyword in all *INCLUDE files
   if a:bang
-    let qfid = lsdyna_vimgrep#Vimgrep(a:kword, '%', 'i')
-    let g:lsdynaManagerCommand = 'LsManager! ' .. a:kword
+    let qfid = lsdyna_vimgrep#Vimgrep(a:kword, #{includes:1})
+    let command = 'LsManager! ' .. a:kword
   else
-    let qfid = lsdyna_vimgrep#Vimgrep(a:kword, '%', '')
-    let g:lsdynaManagerCommand = 'LsManager ' .. a:kword
+    let qfid = lsdyna_vimgrep#Vimgrep(a:kword, #{includes:0})
+    let command = 'LsManager ' .. a:kword
   endif
 
   " list of items found by vimgrep
@@ -50,34 +50,58 @@ function! lsdyna_manager#Manager(bang, kword) abort
     return
   endif
 
-  " save cursor position
-  " parsing keywords change cursor position and I want to stay in place
-  let save_cursor = getpos(".")
-  let save_cursor[0] = bufnr('%')
-
-  " if I make list of all keywords parse all items as "kword" object otherwise
-  " try to detecet type of the keyword
-  let fname = a:kword == '*' ? '_Kword' : '_Autodetect'
+  " mark 'X' is used with <ESC> mapping, with <ESC> I want to go back to
+  " orginal position, or I will be set in qf item position
+  normal! mX
 
   " parse each entry from vimgrep into keyword type
   let qflist = []
   for item in vimgrepQfList
-    let kwords = lsdyna_parser#Keyword(item.lnum, item.bufnr, 'f')
-    "let kwords_obj = kwords.{fname}()
-    let kwords_obj = call(kwords[fname], [], kwords)
+    let kwords = lsdyna_parser#Keyword(item.lnum, item.bufnr, '')
+    " if I make list of all keywords (:LsManager '*') parse all items as 'kword'
+    " in other case try to autodetec keywords
+    let kwords_obj = call(kwords[a:kword=='*'?'_Kword':'_Autodetect'], [], kwords)
     call extend(qflist, map(kwords_obj, 'v:val.Qf()'))
   endfor
 
-  " restore cursor position
-  execute 'noautocmd buffer ' . save_cursor[0]
-  call setpos('.', save_cursor)
+  "-----------------------------------------------------------------------------
+  " define functions used to set quickfix window style depend on content
 
+  " set qf window format
+  let kword_len = a:kword->split()->len()
+  if a:kword ==? '*' || qflist[0].type ==? 'U'
+  " not parsed keywword qf window style
+    let quickfixtype = 'keyword_no_parse'
+    let quickfixtextfunc = 'lsdyna_quickfix#KeywordNoParse_textfunc'
+    let quickfixbufferfunc = 'lsdyna_quickfix#KeywordNoParse_bufferfunc'
+  " includes qf window style
+  elseif kword_len == 1 && a:kword =~? '^*\?INC'
+    let quickfixtype = 'include'
+    let quickfixtextfunc = 'lsdyna_quickfix#Include_textfunc'
+    let quickfixbufferfunc = 'lsdyna_quickfix#Include_bufferfunc'
+  " parameters qf window style
+  elseif kword_len == 1 && a:kword =~? '^*\?PARA'
+    let quickfixtype = 'parameter'
+    let quickfixtextfunc = 'lsdyna_quickfix#Parameter_textfunc'
+    let quickfixbufferfunc = 'lsdyna_quickfix#Parameter_bufferfunc'
+  " parsed keyword qf window style
+  else
+    let quickfixtype = 'keyword'
+    let quickfixtextfunc = 'lsdyna_quickfix#Keyword_textfunc'
+    let quickfixbufferfunc = 'lsdyna_quickfix#Keyword_bufferfunc'
+  endif
+
+  "-----------------------------------------------------------------------------
   " set new qf list with new items
-  call setqflist([], ' ', {'title'            : 'LsManager '.a:kword,
-  \                        'items'            : qflist,
-  \                        'quickfixtextfunc' : 'lsdyna_manager#QfFormatLine'
+  call setqflist([], ' ', #{title            : 'LsManager '..a:kword,
+  \                         items            : qflist,
+  \                         quickfixtextfunc : quickfixtextfunc,
+  \                         context          : {'type'              :quickfixtype,
+  \                                             'quickfixbufferfunc':quickfixbufferfunc,
+  \                                             'quickfixtextfunc'  :quickfixtextfunc,
+  \                                             'command'           :command},
   \                       })
-  "
+
   " save qf list id so I can used it from history
   " history for includes is kept separately
   let qfid = getqflist({'id':0}).id 
@@ -139,7 +163,7 @@ function! lsdyna_manager#QfOpen(qfid, lnum)
 
   " open qf window
   cclose
-  silent execute qf.nr.'chistory'
+  silent execute qf.nr..'chistory'
   "execute 'copen' max([2, min([30, qf.size+1])])
   " qf qindow has minimal size of two lines and max 50% of window height
   execute 'copen' max([2, min([winheight('')/2, qf.size+1])])
@@ -353,7 +377,8 @@ function! lsdyna_manager#QfWindow()
   nnoremap <buffer> e :cclose<CR> :silent cdo LsCmdExe 
   nnoremap <buffer><silent> 4 :call <SID>QfFilter('\$','exclusive')<CR>
   nnoremap <buffer><silent> $ :call <SID>QfFilter('\$','')<CR>
-  nnoremap <buffer><silent> <ESC> :cclose<CR>zz
+  "nnoremap <buffer><silent> <ESC> :cclose<CR>zz
+  nnoremap <buffer><silent> <ESC> :cclose<CR>'P
   nnoremap <buffer><silent> <CR> :cclose<CR>zz
   nnoremap <buffer><silent> <kEnter> :cclose<CR>zz
   nnoremap <buffer><silent> <Home> gg
@@ -676,40 +701,5 @@ function! lsdyna_manager#QfSetCursor()
   wincmd p
 
 endfunction
-
-"-------------------------------------------------------------------------------
-
-"function s:ShowExpr()
-"
-"  "-----------------------------------------------------------------------------
-"  " Function to show only selected parameter and parameters used in
-"  " expression.
-"  "
-"  " Arguments:
-"  " - None
-"  " Return:
-"  " - None
-"  "-----------------------------------------------------------------------------
-"
-"  " get name and full expression for parameter in current line
-"  let exprName = split(getqflist()[line('.')-1].text,'|')[4]
-"  let exprVal  = split(getqflist()[line('.')-1].text,'|')[5]
-"  
-"  " here I am looking for all parameter lines in expression
-"  let rePnames = exprName.'\|'
-"  let start = 0
-"  while 1
-"    let match = matchstrpos(exprVal, '\(^\|[-+*/(,]\)\zs\h\w*\ze\([-+*/)]\|$\)', start, 1) 
-"    if match[1] == -1 | break | endif
-"    let rePnames = rePnames.match[0].'\|'
-"    let start = match[2]
-"  endwhile
-"
-"  " and last step call filter function
-"  let rePnames = '^\w\s*\('.rePnames[:-3].'\) ='
-"  "call writefile([rePnames], 'vimout.txt')
-"  call <SID>Filter(rePnames,'') 
-"
-"endfunction
 
 "-------------------------------------EOF---------------------------------------

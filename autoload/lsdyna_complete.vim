@@ -43,6 +43,7 @@ function! lsdyna_complete#OmnifunctPre(flag)
 
   let s:lsdynaOmniCompletionType = 'none'
   let s:complete_items = []
+  let vg_opts = a:flag =~? 'i' ? 1 : 0
 
   "-----------------------------------------------------------------------------
   " keyword completion
@@ -58,7 +59,7 @@ function! lsdyna_complete#OmnifunctPre(flag)
   if apos > -1
     let s:lsdynaOmniCompletionType = 'parameter'
     normal! mP
-    let qfid = lsdyna_vimgrep#Vimgrep('parameter', '%', a:flag)
+    let qfid = lsdyna_vimgrep#Vimgrep('parameter', #{includes:vg_opts})
     for item in getqflist({'id':qfid, 'items':''}).items
       call extend(s:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Parameter())
     endfor
@@ -87,7 +88,7 @@ function! lsdyna_complete#OmnifunctPre(flag)
   " field id completion
   let s:lsdynaOmniCompletionType = 'field_id'
   normal! mP
-  let qfid = lsdyna_vimgrep#Vimgrep(get(g:lsdynaLibHeaders, header, "set part"), '%', a:flag)
+  let qfid = lsdyna_vimgrep#Vimgrep(get(g:lsdynaLibHeaders, header, "set part"), #{includes:vg_opts})
   for item in getqflist({'id':qfid, 'items':''}).items
     call extend(s:complete_items, lsdyna_parser#Keyword(item.lnum, item.bufnr, 'fn')._Autodetect())
   endfor
@@ -262,6 +263,7 @@ function! lsdyna_complete#CompleteDone()
  
   if complete_mode == 'omni'
 
+    pclose
     if s:lsdynaOmniCompletionType == 'keyword' && !empty(v:completed_item)
       silent execute 'delete _'
       silent execute '.-1read ' .. v:completed_item.user_data
@@ -286,45 +288,6 @@ function! lsdyna_complete#CompleteDone()
   endif
 
 endfunction
-
-"-------------------------------------------------------------------------------
-
-"function! lsdyna_complete#MapEnter()
-"
-"  "-----------------------------------------------------------------------------
-"  " Function change behaviour of <CR> to perform completion.
-"  " It depends on variable set by "lsdyna_complete#OmnifunctPre" function.
-"  "
-"  " Arguments:
-"  " - None
-"  " Return:
-"  " - None
-"  "-----------------------------------------------------------------------------
-"
-"  " do not map if menu not visible
-"  if !pumvisible() | return "\<CR>" | endif
-"
-"  " choose mapping depend on completion type
-"  if s:lsdynaOmniCompletionType == 'keyword'
-"    " insert entry from menu, leave insert mode, insert keyword
-"    let mapStr = "\<C-Y>\<ESC>:call lsdyna_complete#InputKeyword()\<CR>"
-"  elseif s:lsdynaOmniCompletionType == 'parameter'
-"    " insert entry from menu, leave insert mode
-"    let mapStr = "\<C-Y>\<ESC>"
-"  elseif s:lsdynaOmniCompletionType == 'field_opt' || s:lsdynaOmniCompletionType == 'field_id'
-"    " insert entry from menu, leave insert mode
-"    let mapStr = "\<C-Y>\<ESC>"
-"  else
-"    " act normal
-"    let mapStr = "\<CR>"
-"  endif
-"
-"  " reset completion type
-"  let s:lsdynaOmniCompletionType = 'none'
-"
-"  return mapStr
-"
-"endfunction
 
 "-------------------------------------------------------------------------------
 
@@ -498,6 +461,5 @@ function! lsdyna_complete#Completefunc(findstart, base)
   endif
 
 endfunction
-
 
 "-------------------------------------EOF---------------------------------------

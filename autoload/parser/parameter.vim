@@ -53,6 +53,7 @@ function! parser#parameter#Parameter(...) dict
   " - self.name  : kword name
   " - self.peval : parameter value after evaluation
   " - self.pname : parameter name
+  " - self.id    : self.pname
   " - self.ptype : parameter type (R, I, C))
   " - self.pval  : parameter value
   " - self.type  : kword type (kword name after 1st '_', _EXPRESSION, _LOCAL)
@@ -72,6 +73,7 @@ function! parser#parameter#Parameter(...) dict
   let params = []
 
   let lines = self.lines[1:]
+  "let lines = [self.lines]
 
   " get rid of members/mehods you do not want to inherit
   call filter(self, 'v:key[0] != "_"')
@@ -80,40 +82,30 @@ function! parser#parameter#Parameter(...) dict
   " this part process *PARAMETER_EXPRESSION
   if self.name =~? 'EXPRESSION'
 
-    let lcount = 0
-    for line in lines
-      let lcount += 1
-      if line[0] =~? '[RIC]'
+    for lnum in range(len(lines))
+      let line = lines[lnum]
+      " comment line case
+      if line[0] ==? '$'
+        continue
+      " parameter name line case
+      elseif line[0] =~? '[RIC]' 
         let param = copy(self)
-        let param.pname = s:Trim(line[1:9])
+        let param.lines = [self.name]
+        let param.lines += [line]
+        let param.lnum  = param.first + lnum + 1
         let param.ptype = toupper(line[0])
-        let param.lnum  = param.first + lcount
-        "----------------------------------------------------------------------
-        " set parameter value, if needed loop over multi line definition
+        let param.pname = trim(line[1:9])
+        let param.id    = param.pname
         let param.pval  = trim(line[10:])
-        let lnum = param.lnum + 1
-        while 1
-          let exprline = getline(lnum)
-          if exprline[0] == '$'
-            let lnum += 1
-            continue
-          elseif exprline =~? '^ \{10}'
-            let param.pval = param.pval . getline(lnum)[10:]
-            let lnum = lnum + 1
-          else
-            break
-          endif
-        endwhile
-        let param.pval = substitute(param.pval, '[ &<>]', '', 'g')
-        "let param.dub = has_key(g:lsdyna_manager_parameters, toupper(param.pname)) ? 1 : 0
-        let param.peval = lsdyna_parameter#Eval(param.pval)
-        " all parameter values are saved in global dict cause I need them to
-        " make evaluation, I use this dict also to check duplicate parameters
-        let g:lsdyna_manager_parameters[toupper(param.pname)] = param.peval
         let param.Qf    = function('<SID>Qf')
         let param.Tag   = function('<SID>Tag')
         let param.Omni  = function('<SID>Omni')
         call add(params, param)
+      else
+      " multiline case, extend parameter value with next line
+      " current parameter is last item on the 'params' list
+        let params[-1].pval ..= trim(line[10:])
+        let params[-1].lines += [line]
       endif
     endfor
 
@@ -144,14 +136,13 @@ function! parser#parameter#Parameter(...) dict
           " process parameter line list
           for i in range(0, len(lline)-1, 2)
             let param = copy(self)
+            let param.lines = [self.name]
+            let param.lines += [line]
             let param.lnum  = param.first + lcount
             let param.pname = trim(lline[i][1:])
+            let param.id    = param.pname
             let param.ptype = toupper(lline[i][0])
             let param.pval  = trim(substitute(lline[i+1], '[&<>\s]', '', 'g'))
-            "let param.dub   = has_key(g:lsdyna_manager_parameters, toupper(param.pname)) ? 1 : 0
-            " using printf() help me with float precision, :help floating-point-precision
-            let param.peval = lsdyna_parameter#Eval(param.pval)
-            let g:lsdyna_manager_parameters[toupper(param.pname)] = param.peval
             let param.Qf    = function('<SID>Qf')
             let param.Tag   = function('<SID>Tag')
             let param.Omni  = function('<SID>Omni')
@@ -162,6 +153,17 @@ function! parser#parameter#Parameter(...) dict
     endfor
 
   endif
+
+  " evaluate parameter values
+  for param in params
+      let param.pval = substitute(param.pval, '[ &<>]', '', 'g') "clean up expression
+      let param.peval = lsdyna_parameter#Eval(param.pval)
+      "add to global list of parameters, do not overwrite excisted parameters,
+      "this way for evaluation I am using 1st parameter in case of duplicates
+      if !has_key(g:lsdyna_manager_parameters, toupper(param.pname))
+        let g:lsdyna_manager_parameters[toupper(param.pname)] = param.peval
+      endif
+  endfor
 
   return params
 
@@ -220,13 +222,21 @@ function! s:Omni() dict
   "   Tag string
   "-----------------------------------------------------------------------------
 
+  if self.ptype ==? 'I'
+    let peval = printf("%d", self.peval)
+  elseif self.ptype ==? 'R'
+    let peval = printf("%.4g", str2float(self.peval))
+  else
+    let peval = self.peval
+  endif
+
   let item = {}
   let item.word = self.pname
-  let item.menu = self.peval
+  let item.menu = peval
   let item.kind = self.ptype
   let item.dup  = 1
   "let item.info = self.type =~? 'EXPRESSION' ? '' : self.pval
-  let item.info = self.pval ==? self.peval ? '' : '='..self.pval
+  "let item.info = self.pval ==? self.peval ? '' : '='..self.pval
   return item
 
 endfunction
