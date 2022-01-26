@@ -295,13 +295,15 @@ function! lsdyna_include#CommentIncludes(bang, ...)
  
   " function started with keyword manager
   if &filetype == 'qf'
-    let qflist = getqflist()
+    let qf = getqflist({'items':'', 'context':''})
+    let qflist = qf.items
     let qfopen = 1
     cclose
   " keyword started w/o keyword manager
   else
     let qfid = lsdyna_vimgrep#Vimgrep('include', {})
-    let qflist = getqflist({'id':qfid, 'items':''}).items
+    let qf = getqflist({'id':qfid, 'items':'', 'context':''})
+    let qflist = qf.items
     let qfopen = 0
   endif
 
@@ -339,9 +341,9 @@ function! lsdyna_include#CommentIncludes(bang, ...)
     endif
   endfor
   silent execute 'buffer' bufnr
-  
+
   if qfopen
-    execute g:lsdynaManagerCommand
+    execute qf.context.command
   endif
 
 endfunction

@@ -277,6 +277,8 @@ function! lsdyna_quickfix#BufferCommands()
   nnoremap <buffer><silent> h :call <SID>QfNormalCmd('h')<CR>
   nnoremap <buffer><silent> f :call <SID>QfFilter('','f')<CR>
   nnoremap <buffer><silent> F :call <SID>QfFilter('','F')<CR>
+  nnoremap <buffer><silent> 4 :call <SID>QfFilter('\$','F')<CR>
+  nnoremap <buffer><silent> $ :call <SID>QfFilter('\$','f')<CR>
   nnoremap <buffer> e :cclose<CR> :silent cdo LsCmdExe 
 
 endfunction
@@ -438,7 +440,7 @@ function! s:QfFilter(what, options)
   "-----------------------------------------------------------------------------
 
   " if filter name missing ask for it
-  let fname = !empty(a:what) ? a:string : input('Find: ') 
+  let fname = !empty(a:what) ? a:what : input('Find: ')
 
   if empty('fname') | return | endif
 
@@ -451,14 +453,14 @@ function! s:QfFilter(what, options)
   let qf_filter = []
 
   " inclusive filter
-  if a:options ==? 'f'
+  if a:options ==# 'f'
     for i in range(len(qfwindow))
       if qfwindow[i] =~? fname
         call add(qf_filter, qf.items[i])
       endif
     endfor
   " exclusive filter
-  elseif a:options ==? 'F'
+  elseif a:options ==# 'F'
     for i in range(len(qfwindow))
       if qfwindow[i] !~? fname
         call add(qf_filter, qf.items[i])
