@@ -3885,9 +3885,9 @@ names and right has additional information about include like:
 Full list of 'LsManager' commands can be found here |lsdyna-commandsManager|.
 
 Here we will take a close look to commands which operate directly on files:
-- <C> : copy include file
-- <R> : rename include file
-- <D> : delete include file
+- <c-c> : copy include file
+- <c-r> : rename include file
+- <c-d> : delete include file
 
 Let say we want to make a copy of "include_B.inc" file so we can modified its
 content and run a new simulation.
@@ -3924,13 +3924,11 @@ First we open master deck file and use <F12><F12> to get list of includes:
     |~                                            |
     |=============================================|
     | 1. include_A.inc |                          |
-   >| 2. include_B.inc |                          |<C>
+   >| 2. include_B.inc |                          |<c-c>
     | 3. include_C.inc |                          |
     |command-line=================================|
     |                                             |
     +---------------------------------------------+
-
-Next we go to specific include (line) on the list and use command <C>
 
     +---------------------------------------------+
     |lsdyna_model.k===============================|
@@ -3949,6 +3947,8 @@ Next we go to specific include (line) on the list and use command <C>
 
 When we accept a new name with <enter> VIM will copy "include_B.inc" file
 into "include_B1.inc" file and update path line under *INCLUDE keyword.
+Since our cursor is already at new include we can use <gf> command to open
+this include and make changes we want to.
 
     +---------------------------------------------+
     |lsdyna_model.k===============================|
@@ -3964,9 +3964,6 @@ into "include_B1.inc" file and update path line under *INCLUDE keyword.
     |command-line=================================|
     |                                             |
     +---------------------------------------------+
-
-Since our cursor is already at new include we can use <gf> command to open
-this include and make changes we want to.
 
 With <F12><I> command you can open the last include list history. It is helpful
 if you have to update more than one include. Using once again <F12><F12> will

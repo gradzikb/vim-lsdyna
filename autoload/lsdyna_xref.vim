@@ -123,8 +123,9 @@ function! lsdyna_xref#Xref(what, options) abort
   call setqflist([], ' ', #{title           : 'Xref '..xref_match_org,
   \                        items            : qflist,
   \                        quickfixtextfunc : 'lsdyna_xref#Quickfixtextfunc',
-  \                        context          : {'type'              :'xref', 
-  \                                            'quickfixbufferfunc':function('lsdyna_xref#quickfixbufferfunc')},
+  \                         context          : {'type'              :'xref',
+  \                                             'quickfixbufferfunc':'lsdyna_quickfix#Keyword_bufferfunc',
+  \                                             'quickfixtextfunc'  :'lsdyna_quickfix#Keyword_textfunc'},
   \                       })
 
   " finally show me Qf window
