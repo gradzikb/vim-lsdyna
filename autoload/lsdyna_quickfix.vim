@@ -348,10 +348,11 @@ function! s:QfNormalCmd(cmd)
   "-----------------------------------------------------------------------------
   " remove current item from the list
   elseif a:cmd ==# 'x'
+    let lnum = line('.')
     let qflist = getqflist()
-    call remove(qflist, line('.')-1)
+    call remove(qflist, lnum-1)
     call setqflist([], 'r', #{nr: 0, items: qflist})
-    call lsdyna_manager#QfOpen(getqflist({'id':0}).id, line('.'))
+    call lsdyna_manager#QfOpen(getqflist({'id':0}).id, lnum)
   "-----------------------------------------------------------------------------
   " comment/uncomment current keyword
   elseif a:cmd ==# 'c'

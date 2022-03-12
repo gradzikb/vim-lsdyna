@@ -327,6 +327,12 @@ function! QP_popup_filter(winid, key) abort
   elseif a:key == 'q' || a:key == "\<ESC>"
     call popup_clear()
     return 1
+  elseif a:key == 'y'
+    let popup_id = popup_list()[0]
+    let winID = winbufnr(popup_id)
+    let pBuffer = getbufline(winID,1,"$")
+    call setreg('+', pBuffer, 'l')
+    return 1
   endif
   return 0
 
