@@ -32,7 +32,7 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_misc#KeywordTextObject()
+function! lsdyna_misc#KeywordTextObject() range
 
   " ----------------------------------------------------------------------------
   " Function to select all keyword lines.

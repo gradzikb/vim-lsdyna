@@ -76,7 +76,7 @@ setlocal wildmode=list,full
 setlocal textwidth=80
 setlocal listchars=tab:>-,trail:-
 setlocal list
-setlocal completeopt=menuone,noinsert,preview
+setlocal completeopt=menuone,noinsert
 setlocal previewheight=20
 "setlocal completepopup=align:menu,border:off
 setlocal omnifunc=lsdyna_complete#Omnifunc
@@ -99,7 +99,7 @@ setlocal foldmethod=expr
 
 augroup lsdyna
   autocmd!
-  autocmd VimEnter cd %:p:h
+  autocmd VimEnter * cd %:p:h
   autocmd BufWrite * set fileformat=unix
   "autocmd BufEnter * silent call lsdyna_tags#Lstags(0, '*')
   autocmd BufEnter * if empty(&filetype) | set filetype=lsdyna | endif

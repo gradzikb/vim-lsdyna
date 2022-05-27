@@ -65,6 +65,7 @@ function! parser#database_cross_section#Database_cross_section() dict
           let dbcs.Tag   = function('<SID>Tag')
           let dbcs.Omni  = function('<SID>Omni')
           let dbcs.SetTitle = function('<SID>SetTitle')
+          let dbcs.SetId = function('<SID>SetId')
           call add(dbcss, dbcs)
           let dlcount = 0
         endif
@@ -94,6 +95,7 @@ function! parser#database_cross_section#Database_cross_section() dict
           let dbcs.Tag   = function('<SID>Tag')
           let dbcs.Omni  = function('<SID>Omni')
           let dbcs.SetTitle = function('<SID>SetTitle')
+          let dbcs.SetId = function('<SID>SetId')
           call add(dbcss, dbcs)
           let dlcount = 0
         endif
@@ -117,6 +119,7 @@ function! parser#database_cross_section#Database_cross_section() dict
         let dbcs.Tag   = function('<SID>Tag')
         let dbcs.Omni  = function('<SID>Omni')
         let dbcs.SetTitle = function('<SID>SetTitle')
+        let dbcs.SetId = function('<SID>SetId')
         call add(dbcss, dbcs)
 
       endif
@@ -142,6 +145,7 @@ function! parser#database_cross_section#Database_cross_section() dict
           let dbcs.Tag   = function('<SID>Tag')
           let dbcs.Omni  = function('<SID>Omni')
           let dbcs.SetTitle = function('<SID>SetTitle')
+          let dbcs.SetId = function('<SID>SetId')
           call add(dbcss, dbcs)
           let dlcount = 0
         endif
@@ -225,6 +229,25 @@ function! s:SetTitle(title) dict
       if self.lines[i][0] != '$'
         let self.lines[i] = self.lines[i][:9] . a:title
         let self.title = a:title
+        break
+      endif
+    endfor
+  endif
+
+endfunction
+
+function! s:SetId(id) dict
+
+  "-----------------------------------------------------------------------------
+  " Method:
+  "   Set a new title for *DATABASE_CROSS_SECTION keyword.
+  "-----------------------------------------------------------------------------
+
+  if self.type =~? '_ID'  
+    for i in range(1, len(self.lines)-1)
+      if self.lines[i][0] != '$'
+        let self.lines[i] = printf("%10s", a:id) .. self.lines[i][10:]
+        let self.id = a:id
         break
       endif
     endfor
