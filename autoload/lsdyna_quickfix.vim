@@ -129,7 +129,9 @@ function! lsdyna_quickfix#Include_textfunc(info)
   "for incl in qf_items
   for idx in range(qf_items->len())
     let incl  = qf_items[idx]
-    let path  = printf('%-'..max([68, maxlen])..'s', treelvls[idx]..fnamemodify(incl.path,':t'))
+    " remove path separator if at the end, it make difference for fnamemodify(":t")
+    let name = incl.path[-1:] =~? '[/\\]' ? incl.path[:-2] : incl.path 
+    let path  = printf('%-'..max([68, maxlen])..'s', treelvls[idx]..fnamemodify(name,':t'))
     let read  = incl.read <= 0 ? 'error' : ''
     let type  = incl.type
     let hide  = incl.hide ? '$ ' : '  ' 

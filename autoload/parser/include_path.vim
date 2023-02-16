@@ -80,45 +80,44 @@ function! parser#include_path#Include_path() dict
   let path = ''
   let incls = []
 
-  " collect path under the keyword
-  " join path, ' +' at the end
-  let count_path_lines = 0
-  for line in self.Datalines()[1:]
-    let count_path_lines += 1
-    if line =~? ' +\s*$'
-      let path = path . s:Trim(line)[0:-3]
+  for i in range(1, len(self.lines)-1)
+
+    " comment line
+    if self.lines[i][0] ==? '$' 
+      continue
+    endif
+
+    let pathlnum1 = empty(path) ? i : pathlnum1 " line offset from kword line where path start
+
+    " include path (partial or full)
+    if self.lines[i] =~? ' +\s*$'
+      let path ..= self.lines[i][:-3]->trim()
+      continue
     else
-      let path = path . s:Trim(line)
+      let path ..= self.lines[i]->trim() 
     endif
+
+    let pathlnum2 = i                           " line offset from kword line where path end
+
+    " include object
+    call filter(self, 'v:key[0] != "_"') " clean up abstract class
+    let incl = copy(self)
+    " members
+    let incl.path      = path
+    let incl.pathraw   = path
+    let incl.lnum      = incl.first + pathlnum2
+    let incl.pathlnum1 = pathlnum1
+    let incl.pathlnum2 = pathlnum2
+    let incl.read      = <SID>IsDirectory(path)
+    " methods 
+    let incl.Qf      = function('<SID>Qf')
+    let incl.Tag     = function('<SID>Tag')
+    let incl.SetPath = function('parser#include#SetPath')
+    call add(incls, incl)
+
+    let path = ''
+
   endfor
-
-  " find path line number
-  let lnum = 0
-  for line in self.lines[1:]
-    let lnum += 1
-    if line[0] != '$'
-      break
-    endif
-  endfor
-
-  " get rid of members which are not inherit
-  call filter(self, 'v:key[0] != "_"')
-
-  " include object
-  let incl = copy(self)
-  "let incl.path  = self.name ==? '*INCLUDE_PATH_RELATIVE' ? expand('%:p:h').'/'.path : path
-  let incl.path  = path
-  "let incl.path  = <SID>Slash(incl.path, 'u')
-  let incl.pathraw  = path
-  let incl.lnum  = incl.first + lnum
-  let incl.pathlnum1 = lnum " 1st line number with path
-  let incl.pathlnum2 = lnum + count_path_lines - 1 " last line number with path
-  "let incl.read  = isdirectory(path)
-  let incl.read  = <SID>IsDirectory(path)
-  let incl.Qf    = function('<SID>Qf')
-  let incl.Tag   = function('<SID>Tag')
-  let incl.SetPath = function('parser#include#SetPath')
-  call add(incls, incl)
 
   return incls
 
