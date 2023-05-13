@@ -255,24 +255,33 @@ endfunction
 
 "-------------------------------------------------------------------------------
 
-function! lsdyna_include#Quit(bang, cmd)
+function! lsdyna_include#Quit(cmdline)
 
   "-----------------------------------------------------------------------------
   " Function to check includes at write/quit.
   "
   " Arguments:
-  " - None
+  " - a:cmdline : ex commandline text
   " Return:
   " - None
   "-----------------------------------------------------------------------------
 
-  if a:bang
-    execute a:cmd.'!'
-  else
+   " bang guard
+   if a:cmdline =~? '!'
+     execute a:cmdline
+     return
+   endif
+
+   " write command guard
+   if 'write' =~? '^' .. split(a:cmdline)[0] ||
+    \ a:cmdline == 'wq' ||
+    \ a:cmdline == 'wall'
     if lsdyna_include#Check() == 0
-      execute a:cmd
+      execute a:cmdline
     endif
-  endif
+   else
+     execute a:cmdline
+   endif
 
 endfunction
 

@@ -75,6 +75,8 @@ setlocal backspace=2
 setlocal wildmode=list,full
 setlocal textwidth=80
 setlocal listchars=tab:>-,trail:-
+setlocal statusline=%F%m%r%h%w%=\ [%02n][%{&ff}\/%Y][%06l\/%06L,\%02v][%03p%%]
+setlocal laststatus=2
 setlocal list
 setlocal completeopt=menuone,noinsert
 setlocal previewheight=20
@@ -156,10 +158,7 @@ nnoremap <C-]> g<C-]>
 nnoremap <C-w>] <C-w>g}
 nnoremap <c-leftmouse> g<c-]>
 " check includes before write
-command! -nargs=0 -bang W call lsdyna_include#Quit(<bang>0, "w")
-command! -nargs=0 -bang WQ call lsdyna_include#Quit(<bang>0, "wq")
-cnoreabbrev <expr> w  (getcmdtype()==':' && getcmdline()== 'w') ?  'W' :  'w'
-cnoreabbrev <expr> wq (getcmdtype()==':' && getcmdline()=='wq') ? 'WQ' : 'wq'
+cnoremap <expr><silent> <CR> '<C-u>call lsdyna_include#Quit("'..getcmdline()..'")<CR>'
 " autoformat function
 "noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call lsdyna_autoformat#Autoformat()<CR>
 noremap <buffer><script><silent> = :call lsdyna_autoformat#Autoformat()<CR>
