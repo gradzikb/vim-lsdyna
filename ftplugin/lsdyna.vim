@@ -158,7 +158,7 @@ nnoremap <C-]> g<C-]>
 nnoremap <C-w>] <C-w>g}
 nnoremap <c-leftmouse> g<c-]>
 " check includes before write
-cnoremap <expr><silent> <CR> '<C-u>call lsdyna_include#Quit("'..getcmdline()..'")<CR>'
+cnoremap <expr><silent> <CR> '<C-u>call lsdyna_include#ExCmd(' .. shellescape(getcmdline()) .. ')<CR>'
 " autoformat function
 "noremap <buffer><script><silent> <LocalLeader><LocalLeader> :call lsdyna_autoformat#Autoformat()<CR>
 noremap <buffer><script><silent> = :call lsdyna_autoformat#Autoformat()<CR>
