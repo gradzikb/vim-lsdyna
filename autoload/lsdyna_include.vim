@@ -270,20 +270,7 @@ function! lsdyna_include#ExCmd(cmdline)
   call histdel('cmd', -1)
   call histadd('cmd', a:cmdline)
 
-  " bang guard
-  if a:cmdline =~? '!'
-    execute a:cmdline
-    return
-  endif
-
-  " write command guard
-  if 'write' =~? '^' .. split(a:cmdline)[0] ||
-   \ a:cmdline == 'wq' ||
-   \ a:cmdline == 'wall'
-   if lsdyna_include#Check() == 0
-     execute a:cmdline
-   endif
-  else
+  if lsdyna_include#Check() == 0
     execute a:cmdline
   endif
 
