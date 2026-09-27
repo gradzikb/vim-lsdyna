@@ -16,13 +16,12 @@ The plugin make your work with Ls-Dyna keyword file as fast and as easy as possi
 ### Syntax highlighting
 Easy navigation with keyword file.
 
-![syntax](https://githubusercontent.com/wiki/gradzikb/vim-lsdyna/gifs/syntax.gif)
 ![syntax](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/syntax.gif)
 
 ### Nodes/elements table folding
 No more never ending scrolling.
 
-![folding](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
+![syntax](https://raw.github.com/wiki/gradzikb/vim-lsdyna/gifs/folding.gif)
 
 ### Omni-completion
 Inserting of keywords/options/ids/parameters never was easier.
